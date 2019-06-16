@@ -13,5 +13,3 @@ def main():
     # install xact
     util.protontricks('xact')
 
-    # set xaudio2_7.dll to native
-    util.winedll_override('xaudio2_7', 'n')

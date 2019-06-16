@@ -11,6 +11,5 @@ def main():
     # https://github.com/ValveSoftware/Proton/issues/1387#issuecomment-428059647
     util.protontricks('winxp')
     util.protontricks('dotnet45')
-    util.protontricks('directx9')
     util.protontricks('vcruntime2010')
     util.protontricks('xact_june2018')

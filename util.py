@@ -403,6 +403,12 @@ def disable_esync():  # pylint: disable=missing-docstring
 def disable_d3d11():  # pylint: disable=missing-docstring
     set_environment('PROTON_NO_D3D11', '1')
 
+def disable_d3d10():  # pylint: disable=missing-docstring
+    set_environment('PROTON_NO_D3D10', '1')
+
+def disable_d3d9():  # pylint: disable=missing-docstring
+    set_environment('PROTON_NO_D3D9', '1')
+
 
 def create_dosbox_conf(conf_file, conf_dict):
     """Create DOSBox configuration file.

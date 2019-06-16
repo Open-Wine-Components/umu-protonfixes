@@ -11,4 +11,3 @@ def main():
     """
 
     util.protontricks('xact')
-    util.winedll_override('xaudio2_7', 'n')

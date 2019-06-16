@@ -15,7 +15,6 @@ def main():
     util.protontricks('dotnet35')
     util.protontricks('physx')
     util.protontricks('mdx')
-    util.protontricks('d3dx9')
     util.protontricks('d3dcompiler_43')
     util._mk_syswow64() #pylint: disable=protected-access
 

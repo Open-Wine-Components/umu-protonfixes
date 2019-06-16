@@ -14,5 +14,3 @@ def main():
     if not util.checkinstalled('xact'):
         util.protontricks('xact')
 
-    # Set xaudio2_7 to native, otherwise audio won't work
-    util.winedll_override('xaudio2_7', 'n')

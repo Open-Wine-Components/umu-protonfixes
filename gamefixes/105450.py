@@ -17,5 +17,4 @@ def main():
     util.protontricks('l3codecx')
     util.protontricks('quartz')
     util.protontricks('mfc42')
-    util.protontricks('d3dx9')
     util.protontricks('dotnet20')
