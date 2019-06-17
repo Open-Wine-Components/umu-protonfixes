@@ -1,11 +1,11 @@
-""" Game fix for Borderlands 2
+""" Game fix for Strange Brigade
 """
 #pylint: disable=C0103
 
 from protonfixes import util
 
 def main():
-    """ Launcherfix and NVIDIA PhysX support.
+    """ This bypasses Strange Brigade's Launcher, which renders all black.
     """
 
     # Fixes the startup process.
