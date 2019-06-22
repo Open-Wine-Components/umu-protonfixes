@@ -20,8 +20,9 @@ def main():
     if not os.path.exists(configpath):
         os.makedirs(configpath)
     configgame = os.path.join(configpath, 'FFXIV.cfg')
-    f = open(configgame,"w+")
-    f.write("<FINAL FANTASY XIV Config File>\n\n<Cutscene Settings>\nCutsceneMovieOpening 1")
-    f.close
+    if not os.path.isfile(configgame):
+        f = open(configgame,"w+")
+        f.write("<FINAL FANTASY XIV Config File>\n\n<Cutscene Settings>\nCutsceneMovieOpening 1")
+        f.close
 
 
