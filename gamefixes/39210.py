@@ -6,11 +6,8 @@ from protonfixes import util
 import os
 
 def main():
-    """ for FFXIV hide wine exports to allow launcher to work.
+    """ for FFXIV skip intro cutscene to allow game to work.
     """
-
-    # https://bugs.winehq.org/show_bug.cgi?id=47342
-    util.protontricks('hidewineexports=enable')
 
     # launcher tries to render in d3d9, d9vk doesnt work with it yet
     util.disable_d3d9() 
