@@ -7,20 +7,12 @@ w_metadata mf_install dlls \
     installed_file1="$W_SYSTEM32_DLLS_WIN/mf.dll"
 
 load_mf_install()
-{    
+{
+    # FIXME: mf_.dll
+
     if [ ! -f "$W_CACHE/$W_PACKAGE/installcab.py" ]; then
         w_download_to "$W_CACHE/$W_PACKAGE" https://raw.githubusercontent.com/z0z0z/mf-installcab/master/installcab.py a32063ec2af233c6fdbc013e90977be46dc78d525cea5e699ab692f7850beabd installcab.py
     fi
-
-    if [ ! -f "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X86.exe" ]; then
-        w_download_to "$W_CACHE/$W_PACKAGE" https://download.microsoft.com/download/0/A/F/0AFB5316-3062-494A-AB78-7FB0D4461357/windows6.1-KB976932-X86.exe e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97 windows6.1-KB976932-X86.exe
-    fi
-    python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X86.exe" mediafoundation
-    python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X86.exe" mf_
-    python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X86.exe" mfreadwrite
-    python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X86.exe" wmadmod
-    python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X86.exe" wmvdecod
-    python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X86.exe" wmadmod
 
     w_download_to "$W_CACHE/$W_PACKAGE" https://lutris.net/files/tools/dll/mfplat/x32/mfplat.dll 1d41496b65c6a3fd463a4e38f5ed856c1d283459e1cbaf8869dbdf2bfa5fc5ad mfplat.dll.32
     w_try cp "$W_CACHE/$W_PACKAGE/mfplat.dll.32" "$W_SYSTEM32_DLLS/mfplat.dll"
@@ -49,16 +41,13 @@ load_mf_install()
     helper_win7sp1 x86_microsoft-windows-wmvdecod_31bf3856ad364e35_6.1.7601.17514_none_c491ee3d3e923b78/wmvdecod.dll
     w_try cp "$W_TMP/x86_microsoft-windows-wmvdecod_31bf3856ad364e35_6.1.7601.17514_none_c491ee3d3e923b78/wmvdecod.dll" "$W_SYSTEM32_DLLS/wmvdecod.dll"
 
+    python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" mediafoundation
+    python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" mfreadwrite
+    python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" wmadmod
+    python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" wmvdecod
+    python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" wmadmod
+
     if [ "$W_ARCH" = "win64" ]; then
-        if [ ! -f "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X64.exe" ]; then
-            w_download_to "$W_CACHE/$W_PACKAGE" https://download.microsoft.com/download/0/A/F/0AFB5316-3062-494A-AB78-7FB0D4461357/windows6.1-KB976932-X64.exe f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8 windows6.1-KB976932-X64.exe
-        fi
-        python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X64.exe" mediafoundation
-        python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X64.exe" mf_
-        python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X64.exe" mfreadwrite
-        python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X64.exe" wmadmod
-        python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X64.exe" wmvdecod
-        python2 "$W_CACHE/$W_PACKAGE/installcab.py" "$W_CACHE/$W_PACKAGE/windows6.1-KB976932-X64.exe" wmadmod
 
         w_download_to "$W_CACHE/$W_PACKAGE" https://lutris.net/files/tools/dll/mfplat/x64/mfplat.dll 81c13718b01e698ddc31d13f60335cc6182c9f4cef9e29ece2a5ba5a4f138a1c mfplat.dll.64
         w_try cp "$W_CACHE/$W_PACKAGE/mfplat.dll.64" "$W_SYSTEM64_DLLS/mfplat.dll"
@@ -86,6 +75,13 @@ load_mf_install()
 
         helper_win7sp1_x64 amd64_microsoft-windows-wmvdecod_31bf3856ad364e35_6.1.7601.17514_none_20b089c0f6efacae/wmvdecod.dll
         w_try cp "$W_TMP/amd64_microsoft-windows-wmvdecod_31bf3856ad364e35_6.1.7601.17514_none_20b089c0f6efacae/wmvdecod.dll" "$W_SYSTEM64_DLLS/wmvdecod.dll"
+
+        python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" mediafoundation
+        python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" mfreadwrite
+        python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" wmadmod
+        python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" wmvdecod
+        python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" wmadmod
+
     fi
 
     cat > "$W_TMP"/mf.reg <<_EOF_
@@ -355,4 +351,6 @@ _EOF_
     
     w_try_regsvr64 msmpeg2adec.dll
     w_try_regsvr64 msmpeg2vdec.dll
+    w_try_regsvr msmpeg2adec.dll
+    w_try_regsvr msmpeg2vdec.dll
 }
