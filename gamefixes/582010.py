@@ -7,6 +7,7 @@ from protonfixes import util
 def main():
     """ Requires media foundation dlls
     """
-    util.set_environment('WINEDLLOVERRIDES','nvapi,nvapi64=')
+    util.winedll_override('nvapi','')
+    util.winedll_override('nvapi64','')
     util.protontricks('mf_install')
  
