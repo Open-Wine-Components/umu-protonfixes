@@ -8,14 +8,18 @@ w_metadata mf_install dlls \
 
 load_mf_install()
 {
-    # FIXME: mf_.dll
-
     if [ ! -f "$W_CACHE/$W_PACKAGE/installcab.py" ]; then
         w_download_to "$W_CACHE/$W_PACKAGE" https://raw.githubusercontent.com/z0z0z/mf-installcab/master/installcab.py a32063ec2af233c6fdbc013e90977be46dc78d525cea5e699ab692f7850beabd installcab.py
     fi
 
     w_download_to "$W_CACHE/$W_PACKAGE" https://lutris.net/files/tools/dll/mfplat/x32/mfplat.dll 1d41496b65c6a3fd463a4e38f5ed856c1d283459e1cbaf8869dbdf2bfa5fc5ad mfplat.dll.32
     w_try cp "$W_CACHE/$W_PACKAGE/mfplat.dll.32" "$W_SYSTEM32_DLLS/mfplat.dll"
+    
+    w_download_to "$W_CACHE/$W_PACKAGE" https://github.com/gloriouseggroll/mf-install/raw/master/syswow64/mfplay.dll a1ade23dada272236c724107648e1ff53741a5b53dfd24e0724f170d99c79ced mfplay.dll.32
+    w_try cp "$W_CACHE/$W_PACKAGE/mfplay.dll.32" "$W_SYSTEM32_DLLS/mfplay.dll"
+    
+    w_download_to "$W_CACHE/$W_PACKAGE" https://github.com/gloriouseggroll/mf-install/raw/master/syswow64/colorcnv.dll 703559b28738cf6f14456f330fd1bc740671a7584694b03cb03245dae5aaa58d colorcnv.dll.32
+    w_try cp "$W_CACHE/$W_PACKAGE/colorcnv.dll.32" "$W_SYSTEM32_DLLS/colorcnv.dll"
 
     w_download_to "$W_CACHE/$W_PACKAGE" https://github.com/z0z0z/mf-install/raw/master/syswow64/msmpeg2adec.dll 9c0708bc7b1e49725d2ab7bb1cc67f635284c6452ad4743f2262b71f3ceef287 msmpeg2adec.dll.32
     w_try cp "$W_CACHE/$W_PACKAGE/msmpeg2adec.dll.32" "$W_SYSTEM32_DLLS/msmpeg2adec.dll"
@@ -42,15 +46,21 @@ load_mf_install()
     w_try cp "$W_TMP/x86_microsoft-windows-wmvdecod_31bf3856ad364e35_6.1.7601.17514_none_c491ee3d3e923b78/wmvdecod.dll" "$W_SYSTEM32_DLLS/wmvdecod.dll"
 
     python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" mediafoundation
+    python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" mf_
     python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" mfreadwrite
     python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" wmadmod
     python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" wmvdecod
     python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X86.exe" wmadmod
 
     if [ "$W_ARCH" = "win64" ]; then
-
         w_download_to "$W_CACHE/$W_PACKAGE" https://lutris.net/files/tools/dll/mfplat/x64/mfplat.dll 81c13718b01e698ddc31d13f60335cc6182c9f4cef9e29ece2a5ba5a4f138a1c mfplat.dll.64
         w_try cp "$W_CACHE/$W_PACKAGE/mfplat.dll.64" "$W_SYSTEM64_DLLS/mfplat.dll"
+
+        w_download_to "$W_CACHE/$W_PACKAGE" https://github.com/gloriouseggroll/mf-install/raw/master/system32/mfplay.dll a5c579a7ad6d55cbb13c748201b97c286e0e165827b8ed19019c696459f1f13a mfplay.dll.64
+        w_try cp "$W_CACHE/$W_PACKAGE/mfplay.dll.64" "$W_SYSTEM64_DLLS/mfplay.dll"
+        
+        w_download_to "$W_CACHE/$W_PACKAGE" https://github.com/gloriouseggroll/mf-install/raw/master/system32/colorcnv.dll 0bab1293a19c960315b89789f7cf4dd39d6cb743d0f4929d03e8f149b6845718 colorcnv.dll.64
+        w_try cp "$W_CACHE/$W_PACKAGE/colorcnv.dll.64" "$W_SYSTEM64_DLLS/colorcnv.dll"
 
         w_download_to "$W_CACHE/$W_PACKAGE" https://github.com/z0z0z/mf-install/raw/master/system32/msmpeg2adec.dll 97a9b89b1b50cddf6adff9059dce5935d905796dbcd6db58ea2fa693caaa194a msmpeg2adec.dll.64
         w_try cp "$W_CACHE/$W_PACKAGE/msmpeg2adec.dll.64" "$W_SYSTEM64_DLLS/msmpeg2adec.dll"
@@ -77,11 +87,11 @@ load_mf_install()
         w_try cp "$W_TMP/amd64_microsoft-windows-wmvdecod_31bf3856ad364e35_6.1.7601.17514_none_20b089c0f6efacae/wmvdecod.dll" "$W_SYSTEM64_DLLS/wmvdecod.dll"
 
         python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" mediafoundation
+        python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" mf_
         python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" mfreadwrite
         python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" wmadmod
         python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" wmvdecod
         python2 "$W_CACHE/$W_PACKAGE/installcab.py" --debug "$W_CACHE/win7sp1/windows6.1-KB976932-X64.exe" wmadmod
-
     fi
 
     cat > "$W_TMP"/mf.reg <<_EOF_
@@ -342,6 +352,7 @@ _EOF_
     w_override_dlls native mf
     w_override_dlls native mferror
     w_override_dlls native mfplat
+    w_override_dlls native mfplay
     w_override_dlls native mfreadwrite
     w_override_dlls native msmpeg2adec
     w_override_dlls native msmpeg2vdec
@@ -351,6 +362,8 @@ _EOF_
     
     w_try_regsvr64 msmpeg2adec.dll
     w_try_regsvr64 msmpeg2vdec.dll
+    w_try_regsvr64 colorcnv.dll
     w_try_regsvr msmpeg2adec.dll
     w_try_regsvr msmpeg2vdec.dll
+    w_try_regsvr colorcnv.dll
 }
