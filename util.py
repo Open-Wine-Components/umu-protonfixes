@@ -409,6 +409,9 @@ def disable_fsync(): # pylint: disable=missing-docstring
 def disable_d3d11():  # pylint: disable=missing-docstring
     set_environment('PROTON_NO_D3D11', '1')
 
+def wine_mem_alloc_mod():  # pylint: disable=missing-docstring
+    set_environment('WINE_MEM_ALLOC_MOD', '1')
+
 
 def create_dosbox_conf(conf_file, conf_dict):
     """Create DOSBox configuration file.

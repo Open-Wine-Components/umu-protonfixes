@@ -8,10 +8,11 @@ import subprocess
 import os
 
 def main():
-    """ Run script extender if it exists.
+    """ Run script extender if it exists. Use wine_mem_alloc_mod for skyui
     """
 
-    # Fixes the startup process.
+    util.wine_mem_alloc_mod()
+
     if os.path.isfile(os.path.join(os.getcwd(), 'skse64_loader.exe')):
         zenity_bin = splash.sys_zenity_path()
         if not zenity_bin:

@@ -5,7 +5,9 @@
 from protonfixes import util
 
 def main():
-    """ Requires media foundation dlls
+    """ Requires media foundation dlls and mem_alloc mod
     """
+
+    util.wine_mem_alloc_mod()
     util.protontricks('mf_install')
  
