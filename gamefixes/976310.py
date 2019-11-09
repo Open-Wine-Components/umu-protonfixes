@@ -8,6 +8,6 @@ def main():
     """ Requires media foundation dlls and mem_alloc mod
     """
 
-    util.wine_mem_alloc_mod()
     util.protontricks('mf_install')
  
+    util.wine_mem_alloc_mod()
