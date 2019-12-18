@@ -10,6 +10,3 @@ def main():
     # Enable preload options
     util.append_argument('--waitforpreload --nologo --gc2')
 
-    # Enables dxvk async.
-    util.enable_dxvk_async()
-

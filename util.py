@@ -385,32 +385,14 @@ def disable_nvapi():
     winedll_override('nvencodeapi', '')
     winedll_override('nvencodeapi64', '')
 
-def disable_d3d10():
-    """ Disable WINE d3d10* dlls
-    """
-
-    log.info('Disabling d3d10')
-    winedll_override('d3d10', '')
-    winedll_override('d3d10_1', '')
-    winedll_override('d3d10core', '')
-
-def enable_d9vk():  # pylint: disable=missing-docstring
-    set_environment('PROTON_USE_D9VK', '1')
-
 def disable_dxvk():  # pylint: disable=missing-docstring
-    set_environment('PROTON_USE_WINED3D11', '1')
+    set_environment('PROTON_USE_WINED3D', '1')
 
 def disable_esync():  # pylint: disable=missing-docstring
     set_environment('PROTON_NO_ESYNC', '1')
 
-def enable_dxvk_async():  # pylint: disable=missing-docstring
-    set_environment('DXVK_ASYNC', '1')
-
 def disable_fsync(): # pylint: disable=missing-docstring
     set_environment('PROTON_NO_FSYNC', '1')
-
-def disable_d3d11():  # pylint: disable=missing-docstring
-    set_environment('PROTON_NO_D3D11', '1')
 
 def wine_mem_alloc_mod():  # pylint: disable=missing-docstring
     set_environment('WINE_MEM_ALLOC_MOD', '1')
