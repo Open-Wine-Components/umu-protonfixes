@@ -1,4 +1,4 @@
-""" Game fix for FFXIV Trial
+""" Game fix for FFXIV
 """
 #pylint: disable=C0103
 
