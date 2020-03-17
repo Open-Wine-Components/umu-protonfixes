@@ -8,5 +8,4 @@ def main():
     """ Requires media foundation dlls
     """
     util.disable_nvapi()
-    util.protontricks('mf_install')
  
