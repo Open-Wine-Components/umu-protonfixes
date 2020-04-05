@@ -13,12 +13,12 @@ from .util import protonprefix
 from .checks import run_checks
 from .logger import log
 from . import config
-
 from . import progress
 
 # These modules need to be imported for TrackProgress
 from . import util as _util #pylint: disable=unused-import
 from . import download as _download #pylint: disable=unused-import
+
 
 def game_id():
     """ Trys to return the game id from environment variables
@@ -87,7 +87,6 @@ def run_fix(gameid):
 
     game = game_name() + ' ('+ gameid + ')'
     localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
-
 
     # execute default.py
     if os.path.isfile(os.path.join(localpath, 'default.py')):

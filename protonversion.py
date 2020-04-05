@@ -91,4 +91,4 @@ def init():
     return (proton_version, proton_timestamp)
 
 
-PROTON_VERSION, PROTON_TIMESTAMP = init() 
+PROTON_VERSION, PROTON_TIMESTAMP = init()

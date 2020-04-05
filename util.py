@@ -10,7 +10,6 @@ import signal
 import subprocess
 import functools
 from .logger import log
-
 from .protonmain_compat import protonmain
 from .protonversion import PROTON_VERSION, PROTON_TIMESTAMP
 from .progress import TrackProgress
@@ -20,6 +19,7 @@ from .progress import TrackProgress
 def which(appname):
     """ Returns the full path of an executable in $PATH
     """
+
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
         if os.path.exists(fullpath) and os.access(fullpath, os.X_OK):
@@ -31,6 +31,7 @@ def which(appname):
 def protondir():
     """ Returns the path to proton
     """
+
     proton_dir = os.path.dirname(sys.argv[0])
     return proton_dir
 
@@ -38,6 +39,7 @@ def protondir():
 def protonprefix():
     """ Returns the wineprefix used by proton
     """
+
     return os.path.join(
         os.environ['STEAM_COMPAT_DATA_PATH'],
         'pfx/')
@@ -65,12 +67,14 @@ def protonversion(timestamp=False):
 
 def once(func=None, retry=None):
     """ Decorator to use on functions which should only run once in a prefix.
+
     Error handling:
     By default, when an exception occurs in the decorated function, the
     function is not run again. To change that behavior, set retry to True.
     In that case, when an exception occurs during the decorated function,
     the function will be run again the next time the game is started, until
     the function is run successfully.
+
     Implementation:
     Uses a file (one per function) in PROTONPREFIX/drive_c/protonfixes/run/
     to track if a function has already been run in this prefix.
@@ -105,7 +109,6 @@ def once(func=None, retry=None):
 
         return
     return wrapper
-
 
 def _killhanging():
     """ Kills processes that hang when installing winetricks
@@ -215,6 +218,7 @@ def is_custom_verb(verb):
         return os.path.join(verbpath, verb_name)
 
     return False
+
 
 @TrackProgress("Installing winetrick: {}")
 def protontricks(verb):
@@ -410,12 +414,44 @@ def get_game_install_path():
     # only for `waitforexitandrun` command
     return os.environ['PWD']
 
+def get_game_exe_name():
+    """ Game executable name
+    """
+
+    # only for `waitforexitandrun` command
+    game_path = get_game_install_path()
+    game_name = 'UNKNOWN'
+    for _, arg in enumerate(sys.argv):
+        if game_path in arg:
+            game_name = os.path.basename(arg)
+            break
+    log.debug('Detected executable: ' + game_name)
+    return game_name
+
 def winedll_override(dll, dtype):
     """ Add WINE dll override
     """
 
     log.info('Overriding ' + dll + '.dll = ' + dtype)
     protonmain.g_session.dlloverrides[dll] = dtype
+
+def winecfg():
+    """ Run winecfg.exe
+    """
+    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
+    replace_command(game_path, 'winecfg.exe')
+
+def regedit():
+    """ Run regedit.exe
+    """
+    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
+    replace_command(game_path, 'regedit.exe')
+
+def control():
+    """ Run control.exe
+    """
+    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
+    replace_command(game_path, 'control.exe')
 
 def disable_nvapi():
     """ Disable WINE nv* dlls
@@ -447,6 +483,7 @@ def use_seccomp(): # pylint: disable=missing-docstring
 @once
 def disable_uplay_overlay():
     """Disables the UPlay in-game overlay.
+
     Creates or appends the UPlay settings.yml file
     with the correct setting to disable the overlay.
     UPlay will overwrite settings.yml on launch, but keep
@@ -553,7 +590,11 @@ def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
     section = conf.default_section
     dxvk_conf = os.path.join(get_game_install_path(), 'dxvk.conf')
 
-    conf.read(cfile)
+    # HACK: add [DEFAULT] section to the file
+    try:
+        conf.read(cfile)
+    except configparser.MissingSectionHeaderError:
+        conf.read_file(read_dxvk_conf(open(cfile)))
 
     if not conf.has_option(section, 'session') or conf.getint(section, 'session') != os.getpid():
         log.info('Creating new DXVK config')
@@ -573,3 +614,9 @@ def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
 
     with open(cfile, 'w') as configfile:
         conf.write(configfile)
+
+    # HACK: remove [DEFAULT] section from the file
+    with open(cfile, 'r') as fini:
+        dxvkopts = fini.read().splitlines(True)
+    with open(cfile, 'w') as fdxvk:
+        fdxvk.writelines(dxvkopts[1:])

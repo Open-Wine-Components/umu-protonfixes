@@ -13,18 +13,17 @@ def main():
     """
 
     installpath = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-    oldbin = os.getcwd()
-    oldbinbak = os.path.join(os.path.abspath(installpath), 'bin.bak')
-    newbin = os.path.join(os.path.abspath(installpath), 'DefEd', 'bin')
+
 
     if not os.path.isfile(os.path.join(os.path.abspath(installpath), 'bin', 'EoCApp.exe')):
-        shutil.move(oldbin, oldbinbak)
-        subprocess.call(['ln', '-s', newbin, oldbin])
-        zenity_bin = splash.sys_zenity_path()
-        if not zenity_bin:
-            return
-        #pylint: disable=C0301
-        zenity_cmd = ' '.join([zenity_bin, '--info', '--text', '"Steam Play symlinks for Divinity: Original Sin 2 have been set. On first launch the game will black screen. Please force it to close then press PLAY again."', '--no-wrap'])
-        subprocess.Popen(zenity_cmd, shell=True)
+
+        if not os.path.isdir(os.path.join(os.path.abspath(installpath), 'bin-bak')):
+            shutil.move(os.path.join(os.path.abspath(installpath), 'bin'), os.path.join(os.path.abspath(installpath), 'bin-bak'))
+            subprocess.call(['ln', '-s', os.path.join(os.path.abspath(installpath), 'DefEd', 'bin'), os.path.join(os.path.abspath(installpath), 'bin')])
+
+        if not os.path.isdir(os.path.join(os.path.abspath(installpath), 'Data-bak')):
+            shutil.move(os.path.join(os.path.abspath(installpath), 'Data'), os.path.join(os.path.abspath(installpath), 'Data-bak'))
+            subprocess.call(['ln', '-s', os.path.join(os.path.abspath(installpath), 'DefEd', 'Data'), os.path.join(os.path.abspath(installpath), 'Data')])
 
     util.replace_command('SupportTool.exe', 'EoCApp.exe')
+

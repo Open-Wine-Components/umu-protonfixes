@@ -33,6 +33,7 @@ except ImportError:
     App = object
     log.warn('Optional dependency kivy not found')
 
+
 STATUS = {}
 STATUS['cef_queue'] = Queue()
 
@@ -107,6 +108,7 @@ def sys_zenity_path():
         if os.path.exists(zenity_path) and os.access(zenity_path, os.X_OK):
             return zenity_path
     return False
+
 
 def sys_kdialog_path():
     """ Returns the path of kdialog if found in system $PATH
@@ -190,6 +192,7 @@ def zenity_splash():
     zenity.stdin.write('100\n')
     zenity.stdin.flush()
 
+
 @contextmanager
 def kdialog_splash():
     """ Runs the kdialog process until context is returned
@@ -216,6 +219,7 @@ def kdialog_splash():
     log.debug('Terminating kdialog splash screen')
     subprocess.call(kdialog + ['Set', '', 'value', '100'])
     subprocess.call(kdialog + ['close'])
+
 
 @contextmanager
 #pylint: disable=W0621
@@ -248,6 +252,7 @@ def kivy_splash():
         yield
     finally:
         app.stop()
+
 
 @contextmanager
 def splash():
@@ -298,7 +303,6 @@ def splash():
     log.warn('No splash dependencies found, running without splash screen')
     yield
     return
-
 
 
 def set_splash_text(text):

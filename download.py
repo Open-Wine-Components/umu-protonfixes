@@ -10,6 +10,7 @@ from .progress import TrackProgress
 from .logger import log
 from . import config
 
+
 GDRIVE_URL = 'https://drive.google.com/uc?id={}&export=download'
 HASH_BLOCK_SIZE = 65536
 
@@ -41,6 +42,7 @@ def gdrive_download(gdrive_id, path):
     filename = get_filename(resp2.getheaders())
     with open(os.path.join(path, filename), 'wb') as save_file:
         save_file.write(resp2.read())
+
 
 @TrackProgress("Downloading zip from: {}")
 def install_from_zip(url, filename, path=os.getcwd(), filesha=None):
@@ -78,6 +80,7 @@ def sha1sum(filename):
             hasher.update(buf)
             buf = hash_file.read(HASH_BLOCK_SIZE)
     return hasher.hexdigest()
+
 
 def sha256sum(filename):
     """ Computes the sha1sum of the specified file
