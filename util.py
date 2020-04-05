@@ -10,6 +10,7 @@ import signal
 import zipfile
 import subprocess
 import urllib.request
+import functools
 from .logger import log
 from . import config
 
@@ -83,6 +84,49 @@ def protonversion(timestamp=False):
     if timestamp:
         return protontimeversion()
     return protonnameversion()
+
+def once(func=None, retry=None):
+    """ Decorator to use on functions which should only run once in a prefix.
+    Error handling:
+    By default, when an exception occurs in the decorated function, the
+    function is not run again. To change that behavior, set retry to True.
+    In that case, when an exception occurs during the decorated function,
+    the function will be run again the next time the game is started, until
+    the function is run successfully.
+    Implementation:
+    Uses a file (one per function) in PROTONPREFIX/drive_c/protonfixes/run/
+    to track if a function has already been run in this prefix.
+    """
+    if func is None:
+        return functools.partial(once, retry=retry)
+    retry = retry if retry else False
+
+    #pylint: disable=missing-docstring
+    def wrapper(*args, **kwargs):
+        func_id = func.__module__ + "." + func.__name__
+        prefix = protonprefix()
+        directory = os.path.join(prefix, "drive_c/protonfixes/run/")
+        file = os.path.join(directory, func_id)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        if os.path.exists(file):
+            return
+
+        exception = None
+        try:
+            func(*args, **kwargs)
+        except Exception as exc: #pylint: disable=broad-except
+            if retry:
+                raise exc
+            exception = exc
+
+        open(file, 'a').close()
+
+        if exception:
+            raise exception #pylint: disable=raising-bad-type
+
+        return
+    return wrapper
 
 
 def _killhanging():
@@ -366,44 +410,12 @@ def get_game_install_path():
     # only for `waitforexitandrun` command
     return os.environ['PWD']
 
-def get_game_exe_name():
-    """ Game executable name
-    """
-
-    # only for `waitforexitandrun` command
-    game_path = get_game_install_path()
-    game_name = 'UNKNOWN'
-    for idx, arg in enumerate(sys.argv):
-        if game_path in arg:
-            game_name = os.path.basename(arg)
-            break
-    log.debug('Detected executable: ' + game_name)
-    return game_name
-
 def winedll_override(dll, dtype):
     """ Add WINE dll override
     """
 
     log.info('Overriding ' + dll + '.dll = ' + dtype)
     protonmain.g_session.dlloverrides[dll] = dtype
-
-def winecfg():
-    """ Run winecfg.exe
-    """
-    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
-    replace_command(game_path, 'winecfg.exe')
-
-def regedit():
-    """ Run regedit.exe
-    """
-    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
-    replace_command(game_path, 'regedit.exe')
-
-def control():
-    """ Run control.exe
-    """
-    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
-    replace_command(game_path, 'control.exe')
 
 def disable_nvapi():
     """ Disable WINE nv* dlls
@@ -431,6 +443,36 @@ def force_lgadd(): # pylint: disable=missing-docstring
 
 def use_seccomp(): # pylint: disable=missing-docstring
     set_environment('PROTON_USE_SECCOMP', '1')
+
+@once
+def disable_uplay_overlay():
+    """Disables the UPlay in-game overlay.
+    Creates or appends the UPlay settings.yml file
+    with the correct setting to disable the overlay.
+    UPlay will overwrite settings.yml on launch, but keep
+    this setting.
+    """
+    config_dir = os.path.join(
+        protonprefix(),
+        'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/'
+    )
+    config_file = os.path.join(config_dir, 'settings.yml')
+
+    if not os.path.isdir(config_dir):
+        log.warn(
+            'Could not disable UPlay overlay: "'
+            + config_dir
+            + '" does not exist or is not a directory.'
+        )
+        return
+
+    try:
+        with open(config_file, 'a+') as file:
+            file.write("\noverlay:\n  enabled: false\n")
+        log.info('Disabled UPlay overlay')
+        return
+    except OSError as err:
+        log.warn('Could not disable UPlay overlay: ' + err.strerror)
 
 def create_dosbox_conf(conf_file, conf_dict):
     """Create DOSBox configuration file.
@@ -511,11 +553,7 @@ def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
     section = conf.default_section
     dxvk_conf = os.path.join(get_game_install_path(), 'dxvk.conf')
 
-    # HACK: add [DEFAULT] section to the file
-    try:
-        conf.read(cfile)
-    except configparser.MissingSectionHeaderError:
-        conf.read_file(read_dxvk_conf(open(cfile)))
+    conf.read(cfile)
 
     if not conf.has_option(section, 'session') or conf.getint(section, 'session') != os.getpid():
         log.info('Creating new DXVK config')
@@ -535,12 +573,6 @@ def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
 
     with open(cfile, 'w') as configfile:
         conf.write(configfile)
-
-    # HACK: remove [DEFAULT] section from the file
-    with open(cfile, 'r') as fini:
-        dxvkopts = fini.read().splitlines(True)
-    with open(cfile, 'w') as fdxvk:
-        fdxvk.writelines(dxvkopts[1:])
 
 def install_from_zip(url, filename, path=os.getcwd()):
     """ Install a file from a downloaded zip
