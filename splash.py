@@ -93,6 +93,17 @@ def sys_zenity_path():
             return zenity_path
     return False
 
+def sys_kdialog_path():
+    """ Returns the path of kdialog if found in system $PATH
+    """
+
+    steampath = os.environ['PATH'].split(':')
+    syspath = [x for x in steampath if 'steam-runtime' not in x]
+    for path in syspath:
+        kdialog_path = os.path.join(path, 'kdialog')
+        if os.path.exists(kdialog_path) and os.access(kdialog_path, os.X_OK):
+            return kdialog_path
+    return False
 
 @contextmanager
 def zenity_splash():
@@ -132,6 +143,32 @@ def zenity_splash():
     zenity.stdin.write('100\n')
     zenity.stdin.flush()
 
+@contextmanager
+def kdialog_splash():
+    """ Runs the kdialog process until context is returned
+    """
+
+    log.debug('Starting kdialog splash screen')
+
+    kdialog_bin = sys_kdialog_path()
+    if not kdialog_bin:
+        return
+
+    kdialog_cmd = [
+        kdialog_bin,
+        '--progressbar',
+        '"ProtonFixes is running a task, please wait..."',
+        '100'
+        ]
+
+    out = subprocess.check_output(kdialog_cmd)
+    kdialog = ['qdbus'] + out.decode().strip('\n').split(' ')
+    subprocess.call(kdialog + ['showCancelButton', 'false'])
+    STATUS['kdialog_handle'] = kdialog
+    yield
+    log.debug('Terminating kdialog splash screen')
+    subprocess.call(kdialog + ['Set', '', 'value', '100'])
+    subprocess.call(kdialog + ['close'])
 
 @contextmanager
 #pylint: disable=W0621
@@ -162,11 +199,23 @@ def splash():
 
     is_bigpicture = 'SteamTenfoot' in os.environ
 
+    if not config.enable_splash:
+        yield
+        return
+
     for splash in config.splash_preference.split(','):
         if splash.strip() == 'cef' and HAS_CEF:
             log.debug('Using cefpython splash screen')
             with cef_splash(cef):
                 STATUS['handler'] = 'cef'
+                yield
+                return
+
+        if (splash.strip() == 'kdialog' and sys_kdialog_path()
+                and (not is_bigpicture or config.kdialog_bigpicture)):
+            log.debug('Using kdialog splash screen')
+            with kdialog_splash():
+                STATUS['handler'] = 'kdialog'
                 yield
                 return
 
@@ -182,10 +231,15 @@ def splash():
     yield
     return
 
+
+
 def set_splash_text(text):
     """ Set splash screen text
     """
-    if STATUS['handler'] == 'zenity':
+    if STATUS['handler'] == 'kdialog':
+        kdialog = STATUS['kdialog_handle']
+        subprocess.call(kdialog + ['setLabelText', text])
+    elif STATUS['handler'] == 'zenity':
         zenity = STATUS['zenity_handle']
         zenity.stdin.write('#' + text + '\n')
         zenity.stdin.flush()
@@ -199,7 +253,10 @@ def set_splash_text(text):
 def set_splash_progress(progress):
     """ Set splash screen progress in a 0-100 scale
     """
-    if STATUS['handler'] == 'zenity':
+    if STATUS['handler'] == 'kdialog':
+        kdialog = STATUS['kdialog_handle']
+        subprocess.call(kdialog + ['Set', '', 'value', str(progress)])
+    elif STATUS['handler'] == 'zenity':
         zenity = STATUS['zenity_handle']
         zenity.stdin.write(str(progress) + '\n')
         zenity.stdin.flush()
