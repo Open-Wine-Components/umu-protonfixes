@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Splash</title>
+  <style>
+    body {
+      color: #79bcec;
+      overflow: hidden;
+      text-shadow: 0px 0px 10px #222;
+      margin: 0px;
+      font-family: "Arial", "Helvetica", sans-serif;
+    }
+
+    h1, h3 {
+      padding: 20px;
+    }
+
+    hr {
+      border: 1px solid #79bcec;
+      width: 500px;
+      box-shadow: 0px 0px 10px 0px #222;
+    }
+
+    .box {
+      width: 600px;
+      height: 360px;
+      position: absolute;
+      text-align: center;
+    }
+
+    .blur {
+      box-shadow: inset 0px 0px 160px -60px #bcdef4;
+    }
+
+    .gradient {
+      background: radial-gradient(circle at top right, #153445 0%, #081322 78%);
+    }
+
+    #progress {
+      position: relative;
+      margin: 0 auto;
+      width: 80%;
+      border: 8px solid #79bcec;
+      height: 50px;
+      border-radius: 20px;
+    }
+
+    #progress-bar {
+      position: relative;
+      top: 8%;
+      left: 1%;
+      height: 84%;
+      background-color: #79bcec;
+      border-radius: 5px;
+    }
+    </style>
+  </style>
+</script>
+</head>
+
+<body>
+  <div class='box gradient'>
+    <h1>ProtonFixes</h1>
+    <hr>
+    <h3 id="status">ProtonFixes is running a task, please wait...</h3>
+    <div id="progress-container">
+      <h4 id="progress-text">Loading...</h4>
+      <div id="progress"><div id="progress-bar"></div></div>
+    </div>
+    <script>
+        function setWidth(width){
+            var elem = document.getElementById("progress-bar");
+            if(width > 100) width = 100;
+            elem.style.width = width*0.98 + '%';
+        }
+
+        function setText(text){
+            var elem = document.getElementById("progress-text");
+            elem.innerHTML = text;
+        }
+        setWidth(0);
+    </script>
+  </div>
+</body>
+
+</html>
