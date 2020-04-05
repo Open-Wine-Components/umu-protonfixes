@@ -75,7 +75,7 @@ def run_fix(gameid):
             game_module.main()
         except ImportError:
             log.info('No local defaults found for ' + game)
-    else:
+    elif config.enable_global_fixes:
         try:
             game_module = import_module('protonfixes.gamefixes.default')
             log.info('Using global defaults for ' + game)
@@ -93,7 +93,7 @@ def run_fix(gameid):
             game_module.main()
         except ImportError:
             log.info('No local protonfix found for ' + game)
-    else:
+    elif config.enable_global_fixes:
         try:
             game_module = import_module('protonfixes.gamefixes.' + gameid)
             log.info('Using protonfix for ' + game)
