@@ -15,13 +15,13 @@ from .logger import log
 from . import config
 
 from .protonmain_compat import protonmain
+from .protonversion import PROTON_VERSION, PROTON_TIMESTAMP
 
 # pylint: disable=unreachable
 
 def which(appname):
     """ Returns the full path of an executable in $PATH
     """
-
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
         if os.path.exists(fullpath) and os.access(fullpath, os.X_OK):
@@ -33,7 +33,6 @@ def which(appname):
 def protondir():
     """ Returns the path to proton
     """
-
     proton_dir = os.path.dirname(sys.argv[0])
     return proton_dir
 
@@ -41,37 +40,21 @@ def protondir():
 def protonprefix():
     """ Returns the wineprefix used by proton
     """
-
     return os.path.join(
         os.environ['STEAM_COMPAT_DATA_PATH'],
         'pfx/')
 
 
 def protonnameversion():
-    """ Returns the version of proton from sys.argv[0]
+    """ Returns the version of proton
     """
-
-    version = re.search('Proton ([0-9]*\\.[0-9]*)', sys.argv[0])
-    if version:
-        return version.group(1)
-    log.warn('Proton version not parsed from command line')
-    return None
+    return '{major}.{minor}'.format(**PROTON_VERSION)
 
 
 def protontimeversion():
     """ Returns the version timestamp of proton from the `version` file
     """
-
-    fullpath = os.path.join(protondir(), 'version')
-    try:
-        with open(fullpath, 'r') as version:
-            for timestamp in version.readlines():
-                return int(timestamp.strip())
-    except OSError:
-        log.warn('Proton version file not found in: ' + fullpath)
-        return 0
-    log.warn('Proton version not parsed from file: ' + fullpath)
-    return 0
+    return PROTON_TIMESTAMP
 
 
 def protonversion(timestamp=False):
