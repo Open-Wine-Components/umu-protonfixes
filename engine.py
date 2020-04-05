@@ -140,7 +140,7 @@ class Engine():
         """ Disable splash screen
         """
 
-        if self.engine_name is 'UE3':
+        if self.engine_name == 'UE3':
             self._add_argument('-nosplash')
             self._log('nosplash', 'splash screen disabled' + res)
         else:
@@ -151,7 +151,7 @@ class Engine():
         """ Show some information about engine
         """
 
-        if self.engine_name is 'RAGE':
+        if self.engine_name == 'RAGE':
             self._add_argument('-help')
             self._log('info', 'command line arguments')
         else:
@@ -162,7 +162,7 @@ class Engine():
         """ Skip intro videos
         """
 
-        if self.engine_name is 'UE3':
+        if self.engine_name == 'UE3':
             self._add_argument('-nostartupmovies')
             self._log('nointro', 'intro videos disabled')
         elif self.engine_name is 'Dunia 2':
@@ -176,7 +176,7 @@ class Engine():
         """ Force launcher
         """
 
-        if self.engine_name is 'Unity':
+        if self.engine_name == 'Unity':
             self._add_argument('-show-screen-selector')
             self._log('launcher', 'forced')
         else:
@@ -186,10 +186,10 @@ class Engine():
         """ Force windowed mode
         """
 
-        if self.engine_name is 'Unity':
+        if self.engine_name == 'Unity':
             self._add_argument('-popupwindow -screen-fullscreen 0')
             self._log('windowed', 'borderless window')
-        elif self.engine_name is 'RAGE':
+        elif self.engine_name == 'RAGE':
             self._add_argument('-windowed')
             self._log('windowed', 'window')
         else:
@@ -205,10 +205,10 @@ class Engine():
         else:
             return False
 
-        if self.engine_name is 'Unity':
+        if self.engine_name == 'Unity':
             self._add_argument('-screen-width ' + res_wh[0] + ' -screen-height ' + res_wh[1])
             self._log('resolution', res)
-        elif self.engine_name is 'RAGE':
+        elif self.engine_name == 'RAGE':
             self._add_argument('-width ' + res_wh[0] + ' -height ' + res_wh[1])
             self._log('resolution', res)
         else:
