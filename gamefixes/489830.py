@@ -8,7 +8,7 @@ import subprocess
 import os
 
 def main():
-    """ Run script extender if it exists. Use wine_mem_alloc_mod for skyui
+    """ Run script extender if it exists.
     """
 
     if os.path.isfile(os.path.join(os.getcwd(), 'skse64_loader.exe')):
