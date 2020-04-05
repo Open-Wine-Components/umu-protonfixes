@@ -7,7 +7,7 @@ from protonfixes import util
 
 
 def main():
-    """ Install xact, override libraries and add launch parameter
+    """ Add launch parameter
     """
 
     # The game crashes if running with more than one CPU thread,
