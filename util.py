@@ -366,12 +366,44 @@ def get_game_install_path():
     # only for `waitforexitandrun` command
     return os.environ['PWD']
 
+def get_game_exe_name():
+    """ Game executable name
+    """
+
+    # only for `waitforexitandrun` command
+    game_path = get_game_install_path()
+    game_name = 'UNKNOWN'
+    for idx, arg in enumerate(sys.argv):
+        if game_path in arg:
+            game_name = os.path.basename(arg)
+            break
+    log.debug('Detected executable: ' + game_name)
+    return game_name
+
 def winedll_override(dll, dtype):
     """ Add WINE dll override
     """
 
     log.info('Overriding ' + dll + '.dll = ' + dtype)
     protonmain.g_session.dlloverrides[dll] = dtype
+
+def winecfg():
+    """ Run winecfg.exe
+    """
+    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
+    replace_command(game_path, 'winecfg.exe')
+
+def regedit():
+    """ Run regedit.exe
+    """
+    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
+    replace_command(game_path, 'regedit.exe')
+
+def control():
+    """ Run control.exe
+    """
+    game_path = os.path.join(get_game_install_path(), get_game_exe_name())
+    replace_command(game_path, 'control.exe')
 
 def disable_nvapi():
     """ Disable WINE nv* dlls
@@ -394,9 +426,11 @@ def disable_esync():  # pylint: disable=missing-docstring
 def disable_fsync(): # pylint: disable=missing-docstring
     set_environment('PROTON_NO_FSYNC', '1')
 
-def wine_mem_alloc_mod():  # pylint: disable=missing-docstring
-    set_environment('WINE_MEM_ALLOC_MOD', '1')
+def force_lgadd(): # pylint: disable=missing-docstring
+    set_environment('PROTON_FORCE_LARGE_ADDRESS_AWARE', '1')
 
+def use_seccomp(): # pylint: disable=missing-docstring
+    set_environment('PROTON_USE_SECCOMP', '1')
 
 def create_dosbox_conf(conf_file, conf_dict):
     """Create DOSBox configuration file.
