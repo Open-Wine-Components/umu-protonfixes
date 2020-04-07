@@ -8,5 +8,5 @@ def main():
     """ Enable preload options
     """
     # Enable preload options
-    util.append_argument('--waitforpreload --nologo --gc2')
+    util.append_argument('--waitforpreload --noasync --gc2')
 
