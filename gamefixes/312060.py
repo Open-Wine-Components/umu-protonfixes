@@ -10,7 +10,7 @@ def main():
     """
     # Fixes the startup process.
     util.replace_command('ffxivboot.exe', 'ffxivboot64.exe')
-
+    util.protontricks('hidewineexports=enable')
     # disable new character intro cutscene to prevent black screen loop
     configpath = os.path.join(util.protonprefix(), 'drive_c/users/steamuser/My Documents/My Games/FINAL FANTASY XIV - A Realm Reborn')
     if not os.path.exists(configpath):
