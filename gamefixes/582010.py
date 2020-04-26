@@ -5,7 +5,7 @@
 from protonfixes import util
 
 def main():
-    """ Requires media foundation dlls
+    """ Requires nvapi disabled. Needs for DX12/vkd3d
     """
     util.disable_nvapi()
- 
+    util.set_environment('VKD3D_FEATURE_LEVEL', '12_0')
