@@ -5,8 +5,7 @@ import os
 import sys
 import shutil
 # pylint: disable=E0611
-from .protonmain_compat import protonmain
-from .protonversion import PROTON_VERSION
+from __main__ import CURRENT_PREFIX_VERSION, basedir
 from .logger import log
 
 os.environ['DEBUG'] = '1'
@@ -38,11 +37,11 @@ def show_debug_info():
     log.debug(line)
 
     log.debug('Proton Version:')
-    log.debug(PROTON_VERSION)
+    log.debug(CURRENT_PREFIX_VERSION)
     log.debug(line)
 
     log.debug('Proton Directory:')
-    log.debug(protonmain.g_proton.base_dir)
+    log.debug(basedir)
     log.debug(line)
 
     ignorevars = [

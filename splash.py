@@ -4,53 +4,12 @@ import os
 import sys
 import time
 import subprocess
-import threading
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 from contextlib import contextmanager
 from .logger import log
-from . import config
-
-try:
-    from cefpython3 import cefpython as cef
-    HAS_CEF = True
-except ImportError:
-    HAS_CEF = False
-    log.warn('Optional dependency cefpython3 not found')
-
-try:
-    from kivy.app import App
-    from kivy.config import Config
-    from kivy.resources import resource_add_path
-    Config.set('kivy', 'log_level', 'error')
-    Config.set('graphics', 'borderless', 1)
-    Config.set('graphics', 'resizable', 0)
-    Config.set('graphics', 'width', 600)
-    Config.set('graphics', 'height', 360)
-    resource_add_path(os.path.join(os.path.dirname(__file__), 'static'))
-    HAS_KIVY = True
-except ImportError:
-    HAS_KIVY = False
-    App = object
-    log.warn('Optional dependency kivy not found')
 
 
-STATUS = {}
-STATUS['cef_queue'] = Queue()
-
-
-def control_browser(cef_handle, queue):
-    """ Loop thread to send javascript calls to cef
-    """
-    while not cef_handle.HasDocument():
-        time.sleep(2)
-    cef_handle.ExecuteFunction('window.setWidth', 0)
-    while True:
-        operation = queue.get()
-        cef_handle.ExecuteFunction(operation[0], operation[1])
-
-
-#pylint: disable=W0621
-def browser(cef, url, cef_queue):
+def browser(cef, url):
     """ Starts a cef browser in the middle of the screen with url
     """
 
@@ -76,13 +35,10 @@ def browser(cef, url, cef_queue):
 
     win_info = cef.WindowInfo()
     win_info.SetAsChild(0, coordinates(600, 360))
-    brow = cef.CreateBrowserSync(url=url, window_info=win_info, window_title='splash')
 
-    control_t = threading.Thread(target=control_browser, args=(brow, cef_queue))
-    control_t.start()
+    cef.CreateBrowser(url=url, window_info=win_info, window_title='splash')
     cef.MessageLoop()
     cef.Shutdown()
-
 
 def coordinates(width, height):
     """ Returns coordinates [x1, y1, x2, y2] for a centered box of width, height
@@ -110,50 +66,6 @@ def sys_zenity_path():
     return False
 
 
-def sys_kdialog_path():
-    """ Returns the path of kdialog if found in system $PATH
-    """
-
-    steampath = os.environ['PATH'].split(':')
-    syspath = [x for x in steampath if 'steam-runtime' not in x]
-    for path in syspath:
-        kdialog_path = os.path.join(path, 'kdialog')
-        if os.path.exists(kdialog_path) and os.access(kdialog_path, os.X_OK):
-            return kdialog_path
-    return False
-
-
-class SplashApp(App):
-    """ Kivy application that manages the splash screen
-    """
-    LABEL_TEXT = '[color=#79bcec][b]{}[/b][/color]'
-
-    def __init__(self):
-        super().__init__()
-        self.started = threading.Event()
-
-    def change_text(self, text=""):
-        """ Changes the splash screen text to text
-        """
-        self.started.wait()
-        self.root.ids['textlabel'].text = self.LABEL_TEXT.format(text)
-
-    def set_progress(self, progress=0):
-        """ Set the progress on progressbar, in a scale 0.0 - 1.0
-        """
-        self.started.wait()
-        pbar = self.root.ids['progressbar'].canvas.children[-1]
-        oldsize = pbar.size[:]
-        maxsize = self.root.width * .8 - self.root.bordert * 2 - 4
-        pbar.size = (maxsize * progress, oldsize[1])
-
-    def on_start(self):
-        """ This function is run when the splash has finished loading
-            release the started Event to allow progress manipulation
-        """
-        self.started.set()
-
-
 @contextmanager
 def zenity_splash():
     """ Runs the zenity process until context is returned
@@ -169,7 +81,7 @@ def zenity_splash():
         'sleep 2;',
         zenity_bin,
         '--progress',
-        '--percentage=0',
+        '--pulsate',
         '--no-cancel',
         '--auto-close',
         '--text',
@@ -180,57 +92,25 @@ def zenity_splash():
     # but zenity forks and won't quit when the subprocess is killed,
     # hence, using shell=True and 'sleep 2;'
     zenity = subprocess.Popen(zenity_cmd,
-                              encoding='utf-8',
                               stdin=subprocess.PIPE,
-                              stdout=None,
-                              stderr=None,
+                              stdout=subprocess.PIPE,
                               shell=True,
                              )
-    STATUS['zenity_handle'] = zenity
+
     yield
     log.debug('Terminating zenity splash screen')
-    zenity.stdin.write('100\n')
-    zenity.stdin.flush()
+    zenity.kill()
 
 
 @contextmanager
-def kdialog_splash():
-    """ Runs the kdialog process until context is returned
-    """
-
-    log.debug('Starting kdialog splash screen')
-
-    kdialog_bin = sys_kdialog_path()
-    if not kdialog_bin:
-        return
-
-    kdialog_cmd = [
-        kdialog_bin,
-        '--progressbar',
-        '"ProtonFixes is running a task, please wait..."',
-        '100'
-        ]
-
-    out = subprocess.check_output(kdialog_cmd)
-    kdialog = ['qdbus'] + out.decode().strip('\n').split(' ')
-    subprocess.call(kdialog + ['showCancelButton', 'false'])
-    STATUS['kdialog_handle'] = kdialog
-    yield
-    log.debug('Terminating kdialog splash screen')
-    subprocess.call(kdialog + ['Set', '', 'value', '100'])
-    subprocess.call(kdialog + ['close'])
-
-
-@contextmanager
-#pylint: disable=W0621
 def cef_splash(cef, page='index.html'):
     """ Runs the browser process until the context is returned
     """
 
     log.debug('Starting CEF splash screen')
-    data_dir = os.path.join(os.path.dirname(__file__), 'static')
+    data_dir = os.path.join(os.path.dirname(__file__), '..', 'static')
     url = 'file://' + os.path.join(data_dir, page)
-    cef_proc = Process(target=browser, args=(cef, url, STATUS['cef_queue']))
+    cef_proc = Process(target=browser, args=(cef, url))
     cef_proc.start()
     try:
         yield
@@ -240,19 +120,6 @@ def cef_splash(cef, page='index.html'):
     log.debug('Terminating CEF splash screen')
     cef_proc.terminate()
 
-@contextmanager
-def kivy_splash():
-    """ Starts the kivy splash screen
-    """
-    app = SplashApp()
-    thread = threading.Thread(target=app.run)
-    thread.start()
-    STATUS['kivy_handle'] = app
-    try:
-        yield
-    finally:
-        app.stop()
-
 
 @contextmanager
 def splash():
@@ -261,83 +128,25 @@ def splash():
 
     log.debug('Starting splash screen')
 
-    is_bigpicture = 'SteamTenfoot' in os.environ
-
-    if not config.enable_splash:
-        yield
-        return
-
-    for splash in config.splash_preference.split(','):
-        if splash.strip() == 'kivy' and HAS_KIVY:
-            log.debug('Using kivy splash screen')
-            with kivy_splash():
-                STATUS['handler'] = 'kivy'
-                yield
-                return
-
-        if splash.strip() == 'cef' and HAS_CEF:
+    if 'SteamTenfoot' in os.environ:
+        log.debug('Running in Big Picture mode')
+        try:
+            from cefpython3 import cefpython as cef
             log.debug('Using cefpython splash screen')
-            log.warn('cefpython is deprecated, consider switching to kivy')
             with cef_splash(cef):
-                STATUS['handler'] = 'cef'
                 yield
                 return
+        except ImportError:
+            log.warn('Optional dependency cefpython3 not found')
 
-        if (splash.strip() == 'kdialog' and sys_kdialog_path()
-                and (not is_bigpicture or config.kdialog_bigpicture)):
-            log.debug('Using kdialog splash screen')
-            with kdialog_splash():
-                STATUS['handler'] = 'kdialog'
-                yield
-                return
+    if sys_zenity_path():
+        log.debug('Using zenity splash screen')
+        with zenity_splash():
+            yield
+            return
+    else:
+        log.warn('Optional dependency zenity not found')
 
-        if (splash.strip() == 'zenity' and sys_zenity_path()
-                and (not is_bigpicture or config.zenity_bigpicture)):
-            log.debug('Using zenity splash screen')
-            with zenity_splash():
-                STATUS['handler'] = 'zenity'
-                yield
-                return
-
-    STATUS['handler'] = 'log'
     log.warn('No splash dependencies found, running without splash screen')
     yield
     return
-
-
-def set_splash_text(text):
-    """ Set splash screen text
-    """
-    if STATUS['handler'] == 'kdialog':
-        kdialog = STATUS['kdialog_handle']
-        subprocess.call(kdialog + ['setLabelText', text])
-    elif STATUS['handler'] == 'zenity':
-        zenity = STATUS['zenity_handle']
-        zenity.stdin.write('#' + text + '\n')
-        zenity.stdin.flush()
-    elif STATUS['handler'] == 'cef':
-        cef_q = STATUS['cef_queue']
-        cef_q.put(('setText', text))
-    elif STATUS['handler'] == 'kivy':
-        STATUS['kivy_handle'].change_text(text)
-    else:
-        log.info(text)
-
-
-def set_splash_progress(progress):
-    """ Set splash screen progress in a 0-100 scale
-    """
-    if STATUS['handler'] == 'kdialog':
-        kdialog = STATUS['kdialog_handle']
-        subprocess.call(kdialog + ['Set', '', 'value', str(progress)])
-    elif STATUS['handler'] == 'zenity':
-        zenity = STATUS['zenity_handle']
-        zenity.stdin.write(str(progress) + '\n')
-        zenity.stdin.flush()
-    elif STATUS['handler'] == 'cef':
-        cef_q = STATUS['cef_queue']
-        cef_q.put(('setWidth', progress))
-    elif STATUS['handler'] == 'kivy':
-        STATUS['kivy_handle'].set_progress(progress/100)
-    else:
-        log.info("Progress {}%".format(progress))

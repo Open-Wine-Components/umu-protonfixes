@@ -10,10 +10,6 @@ DEFAULT_CONF = '''
 enable_checks = true
 enable_splash = true
 enable_font_links = true
-splash_preference = kdialog,zenity,kivy
-zenity_bigpicture = false
-kdialog_bigpicture = false
-enable_global_fixes = true
 
 [path]
 cache_dir = ~/.cache/protonfixes
@@ -29,16 +25,16 @@ except Exception:
     log.debug('Unable to read config file ' + CONF_FILE)
 
 def opt_bool(opt):
-    """ Convert bool ini strings to actual boolean values, if needed
+    """ Convert bool ini strings to actual boolean values
     """
 
-    if opt.lower() in ['yes', 'y', 'true', '1', 'no', 'n', 'false', '0']:
-        return opt.lower() in ['yes', 'y', 'true', '1']
-    return opt
+    return opt.lower() in ['yes', 'y', 'true', '1']
 
 # pylint: disable=E1101
-locals().update({x:opt_bool(y) for x, y
-                 in CONF['main'].items()})
+locals().update(
+    {x:opt_bool(y) for x, y
+     in CONF['main'].items()
+     if 'enable' in x})
 
 locals().update({x:os.path.expanduser(y) for x, y in CONF['path'].items()})
 

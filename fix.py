@@ -13,12 +13,6 @@ from .util import protonprefix
 from .checks import run_checks
 from .logger import log
 from . import config
-from . import progress
-
-# These modules need to be imported for TrackProgress
-from . import util as _util #pylint: disable=unused-import
-from . import download as _download #pylint: disable=unused-import
-
 
 def game_id():
     """ Trys to return the game id from environment variables
@@ -57,24 +51,6 @@ def game_name():
     return 'UNKNOWN'
 
 
-def install_corefonts():
-    """ Downloads and installs corefonts in the prefix
-    """
-    # get corefonts
-    if not check_corefonts():
-        log.info('Getting ms corefonts')
-        get_corefonts()
-
-    # install corefonts
-    fontsdir = os.path.join(protonprefix(), 'drive_c/windows/Fonts')
-    try:
-        os.makedirs(fontsdir)
-    except FileExistsError:
-        log.debug('Fonts directory exists')
-    if len(os.listdir(fontsdir)) < 30:
-        link_fonts(fontsdir)
-
-
 def run_fix(gameid):
     """ Loads a gamefix module by it's gameid
     """
@@ -87,50 +63,37 @@ def run_fix(gameid):
 
     game = game_name() + ' ('+ gameid + ')'
     localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
-
-    # execute default.py
-    if os.path.isfile(os.path.join(localpath, 'default.py')):
-        open(os.path.join(localpath, '__init__.py'), 'a').close()
-        sys.path.append(os.path.expanduser('~/.config/protonfixes'))
-        try:
-            game_module = import_module('localfixes.default')
-            log.info('Using local defaults for ' + game)
-            game_module.main()
-        except ImportError:
-            log.info('No local defaults found for ' + game)
-    elif config.enable_global_fixes:
-        try:
-            game_module = import_module('protonfixes.gamefixes.default')
-            log.info('Using global defaults for ' + game)
-            game_module.main()
-        except ImportError:
-            log.info('No global defaults found')
-
-    # execute <gameid>.py
-    localfix_py = os.path.join(localpath, gameid + '.py')
-    if os.path.isfile(localfix_py):
+    if os.path.isfile(os.path.join(localpath, gameid + '.py')):
         open(os.path.join(localpath, '__init__.py'), 'a').close()
         sys.path.append(os.path.expanduser('~/.config/protonfixes'))
         try:
             game_module = import_module('localfixes.' + gameid)
-            progress.parse_fix(localfix_py)
             log.info('Using local protonfix for ' + game)
             game_module.main()
         except ImportError:
             log.info('No local protonfix found for ' + game)
-    elif config.enable_global_fixes:
-        globalfix_py = os.path.join(os.path.dirname(__file__),
-                                    'gamefixes', gameid + '.py')
+    else:
         try:
             game_module = import_module('protonfixes.gamefixes.' + gameid)
-            progress.parse_fix(globalfix_py)
             log.info('Using protonfix for ' + game)
             game_module.main()
         except ImportError:
             log.info('No protonfix found for ' + game)
 
     if config.enable_font_links:
-        install_corefonts()
+        # get corefonts
+        if not check_corefonts():
+            log.info('Getting ms corefonts')
+            get_corefonts()
+
+        # install corefonts
+        fontsdir = os.path.join(protonprefix(), 'drive_c/windows/Fonts')
+        try:
+            os.makedirs(fontsdir)
+        except FileExistsError:
+            log.debug('Fonts directory exists')
+        if len(os.listdir(fontsdir)) < 30:
+            link_fonts(fontsdir)
 
 
 def main():
