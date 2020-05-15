@@ -63,6 +63,27 @@ def run_fix(gameid):
 
     game = game_name() + ' ('+ gameid + ')'
     localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
+
+
+    # execute default.py
+    if os.path.isfile(os.path.join(localpath, 'default.py')):
+        open(os.path.join(localpath, '__init__.py'), 'a').close()
+        sys.path.append(os.path.expanduser('~/.config/protonfixes'))
+        try:
+            game_module = import_module('localfixes.default')
+            log.info('Using local defaults for ' + game)
+            game_module.main()
+        except ImportError:
+            log.info('No local defaults found for ' + game)
+    elif config.enable_global_fixes:
+        try:
+            game_module = import_module('protonfixes.gamefixes.default')
+            log.info('Using global defaults for ' + game)
+            game_module.main()
+        except ImportError:
+            log.info('No global defaults found')
+
+    # execute <gameid>.py
     if os.path.isfile(os.path.join(localpath, gameid + '.py')):
         open(os.path.join(localpath, '__init__.py'), 'a').close()
         sys.path.append(os.path.expanduser('~/.config/protonfixes'))
@@ -72,7 +93,7 @@ def run_fix(gameid):
             game_module.main()
         except ImportError:
             log.info('No local protonfix found for ' + game)
-    else:
+    elif config.enable_global_fixes:
         try:
             game_module = import_module('protonfixes.gamefixes.' + gameid)
             log.info('Using protonfix for ' + game)
