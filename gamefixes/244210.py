@@ -1,4 +1,4 @@
-""" Game fix for Age Of Empire 3: Complete Collection
+""" Game fix for Assetto Corsa
 """
 #pylint: disable=C0103
 
@@ -11,3 +11,8 @@ def main():
     util.protontricks('d3dx11_43')
     util.protontricks('d3dcompiler_43')
     util.protontricks('dotnet472')
+    util.protontricks('vcrun2008')
+    util.protontricks('vcrun2010')
+    util.protontricks('vcrun2012')
+    util.protontricks('vcrun2013')
+    util.protontricks('nocrashdialog')

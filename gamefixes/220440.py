@@ -10,6 +10,7 @@ def main():
 
     util.use_win32_prefix()
     util.protontricks('dotnet40')
+    util.protontricks('nocrashdialog')
     util._mk_syswow64() #pylint: disable=protected-access
 
 #TODO Controllers fixes

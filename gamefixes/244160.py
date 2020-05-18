@@ -8,5 +8,6 @@ def main():
     """ Needs dotnet40 """
 
     util.protontricks('dotnet40')
+    util.protontricks('nocrashdialog')
 
 #TODO Controllers fixes

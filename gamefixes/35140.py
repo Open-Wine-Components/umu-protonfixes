@@ -15,6 +15,7 @@ def main():
     util.protontricks('mdx')
     util.protontricks('d3dcompiler_43')
     util.protontricks('d3dx9_43')
+    util.protontricks('nocrashdialog')
     util.protontricks('win10')
     util._mk_syswow64() #pylint: disable=protected-access
 

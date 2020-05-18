@@ -13,3 +13,4 @@ def main():
 
     # If not already installed, install dotnet40
     util.protontricks('dotnet40')
+    util.protontricks('nocrashdialog')
