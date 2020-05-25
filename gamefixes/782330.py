@@ -9,3 +9,4 @@ def main():
     """
 
     util.use_seccomp()
+    util.append_argument('+com_skipSignInManager 1')
