@@ -1,4 +1,4 @@
-""" TOXIKK
+""" Killer Instinct
 """
 #pylint: disable=C0103
 
