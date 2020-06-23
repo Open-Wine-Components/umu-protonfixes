@@ -5,12 +5,9 @@
 from protonfixes import util
 
 def main():
-    """ Uses win32 prefix, installs devenum wmp9
+    """ Uses installs devenum wmp9
     """
-
-    # Winetrick wmp9 requires 32bit prefix
-    util.use_win32_prefix()
 
     # https://github.com/ValveSoftware/Proton/issues/703#issuecomment-416075961
     util.protontricks('devenum')
-    util.protontricks('wmp9')
+    util.protontricks('wmp9_x86_64')

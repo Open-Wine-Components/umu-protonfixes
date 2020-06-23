@@ -7,11 +7,8 @@ from protonfixes import util
 def main():
     """ Needs WMP9, devenum, quartz, dinput and win7 """
 
-    #For WMP9 to work
-    util.use_win32_prefix()
-
     #For main menu, intro and outro playback
-    util.protontricks('wmp9')
+    util.protontricks('wmp9_x86_64')
     util.protontricks('devenum')
     util.protontricks('quartz')
 
