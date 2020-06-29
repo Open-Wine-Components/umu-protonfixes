@@ -1,20 +1,27 @@
 """ Game fix for Doom 2016
 """
 #pylint: disable=C0103
+import os
+import shutil
+import urllib.request
+import zipfile
 
-from protonfixes import util, download
+from protonfixes import util
+
 
 def main():
-    """ Install vcrun2015
+    """ Enable preload options
     """
 
-    # https://github.com/ValveSoftware/Proton/issues/788#issuecomment-416651267
-    util.protontricks('vcrun2015')
+    # Enable preload options
+    util.append_argument('+r_renderAPI 1')
 
-    # disable chroma implementation that is broken in wine
-    # https://github.com/simons-public/protonfixes/issues/26
-    chroma_url = 'https://github.com/Riesi/CChromaEditor/files/2277158/CChromaEditorLibrary.zip'
-    download.install_from_zip(chroma_url,
-                              'CChromaEditorLibrary.dll',
-                              util.get_game_install_path(),
-                              '0b947580ed2a13dd8c8f0c987d5c7993281e64ab967368ba8d72c8b82e2d906a')
+    installpath = os.path.abspath(os.getcwd())
+    url = "https://github.com/Riesi/CChromaEditor/files/2277158/CChromaEditorLibrary.zip"
+
+    if not os.path.isfile(os.path.join(installpath, 'CChromaEditorLibrary.dll.bak')):
+        urllib.request.urlretrieve (url, "CChromaEditorLibrary.zip")
+        shutil.move(os.path.join(installpath, 'CChromaEditorLibrary.dll'),
+                    os.path.join(installpath, 'CChromaEditorLibrary.dll.bak'))
+        with zipfile.ZipFile("CChromaEditorLibrary.zip", "r") as zip_ref:
+            zip_ref.extractall(installpath)
