@@ -1,4 +1,4 @@
-""" Game fix for Path of Exile
+""" Game fix for Borderlands 3
 """
 #pylint: disable=C0103
 
