@@ -1,0 +1,14 @@
+w_metadata lavfilters dlls \
+    title="LAV Filters" \
+    publisher="Nevcairiel" \
+    year="2019" \
+    media="download" \
+    file1="https://github.com/Nevcairiel/LAVFilters/releases/download/0.74.1/LAVFilters-0.74.1-Installer.exe" \
+
+load_lavfilters()
+{
+    w_download https://github.com/Nevcairiel/LAVFilters/releases/download/0.74.1/LAVFilters-0.74.1-Installer.exe 181e24428eaa34d0121cd53ec829c18e52d028689e12a7326f952989daa44ddb
+
+    w_try_cd "${W_CACHE}"/"${W_PACKAGE}"
+    w_try "${WINE}" LAVFilters-0.74.1-Installer.exe ${W_OPT_UNATTENDED:+/q}
+}
