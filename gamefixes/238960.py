@@ -8,5 +8,5 @@ def main():
     """ Enable preload options
     """
     # Enable preload options
-    util.append_argument('--waitforpreload --noasync --gc2')
+    util.set_environment('WINEDLLOVERRIDES','dxgi=n')
 

@@ -8,4 +8,5 @@ def main():
     """ Requires nvapi disabled. Needs for DX12/vkd3d
     """
     util.disable_nvapi()
+    util.use_seccomp()
     util.set_environment('VKD3D_FEATURE_LEVEL', '12_0')
