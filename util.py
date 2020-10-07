@@ -254,7 +254,6 @@ def protontricks(verb):
         env['LD_PRELOAD'] = ''
         
         winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
-        log.warn(winetricks_bin)
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
 
         # check is verb a custom winetricks verb
