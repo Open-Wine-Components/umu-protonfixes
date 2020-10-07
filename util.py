@@ -5,7 +5,7 @@ import configparser
 import os
 import sys
 import re
-import shutil
+#import shutil
 import signal
 import zipfile
 import subprocess
@@ -252,8 +252,9 @@ def protontricks(verb):
         env['WINESERVER'] = protonmain.g_proton.wineserver_bin
         env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
         env['LD_PRELOAD'] = ''
-
-        winetricks_bin = which('winetricks')
+        
+        winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
+        log.warn(winetricks_bin)
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
 
         # check is verb a custom winetricks verb

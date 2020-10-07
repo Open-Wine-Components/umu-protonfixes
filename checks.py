@@ -24,24 +24,6 @@ def esync_file_limits():
             return False
     return True
 
-
-def check_winetricks():
-    """ Check if winetricks is installed """
-
-    warning = '''winetricks was not found in your $PATH
-    Installation is recommended because many gamefixes require
-    winetricks to install software and make configuration
-    changes in Proton wine prefixes. To install winetricks
-    use your system's package manager or use the directions here:
-    https://wiki.winehq.org/Winetricks#Installing_winetricks
-    '''
-
-    if not shutil.which('winetricks'):
-        log.warn(warning)
-        return False
-    return True
-
-
 def check_zenity():
     """ Check if zenity is installed """
 
@@ -80,7 +62,6 @@ def run_checks():
     log.info('Running checks')
     checks = [
         esync_file_limits(),
-        check_winetricks(),
         check_zenity(),
         check_cabextract_or_bsdtar(),
         ]
