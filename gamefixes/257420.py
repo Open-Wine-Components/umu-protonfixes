@@ -2,12 +2,25 @@
 """
 #pylint: disable=C0103
 
+import os
+import subprocess
 from protonfixes import util
 
 def main():
-    """ This launches the game with the Vulkan renderer by default.
+    """ This launches the game with the DX11 renderer by default.
     """
-
-    # Fixes the startup process.
-    util.append_argument('util.append_argument('+gfx_strAPI Vulkan')
-
+    util.protontricks('d3dcompiler_47')
+    if not os.path.isfile('UserCfg.lua.bak'):
+        subprocess.call(['cp', 'UserCfg.lua', 'UserCfg.lua.bak'])
+        f = open('UserCfg.lua',"a+")
+        f.write("gfx_strAPI = \"Direct3D11\";\nsfx_strAPI = \"OpenAL\";\nren_bDepthPrepass = 0;")
+        f.close
+    if not os.path.isfile('Content/SeriousSam4/Config/Content/SeriousSam4/Config/CheckDriver.lua.bak'):
+        subprocess.call(['cp', 'Content/SeriousSam4/Config/CheckDriver.lua', 'Content/SeriousSam4/Config/CheckDriver.lua.bak'])
+        f = open('Content/SeriousSam4/Config/CheckDriver.lua',"rt")
+        data = f.read()
+        data = data.replace('gfx_iReqDriverVersion = 1100;', 'gfx_iReqDriverVersion = 1000;')
+        f.close()
+        f = open('Content/SeriousSam4/Config/CheckDriver.lua',"wt")
+        f.write(data)
+        f.close()
