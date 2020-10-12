@@ -9,9 +9,10 @@ def main():
     """
 
     # Fix pre-rendered cutscene playback
-    util.protontricks('devenum')
+    util.protontricks('lavfilters')
+    util.protontricks('wmp9')
     util.protontricks('quartz')
-    util.protontricks('wmp9_x86_64')
+    util.protontricks('devenum')
 
     # Fix crackling audio
     util.set_environment('PULSE_LATENCY_MSEC', '60')
