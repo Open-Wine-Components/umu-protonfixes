@@ -9,4 +9,3 @@ def main():
     """
     util.disable_nvapi()
     util.use_seccomp()
-    util.set_environment('VKD3D_FEATURE_LEVEL', '12_0')
