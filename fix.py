@@ -7,7 +7,6 @@ import os
 import re
 import sys
 from importlib import import_module
-from protonfixes.splash import splash
 from .corefonts import check_corefonts, get_corefonts, link_fonts
 from .util import protonprefix
 from .checks import run_checks
@@ -118,7 +117,7 @@ def run_fix(gameid):
 
 
 def main():
-    """ Runs the gamefix, with splash if zenity or cefpython3 is available
+    """ Runs the gamefix
     """
 
     check_args = [
@@ -133,9 +132,4 @@ def main():
         return
 
     log.info('Running protonfixes')
-
-    if config.enable_splash:
-        with splash():
-            run_fix(game_id())
-    else:
-        run_fix(game_id())
+    run_fix(game_id())

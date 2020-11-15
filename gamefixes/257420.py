@@ -5,7 +5,6 @@
 import os
 import subprocess
 from protonfixes import util
-from protonfixes import splash
 
 def main():
     """ Graphics API workaround
@@ -27,48 +26,3 @@ def main():
         f.write(data)
         f.close()
 
-    zenity_bin = splash.sys_zenity_path()
-    if not zenity_bin:
-        return
-    zenity_cmd = ' '.join([zenity_bin, '--question','--text', '"Would you like to run the game with Vulkan? (No = DX11)"', '--no-wrap'])
-    zenity = subprocess.Popen(zenity_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
-    zenity.communicate()
-    if zenity.returncode:
-        util.set_environment('WINEDLLOVERRIDES','dxgi=n')
-        f = open("UserCfg.lua", "r")
-        for line in f:
-            if "Vulkan" in line:
-                f = open('UserCfg.lua',"rt")
-                data = f.read()
-                data = data.replace('gfx_strAPI = "Vulkan";', 'gfx_strAPI = "Direct3D11";')
-                f.close()
-                f = open('UserCfg.lua',"wt")
-                f.write(data)
-                f.close()
-            if "Direct3D12" in line:
-                f = open('UserCfg.lua',"rt")
-                data = f.read()
-                data = data.replace('gfx_strAPI = "Direct3D12";', 'gfx_strAPI = "Direct3D11";')
-                f.close()
-                f = open('UserCfg.lua',"wt")
-                f.write(data)
-                f.close()
-    else:
-        f = open("UserCfg.lua", "r")
-        for line in f:
-            if "Direct3D11" in line:
-                f = open('UserCfg.lua',"rt")
-                data = f.read()
-                data = data.replace('gfx_strAPI = "Direct3D11";', 'gfx_strAPI = "Vulkan";')
-                f.close()
-                f = open('UserCfg.lua',"wt")
-                f.write(data)
-                f.close()
-            if "Direct3D12" in line:
-                f = open('UserCfg.lua',"rt")
-                data = f.read()
-                data = data.replace('gfx_strAPI = "Direct3D12";', 'gfx_strAPI = "Vulkan";')
-                f.close()
-                f = open('UserCfg.lua',"wt")
-                f.write(data)
-                f.close()

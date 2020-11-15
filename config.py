@@ -8,7 +8,7 @@ CONF_FILE = '~/.config/protonfixes/config.ini'
 DEFAULT_CONF = '''
 [main]
 enable_checks = true
-enable_splash = true
+enable_splash = false
 enable_font_links = true
 enable_global_fixes = true
 

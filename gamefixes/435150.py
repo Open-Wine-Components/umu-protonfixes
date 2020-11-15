@@ -6,7 +6,6 @@ import os
 import shutil
 import subprocess
 from protonfixes import util
-from protonfixes import splash
 
 def main():
     """ Launcherfix
