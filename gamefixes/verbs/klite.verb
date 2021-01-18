@@ -1,0 +1,14 @@
+w_metadata klite dlls \
+    title="K-Lite codecs" \
+    media="download" \
+    file1="K-Lite_Codec_Pack_1595_Basic.exe" \
+    homepage="https://codecguide.com/download_kl.htm"
+
+load_klite()
+{
+    w_download https://files3.codecguide.com/K-Lite_Codec_Pack_1595_Basic.exe 73772a2a0e8f9bc4ec4ca35578608cda76847e563613d1600bd5bf659a908559
+    https://gist.githubusercontent.com/GloriousEggroll/463e41df8e0d7e205aad06a1869ed5cf/raw/7511cc8b5f16efb5801f3dbc9e9809aa313b500d/klcp_basic_unattended.ini e308abaf704ba612fc279b922e6aab6bccc650563692747384e14632dfcfd2d2
+    w_try_cd "${W_CACHE}/${W_PACKAGE}"
+    w_try "${WINE}" K-Lite_Codec_Pack_1595_Basic.exe /verysilent /norestart /LoadInf="./klcp_basic_unattended.ini"
+    #w_try "${WINE}" K-Lite_Codec_Pack_1595_Basic.exe -makeunattended
+}

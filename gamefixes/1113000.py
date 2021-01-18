@@ -9,10 +9,12 @@ def main():
     """
 
     # Fix pre-rendered cutscene playback
-    util.protontricks('lavfilters')
     util.protontricks('wmp9')
     util.protontricks('quartz')
-    util.protontricks('devenum')
+    util.protontricks('qcap')
+    util.protontricks('qasf')
+    util.protontricks('d3dx11_43')
+    util.protontricks('d3dcompiler_43')
+    util.protontricks('klite')
+    util.set_environment('WINEDLLOVERRIDES','mfplay=n')
 
-    # Fix crackling audio
-    util.set_environment('PULSE_LATENCY_MSEC', '60')
