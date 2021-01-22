@@ -1,0 +1,33 @@
+w_metadata xactengine3_7_ge dlls \
+    title="MS XACT Engine (32-bit only)" \
+    publisher="Microsoft" \
+    year="2010" \
+    media="download" \
+    file1="../directx9/directx_Jun2010_redist.exe" \
+    installed_file1="${W_SYSTEM32_DLLS_WIN}/xactengine3_7.dll"
+
+load_xactengine3_7_ge()
+{
+    helper_directx_Jun2010
+
+    # Extract xactengine?_?.dll, X3DAudio?_?.dll, xaudio?_?.dll, xapofx?_?.dll
+    w_try_cabextract -d "${W_TMP}" -L -F '*_xact_*x86*' "${W_CACHE}/directx9/${DIRECTX_NAME}"
+    w_try_cabextract -d "${W_TMP}" -L -F '*_x3daudio_*x86*' "${W_CACHE}/directx9/${DIRECTX_NAME}"
+    w_try_cabextract -d "${W_TMP}" -L -F '*_xaudio_*x86*' "${W_CACHE}/directx9/${DIRECTX_NAME}"
+
+    for x in "${W_TMP}"/*.cab ; do
+        w_try_cabextract -d "${W_TMP}" -L -F 'xactengine3_7.dll' "${x}"
+        w_try_cd "${W_TMP}"
+        cp -f "${W_TMP}"/xactengine3_7.dll "${W_SYSTEM32_DLLS}"/
+    done
+
+    # Don't install 64-bit xact DLLs by default. They are broken in Wine, see:
+    # https://bugs.winehq.org/show_bug.cgi?id=41618#c5
+
+    w_override_dlls native,builtin xactengine3_7
+
+    # Register xactengine?_?.dll
+    for x in "${W_SYSTEM32_DLLS}"/xactengine3_7.dll ; do
+        w_try_regsvr "$(basename "${x}")"
+    done
+}
