@@ -9,6 +9,7 @@ def main():
     """
 
     # Fix pre-rendered cutscene playback
+    util.protontricks('xactengine3_7_ge')
     util.protontricks('wmp9_ge')
     util.protontricks('quartz')
     util.protontricks('d3dx11_43')
