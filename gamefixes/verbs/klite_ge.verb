@@ -1,10 +1,10 @@
-w_metadata klite dlls \
+w_metadata klite_ge dlls \
     title="K-Lite codecs" \
     media="download" \
     file1="K-Lite_Codec_Pack_1595_Basic.exe" \
     homepage="https://codecguide.com/download_kl.htm"
 
-load_klite()
+load_klite_ge()
 {
     w_download https://files3.codecguide.com/K-Lite_Codec_Pack_1595_Basic.exe 73772a2a0e8f9bc4ec4ca35578608cda76847e563613d1600bd5bf659a908559
     w_try_cd "${W_CACHE}/${W_PACKAGE}"
