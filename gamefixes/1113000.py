@@ -10,9 +10,10 @@ def main():
 
     # Fix pre-rendered cutscene playback
     util.protontricks('xactengine3_7_ge')
-    util.protontricks('d3dx11_43_ge')
-    util.protontricks('d3dcompiler_43_ge')
     util.protontricks('wmp9_ge')
     util.protontricks('quartz')
-    util.protontricks('klite_ge')
+    util.protontricks('d3dx11_43')
+    util.protontricks('d3dcompiler_43')
+    util.protontricks('klite')
     util.set_environment('WINEDLLOVERRIDES','mfplay=n')
+
