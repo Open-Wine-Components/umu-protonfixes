@@ -9,7 +9,6 @@ DEFAULT_CONF = '''
 [main]
 enable_checks = true
 enable_splash = false
-enable_font_links = true
 enable_global_fixes = true
 
 [path]
