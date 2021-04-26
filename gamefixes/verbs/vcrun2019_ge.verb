@@ -22,7 +22,7 @@ load_vcrun2019_ge()
     w_override_dlls native,builtin api-ms-win-crt-private-l1-1-0 api-ms-win-crt-conio-l1-1-0 api-ms-win-crt-heap-l1-1-0 api-ms-win-crt-locale-l1-1-0 api-ms-win-crt-math-l1-1-0 api-ms-win-crt-runtime-l1-1-0 api-ms-win-crt-stdio-l1-1-0 api-ms-win-crt-time-l1-1-0 atl140 concrt140 msvcp140 msvcr140 ucrtbase vcomp140 vcruntime140
 
     w_try_cd "${W_CACHE}"/"${W_PACKAGE}"
-    w_try "${WINE}" vc_redist.x86.exe ${W_OPT_UNATTENDED:+/q}
+    w_try "${WINE}" start.exe /w /b vc_redist.x86.exe ${W_OPT_UNATTENDED:+/q}
 
     case "${W_ARCH}" in
         win64)

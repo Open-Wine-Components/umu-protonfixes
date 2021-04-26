@@ -154,7 +154,7 @@ load_wmp9_ge()
             cp -f "${W_TMP}"/WMVDMOE2.DLL "${W_SYSTEM32_DLLS}"/
         w_warn "wm9codecs is not supported in win64 prefixes. If you need those codecs, reinstall wmp9 in a 32-bit prefix."
     else
-        w_try "${WINE}" MPSetup.exe ${W_OPT_UNATTENDED:+/q}
+        w_try "${WINE}" start.exe /w /b MPSetup.exe ${W_OPT_UNATTENDED:+/q}
         load_wm9codecs
     fi
 

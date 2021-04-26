@@ -40,5 +40,5 @@ hwa_other_auto=1
 lang_set_preferred=1
 lang_autodetect=1
 _EOF_
-    w_try "${WINE}" K-Lite_Codec_Pack_1595_Basic.exe /verysilent /norestart /LoadInf="./klcp_basic_unattended.ini"
+    w_try "${WINE}" start.exe /w /b K-Lite_Codec_Pack_1595_Basic.exe /verysilent /norestart /LoadInf="./klcp_basic_unattended.ini"
 }
