@@ -1,0 +1,12 @@
+w_metadata origin_ge dlls \
+    title="EA Origin" \
+    media="download" \
+    file1="OriginThinSetup.exe" \
+    homepage="https://www.origin.com/"
+
+load_origin_ge()
+{
+    w_download https://origin-a.akamaihd.net/Origin-Client-Download/origin/live/OriginThinSetup.exe e9349aaee26e5b4abfab8b8f829febd908554218e83e748cf624f29fc81ba0bc
+    w_try_cd "${W_CACHE}/${W_PACKAGE}"
+    w_try "${WINE}" start.exe /exec OriginThinSetup.exe /NoLaunch
+}
