@@ -10,4 +10,3 @@ def main():
 
     # Replace launcher with game exe in proton arguments
     util.protontricks('vcrun2019_ge')
-    util.protontricks('origin_ge')
