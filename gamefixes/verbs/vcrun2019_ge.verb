@@ -9,8 +9,8 @@ w_metadata vcrun2019_ge dlls \
 
 load_vcrun2019_ge()
 {
-    # https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
-    w_download https://aka.ms/vs/16/release/vc_redist.x86.exe
+    # Grab the last version that still containts ucrtbase
+    https://web.archive.org/web/20210415064013/https://download.visualstudio.microsoft.com/download/pr/85d47aa9-69ae-4162-8300-e6b7e4bf3cf3/14563755AC24A874241935EF2C22C5FCE973ACB001F99E524145113B2DC638C1/VC_redist.x86.exe
 
     w_override_dlls native,builtin api-ms-win-crt-private-l1-1-0 api-ms-win-crt-conio-l1-1-0 api-ms-win-crt-heap-l1-1-0 api-ms-win-crt-locale-l1-1-0 api-ms-win-crt-math-l1-1-0 api-ms-win-crt-runtime-l1-1-0 api-ms-win-crt-stdio-l1-1-0 api-ms-win-crt-time-l1-1-0 atl140 concrt140 msvcp140 msvcr140 ucrtbase vcomp140 vcruntime140
 
@@ -23,7 +23,7 @@ load_vcrun2019_ge()
             # vcruntime140_1 is only shipped on x64:
             w_override_dlls native,builtin vcruntime140_1
 
-            w_download https://aka.ms/vs/16/release/vc_redist.x64.exe
+            w_download https://web.archive.org/web/20210414165612/https://download.visualstudio.microsoft.com/download/pr/85d47aa9-69ae-4162-8300-e6b7e4bf3cf3/52B196BBE9016488C735E7B41805B651261FFA5D7AA86EB6A1D0095BE83687B2/VC_redist.x64.exe
             rm -f "${W_TMP}"/*  # Avoid permission error
             w_try_cabextract --directory="${W_TMP}" vc_redist.x64.exe
             w_try_cabextract --directory="${W_TMP}" "${W_TMP}/a10"
