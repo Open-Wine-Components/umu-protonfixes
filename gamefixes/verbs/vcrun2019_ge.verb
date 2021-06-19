@@ -4,7 +4,7 @@ w_metadata vcrun2019_ge dlls \
     year="2019" \
     media="download" \
     conflicts="vcrun2015 vcrun2017 vcrun2019" \
-    file1="vc_redist.x86.exe" \
+    file1="VC_redist.x86.exe" \
     installed_file1="${W_SYSTEM32_DLLS_WIN}/mfc140.dll"
 
 load_vcrun2019_ge()
@@ -15,7 +15,7 @@ load_vcrun2019_ge()
     w_override_dlls native,builtin api-ms-win-crt-private-l1-1-0 api-ms-win-crt-conio-l1-1-0 api-ms-win-crt-heap-l1-1-0 api-ms-win-crt-locale-l1-1-0 api-ms-win-crt-math-l1-1-0 api-ms-win-crt-runtime-l1-1-0 api-ms-win-crt-stdio-l1-1-0 api-ms-win-crt-time-l1-1-0 atl140 concrt140 msvcp140 msvcr140 ucrtbase vcomp140 vcruntime140
 
     w_try_cd "${W_CACHE}"/"${W_PACKAGE}"
-    w_try "${WINE}" start.exe /exec vc_redist.x86.exe ${W_OPT_UNATTENDED:+/q}
+    w_try "${WINE}" start.exe /exec VC_redist.x86.exe ${W_OPT_UNATTENDED:+/q}
 
     case "${W_ARCH}" in
         win64)
@@ -25,7 +25,7 @@ load_vcrun2019_ge()
 
             w_download https://web.archive.org/web/20210414165612/https://download.visualstudio.microsoft.com/download/pr/85d47aa9-69ae-4162-8300-e6b7e4bf3cf3/52B196BBE9016488C735E7B41805B651261FFA5D7AA86EB6A1D0095BE83687B2/VC_redist.x64.exe
             rm -f "${W_TMP}"/*  # Avoid permission error
-            w_try_cabextract --directory="${W_TMP}" vc_redist.x64.exe
+            w_try_cabextract --directory="${W_TMP}" VC_redist.x64.exe
             w_try_cabextract --directory="${W_TMP}" "${W_TMP}/a10"
             w_try_cabextract --directory="${W_TMP}" "${W_TMP}/a11"
             cp "${W_TMP}"/concrt140.dll "${W_SYSTEM64_DLLS}"/concrt140.dll
