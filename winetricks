@@ -10592,10 +10592,10 @@ _EOF_
 
     # Note, this leaves a dangling explorer window.
     # Wait for it to appear and kill it
-    while ! inode_pid=$(pgrep -f "explorer.exe.*Indeo"); do
-        sleep 1
-    done
-    kill -HUP "${inode_pid}"
+    #while ! inode_pid=$(pgrep -f "explorer.exe.*Indeo"); do
+    #    sleep 1
+    #done
+    #kill -HUP "${inode_pid}"
 }
 
 #----------------------------------------------------------------
