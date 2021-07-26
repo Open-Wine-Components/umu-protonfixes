@@ -5,7 +5,7 @@ import configparser
 import os
 import sys
 import re
-#import shutil
+import shutil
 import signal
 import zipfile
 import subprocess
