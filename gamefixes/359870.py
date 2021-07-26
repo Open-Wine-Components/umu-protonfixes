@@ -6,7 +6,7 @@ from protonfixes import util
 import os
 
 def main():
-    """ for FFXIV skip intro cutscene to allow game to work.
+    """
     """
     # disable new character intro cutscene to prevent black screen loop
     configpath = os.path.join(util.protonprefix(), 'drive_c/users/steamuser/My Documents/SQUARE ENIX/FINAL FANTASY X&X-2 HD Remaster')
