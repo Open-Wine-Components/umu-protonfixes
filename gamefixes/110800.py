@@ -5,7 +5,7 @@
 from protonfixes import util
 
 def main():
-    """ installs 110800, d3dx9_43, d3dcompiler_43, d3dx11_43, d3dcompiler_47
+    """ installs d3dx9_43, d3dcompiler_43, d3dx11_43, d3dcompiler_47
     """
 
     # https://github.com/ValveSoftware/Proton/issues/544#issuecomment-826150012
