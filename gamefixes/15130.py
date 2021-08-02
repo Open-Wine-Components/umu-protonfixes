@@ -23,5 +23,8 @@ def main():
     if not os.path.isfile(os.path.join(installpath, 'dsound.dll')):
         urllib.request.urlretrieve (url, "dsound.dll")
 
+    """ Add a couple of keys in regedit
+    """
+
     util.regedit_add("HKLM\\Software\\Wow6432Node\\Ubisoft")
     util.regedit_add("HKLM\\Software\\Wow6432Node\\Ubisoft\\Beyond Good & Evil",'InstallLanguage','REG_DWORD','1')
