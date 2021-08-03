@@ -12,7 +12,7 @@ def main():
 
     # Fixes the startup process.
     util.set_environment('WINEDLLOVERRIDES','dxgi=n')
-    util.set_environment('DXVK_ASYNC','1')
+    util.enable_dxvk_async()
 
     installpath = os.getcwd()
 
