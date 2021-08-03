@@ -378,6 +378,9 @@ def disable_nvapi():
 def disable_dxvk():  # pylint: disable=missing-docstring
     set_environment('PROTON_USE_WINED3D', '1')
 
+def enable_dxvk_async():  # pylint: disable=missing-docstring
+    set_environment('DXVK_ASYNC', '1')
+
 def disable_esync():  # pylint: disable=missing-docstring
     set_environment('PROTON_NO_ESYNC', '1')
 
