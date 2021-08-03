@@ -27,6 +27,5 @@ def main():
         f.write("<FINAL FANTASY XIV Boot Config File>\n\n<Version>\nBrowser 1\nStartupCompleted 1")
         f.close
     # Fixes the startup process.
-    util.replace_command('ffxivboot.exe', 'ffxivboot64.exe')
     if 'NOSTEAM' in os.environ:
         util.replace_command('-issteam', '')
