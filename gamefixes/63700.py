@@ -1,4 +1,4 @@
-""" Game fix for Blood and Bacon
+""" Game fix for BIT.TRIP BEAT
 """
 
 #pylint: disable=C0103
