@@ -290,6 +290,28 @@ def protontricks(verb):
 
     return False
 
+def regedit_add(folder,name=None,type=None,value=None):
+    """ Add regedit keys
+    """
+
+    env = dict(protonmain.g_session.env)
+    env['WINEPREFIX'] = protonprefix()
+    env['WINE'] = protonmain.g_proton.wine_bin
+    env['WINELOADER'] = protonmain.g_proton.wine_bin
+    env['WINESERVER'] = protonmain.g_proton.wineserver_bin
+    
+    if name is not None and type is not None and value is not None:
+
+        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', '/v', name, '/t', type, '/d', value]
+        log.info('Adding key: ' + folder)
+
+    else:
+
+        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f']
+        log.info('Adding key: ' + folder)
+
+    process = subprocess.Popen(regedit_cmd, env=env)
+    process.wait()
 
 def replace_command(orig_str, repl_str):
     """ Make a commandline replacement in sys.argv
