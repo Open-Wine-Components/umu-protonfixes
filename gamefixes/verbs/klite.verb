@@ -1,12 +1,12 @@
 w_metadata klite dlls \
     title="K-Lite codecs" \
     media="download" \
-    file1="K-Lite_Codec_Pack_1610_Basic.exe" \
+    file1="K-Lite_Codec_Pack_1635_Basic.exe" \
     homepage="https://codecguide.com/download_kl.htm"
 
 load_klite()
 {
-    w_download https://files3.codecguide.com/K-Lite_Codec_Pack_1610_Basic.exe 064b7e0b98174abbbee99811e19c056cd16baba6050814ff0dc387e96e1cce21
+    w_download https://files3.codecguide.com/K-Lite_Codec_Pack_1635_Basic.exe e417fb60a6e583e6588ca6e60d2aecdf92e210b5d23a35ba7e3194c8eb598bd7
     w_try_cd "${W_CACHE}/${W_PACKAGE}"
     cat > "klcp_basic_unattended.ini" <<_EOF_
 [Setup]
@@ -40,5 +40,5 @@ hwa_other_auto=1
 lang_set_preferred=1
 lang_autodetect=1
 _EOF_
-    w_try "${WINE}" start.exe /exec K-Lite_Codec_Pack_1610_Basic.exe /verysilent /norestart /LoadInf="./klcp_basic_unattended.ini"
+    w_try "${WINE}" start.exe /exec K-Lite_Codec_Pack_1635_Basic.exe /verysilent /norestart /LoadInf="./klcp_basic_unattended.ini"
 }
