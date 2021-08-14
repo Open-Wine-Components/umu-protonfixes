@@ -378,6 +378,9 @@ def disable_nvapi():
 def disable_dxvk():  # pylint: disable=missing-docstring
     set_environment('PROTON_USE_WINED3D', '1')
 
+def enable_dxvk_async():  # pylint: disable=missing-docstring
+    set_environment('DXVK_ASYNC', '1')
+
 def disable_esync():  # pylint: disable=missing-docstring
     set_environment('PROTON_NO_ESYNC', '1')
 
@@ -456,7 +459,7 @@ def _get_ini_full_path(cfile, base_path):
     return False
 
 
-def set_ini_options(ini_opts, cfile, base_path='user'):
+def set_ini_options(ini_opts, cfile, encoding, base_path='user'):
     """ Edit game's INI config file
     """
     cfg_path = _get_ini_full_path(cfile, base_path)
@@ -471,7 +474,7 @@ def set_ini_options(ini_opts, cfile, base_path='user'):
     conf = configparser.ConfigParser(empty_lines_in_values=True, allow_no_value=True, strict=False)
     conf.optionxform = str
 
-    conf.read(cfg_path)
+    conf.read(cfg_path,encoding)
 
     # set options
     log.info('Addinging INI options into '+cfile+':\n'+ str(ini_opts))
