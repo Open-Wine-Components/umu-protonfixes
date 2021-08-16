@@ -1,4 +1,4 @@
-""" Game fix for Serious Sam 4
+""" Game workaround for Call of Duty Black Ops III
 """
 #pylint: disable=C0103
 
