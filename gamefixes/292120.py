@@ -9,5 +9,5 @@ def main():
     """ Changes the proton argument from the launcher to the game
     """
 
-    # Replace launcher with game exe in proton arguments
+    # reduce stuttering
     util.enable_dxvk_async()
