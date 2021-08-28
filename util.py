@@ -484,6 +484,14 @@ def set_ini_options(ini_opts, cfile, encoding, base_path='user'):
         conf.write(configfile)
     return True
 
+def get_resolution():
+    """ Returns screen res width, height
+    """
+
+    with open('/sys/class/graphics/fb0/virtual_size', 'r') as res:
+        screenx, screeny = map(int, res.read().strip('\n').split(','))
+
+        return(screenx,screeny)
 
 def read_dxvk_conf(cfp):
     """ Add fake [DEFAULT] section to dxvk.conf

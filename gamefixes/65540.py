@@ -5,8 +5,27 @@
 import os
 from protonfixes import util
 
+
 def main():
 
-    # Fix the game getting locked
+    screen_width,screen_height = util.get_resolution()
+
+    zVidResFullscreenX=str(screen_width)
+    zVidResFullscreenY=str(screen_height)
+
+    """ Modify Gothic.ini
+    """
+
+    game_opts = """
+    [GAME]
+    scaleVideos=1
+    [VIDEO]
+    zVidResFullscreenX=""" + zVidResFullscreenX + """
+    zVidResFullscreenY=""" + zVidResFullscreenY + """
+    zVidResFullscreenBPP=32
+    """
+
+    util.set_ini_options(game_opts,'Gothic.ini','cp1251','game')
+
+    # Fix the game getting locked on exit
     util.disable_fsync()
-    # To make cinametics work install https://github.com/dosinabox/g1_steam_fix
