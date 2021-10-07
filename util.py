@@ -293,14 +293,14 @@ def protontricks(verb):
 def install_dotnet(verb):
     """ Game installation path
     """
-    log.info(str(os.path.join(protonprefix(), 'drive_c', 'windows','Microsoft.NET','Framework','v4.0.30319','WsatConfig.exe')))
+    log.info('Checking for file' + str(os.path.join(protonprefix(), 'drive_c', 'windows','Microsoft.NET','Framework','v4.0.30319','WsatConfig.exe')))
     if not os.path.isfile(os.path.join(protonprefix(), 'drive_c', 'windows','Microsoft.NET','Framework','v4.0.30319','WsatConfig.exe')):
         try:
             shutil.rmtree(protonprefix())
         except FileNotFoundError:
             log.warn('The protonprefix folder was not found')
 
-        log.info(str(os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')))
+        log.info('Folder Proton 5.0' + str(os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0')))
         env = dict(protonmain.g_session.env)
         env['WINEPREFIX'] = protonprefix()
         env['WINE'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
