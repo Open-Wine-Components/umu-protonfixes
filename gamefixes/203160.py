@@ -1,12 +1,13 @@
-""" Game fix for Quake Champions
+
+""" Game fix for Tomb Raider 2013
 """
 #pylint: disable=C0103
 
 from protonfixes import util
 
 def main():
-    """ Emable DXVK async and disable esync.
+    """ Improve smooth experience 
     """
 
+    # reduce stuttering
     util.enable_dxvk_async()
-    util.disable_esync()
