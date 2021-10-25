@@ -290,6 +290,32 @@ def protontricks(verb):
 
     return False
 
+def install_dotnet(verb):
+    """ Game installation path
+    """
+    log.info('Checking for file' + str(os.path.join(protonprefix(), 'drive_c', 'windows','Microsoft.NET','Framework','v4.0.30319','WsatConfig.exe')))
+    if not os.path.isfile(os.path.join(protonprefix(), 'drive_c', 'windows','Microsoft.NET','Framework','v4.0.30319','WsatConfig.exe')):
+        try:
+            shutil.rmtree(protonprefix())
+        except FileNotFoundError:
+            log.warn('The protonprefix folder was not found')
+
+        log.info('Folder Proton 5.0' + str(os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0')))
+        env = dict(protonmain.g_session.env)
+        env['WINEPREFIX'] = protonprefix()
+        env['WINE'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
+        env['WINELOADER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
+        env['WINESERVER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wineserver')
+        env['WINEPATH'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine64')
+        env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
+        env['LD_PRELOAD'] = ''
+        winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
+        winetricks_cmd = [winetricks_bin, '--unattended', '--force'] + verb.split(' ')
+        
+
+        process = subprocess.Popen(winetricks_cmd, env=env)
+        process.wait()
+
 def regedit_add(folder,name=None,type=None,value=None):
     """ Add regedit keys
     """
@@ -438,8 +464,8 @@ def create_dosbox_conf(conf_file, conf_dict):
         conf.write(file)
 
 
-def _get_ini_full_path(cfile, base_path):
-    """ Find game's INI config file
+def _get_config_full_path(cfile, base_path):
+    """ Find game's config file
     """
 
     # Start from 'user'/'game' directories or absolute path
@@ -452,37 +478,72 @@ def _get_ini_full_path(cfile, base_path):
             cfg_path = cfile
 
     if os.path.exists(cfg_path) and os.access(cfg_path, os.F_OK):
-        log.debug('Found INI file: ' + cfg_path)
+        log.debug('Found config file: ' + cfg_path)
         return cfg_path
 
-    log.warn('INI file not found: ' + cfg_path)
+    log.warn('Config file not found: ' + cfg_path)
     return False
 
+def create_backup_config(cfg_path):
+    """ Create backup config file
+    """
+
+    # Backup
+    if not os.path.exists(cfg_path + '.protonfixes.bak'):
+        log.info('Creating backup for config file')
+        shutil.copyfile(cfg_path, cfg_path + '.protonfixes.bak')
 
 def set_ini_options(ini_opts, cfile, encoding, base_path='user'):
     """ Edit game's INI config file
     """
-    cfg_path = _get_ini_full_path(cfile, base_path)
+    cfg_path = _get_config_full_path(cfile, base_path)
     if not cfg_path:
         return False
 
-    # Backup
-    if not os.path.exists(cfg_path + '.protonfixes.bak'):
-        log.info('Creating backup for INI file')
-        shutil.copyfile(cfg_path, cfg_path + '.protonfixes.bak')
+    create_backup_config(cfg_path)
 
+    # set options
     conf = configparser.ConfigParser(empty_lines_in_values=True, allow_no_value=True, strict=False)
     conf.optionxform = str
 
     conf.read(cfg_path,encoding)
 
-    # set options
     log.info('Addinging INI options into '+cfile+':\n'+ str(ini_opts))
     conf.read_string(ini_opts)
 
     with open(cfg_path, 'w') as configfile:
         conf.write(configfile)
     return True
+
+def set_xml_options(base_attibutte, xml_line, cfile, base_path='user'):
+    """ Edit game's XML config file
+    """
+    xml_path = _get_config_full_path(cfile, base_path)
+    if not xml_path:
+        return False
+
+    create_backup_config(xml_path)
+
+    # set options
+
+    base_size = os.path.getsize(xml_path)
+    backup_size = os.path.getsize(xml_path + '.protonfixes.bak')
+
+    if base_size == backup_size:
+        ConfigFile = open(xml_path, 'r')
+        contents = ConfigFile.readlines()
+        LINENUM=0
+        for line in contents:
+            LINENUM+=1
+            if base_attibutte in line:
+                log.info('Addinging XML options into '+cfile+':\n'+ str(xml_line))
+                contents.insert(LINENUM, xml_line + "\n")
+        ConfigFile.close()
+        ConfigFile = open(xml_path, 'w')
+        for eachitem in contents:
+            ConfigFile.write(eachitem)
+        ConfigFile.close()
+        log.info("Config Patch Applied! \n")
 
 def get_resolution():
     """ Returns screen res width, height
