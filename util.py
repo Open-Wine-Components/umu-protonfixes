@@ -431,6 +431,10 @@ def disable_uplay_overlay():
         protonprefix(),
         'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/'
     )
+
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+
     config_file = os.path.join(config_dir, 'settings.yml')
 
     if not os.path.isdir(config_dir):
@@ -441,13 +445,19 @@ def disable_uplay_overlay():
         )
         return
 
-    try:
-        with open(config_file, 'a+') as file:
-            file.write("\noverlay:\n  enabled: false\n")
+    if not os.path.isfile(config_file):
+        f = open(config_file,"w+")
+        f.write("\noverlay:\n  enabled: false\n  forceunhookgame: false\n  fps_enabled: false\n  warning_enabled: false\n")
+        f.close
         log.info('Disabled UPlay overlay')
-        return
-    except OSError as err:
-        log.warn('Could not disable UPlay overlay: ' + err.strerror)
+    else:
+        try:
+            with open(config_file, 'a+') as file:
+                file.write("\noverlay:\n  enabled: false\n  forceunhookgame: false\n  fps_enabled: false\n  warning_enabled: false\n")
+            log.info('Disabled UPlay overlay')
+            return
+        except OSError as err:
+            log.warn('Could not disable UPlay overlay: ' + err.strerror)
 
 def create_dosbox_conf(conf_file, conf_dict):
     """Create DOSBox configuration file.
