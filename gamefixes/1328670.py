@@ -8,6 +8,3 @@ def main():
     """ 
     """
     util.protontricks('d3dcompiler_47')
-    util.set_environment('WINEDLLOVERRIDES','openal32=b')
-
-
