@@ -290,11 +290,10 @@ def protontricks(verb):
 
     return False
 
-def install_dotnet(verb):
+def protontricks_proton_5(verb):
     """ Game installation path
     """
-    log.info('Checking for file' + str(os.path.join(protonprefix(), 'drive_c', 'windows','Microsoft.NET','Framework','v4.0.30319','WsatConfig.exe')))
-    if not os.path.isfile(os.path.join(protonprefix(), 'drive_c', 'windows','Microsoft.NET','Framework','v4.0.30319','WsatConfig.exe')):
+    if not checkinstalled(verb):
         try:
             shutil.rmtree(protonprefix())
         except FileNotFoundError:
