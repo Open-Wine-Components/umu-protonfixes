@@ -9,4 +9,4 @@ from protonfixes import util
 def main():
 
     # This requires Proton 5.0 installed
-    util.protontricks_proton_5('wmp11')
+    util.protontricks('wmp11')
