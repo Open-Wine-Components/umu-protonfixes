@@ -1,4 +1,4 @@
-""" Game fix Super Meat Boy
+""" Game fix for Super Meat Boy
 """
 #pylint: disable=C0103
 #
