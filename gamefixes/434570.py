@@ -6,4 +6,4 @@
 from protonfixes import util
 
 def main():
-    util.protontricks('dotnet40')
+    util.protontricks_proton_5('dotnet40')
