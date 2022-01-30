@@ -11,6 +11,7 @@ def main():
     """ Installs wmp11
     """
     util.protontricks('wmp11')
+    util.protontricks('gfw')
 
     installpath = os.path.abspath(os.getcwd())
     videopath =  os.path.join(installpath,'nativePC_MT','movie')
