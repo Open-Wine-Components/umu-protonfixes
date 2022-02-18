@@ -338,7 +338,7 @@ def regedit_add(folder,name=None,type=None,value=None,arch=None):
 
     else:
 
-        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f']
+        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', arch]
         log.info('Adding key: ' + folder)
 
     process = subprocess.Popen(regedit_cmd, env=env)
