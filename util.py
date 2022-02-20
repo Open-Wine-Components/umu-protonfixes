@@ -315,6 +315,11 @@ def protontricks_proton_5(verb):
         process = subprocess.Popen(winetricks_cmd, env=env)
         process.wait()
 
+def regedit_determineArch(var):
+    if var is not None and type(var) == int:
+        return '/reg:64'
+    return ''
+
 def regedit_add(folder,name=None,type=None,value=None,arch=None):
     """ Add regedit keys
     """
@@ -325,20 +330,14 @@ def regedit_add(folder,name=None,type=None,value=None,arch=None):
     env['WINELOADER'] = protonmain.g_proton.wine_bin
     env['WINESERVER'] = protonmain.g_proton.wineserver_bin
     
-    # Flag for if we want to force writing to the 64-bit registry sector
-    if arch is not None:
-        arch = '/reg:64'
-    else:
-        arch = ''
-    
     if name is not None and type is not None and value is not None:
 
-        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', '/v', name, '/t', type, '/d', value, arch]
+        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', '/v', name, '/t', type, '/d', value, regedit_determineArch(arch)]
         log.info('Adding key: ' + folder)
 
     else:
 
-        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', arch]
+        regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', regedit_determineArch(name)]
         log.info('Adding key: ' + folder)
 
     process = subprocess.Popen(regedit_cmd, env=env)
