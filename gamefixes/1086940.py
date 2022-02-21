@@ -10,4 +10,3 @@ def main():
     # Fixes the startup process.
     util.protontricks('vcrun2019_ge')
     util.protontricks('d3dcompiler_47')
-    util.replace_command('LariLauncher.exe', '../bin/bg3.exe')
