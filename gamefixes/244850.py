@@ -15,6 +15,4 @@ def main():
 
     util.set_xml_options(base_attibutte, game_opts, 'SpaceEngineers.exe.config','game')
 
-    # This requires Proton 5.0 installed
-    util.protontricks_proton_5('dotnet48')
     util.append_argument('-skipintro')
