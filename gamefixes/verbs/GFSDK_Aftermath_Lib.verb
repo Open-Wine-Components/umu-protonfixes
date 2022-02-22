@@ -1,0 +1,14 @@
+w_metadata GFSDK_Aftermath_Lib dlls \
+    title="GFSDK_Aftermath_Lib.x64 Proxy DLL" \
+    publisher="Thomas Crider" \
+    year="2022" \
+    media="download" \
+    file1="GFSDK_Aftermath_Lib.x64.tar.gz" \
+    installed_file1="GFSDK_Aftermath_Lib.x64.dll"
+
+load_GFSDK_Aftermath_Lib()
+{
+    w_download "https://github.com/GloriousEggroll/GFSDK_Aftermath_Lib/releases/download/0.1/GFSDK_Aftermath_Lib.x64.tar.gz" ec6c89d9547b3928f05a7b039137add577b721d62ce3ef409ab9e8630ea4027b
+    w_try tar -zxf "${W_CACHE}/${W_PACKAGE}/${file1}" -C "${W_DRIVE_C}/windows/temp/"
+}
+
