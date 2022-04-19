@@ -1,14 +1,14 @@
-""" Game fix for Persona 4 Golden
+""" Game fix for Final Fantasy VII
 """
 #pylint: disable=C0103
 
 from protonfixes import util
 
 def main():
-    """ installs devenum, quartz, wmp9 and adjust pulse latency
+    """ installs vcrun2019_ge and d3dcompiler47                
     """
 
-    # Fix pre-rendered cutscene playback
+    # FFVII needs vcrun2019 and d3dcompiler_47
     util.protontricks('vcrun2019_ge')
     util.protontricks('d3dcompiler_47')
 
