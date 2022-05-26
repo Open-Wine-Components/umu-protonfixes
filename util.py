@@ -12,6 +12,7 @@ import subprocess
 import urllib.request
 import functools
 from .logger import log
+from .steamhelper import install_app
 from . import config
 
 try:
@@ -612,6 +613,16 @@ def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
     with open(cfile, 'w') as configfile:
         conf.write(configfile)
 
+def install_eac_runtime():
+    """ Install Proton Easyanticheat Runtime
+    """
+    install_app(1826330)
+
+def install_battleye_runtime():
+    """ Install Proton BattlEye Runtime
+    """
+    install_app(1161040)
+        
 def install_from_zip(url, filename, path=os.getcwd()):
     """ Install a file from a downloaded zip
     """
