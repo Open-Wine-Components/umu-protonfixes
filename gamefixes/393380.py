@@ -25,6 +25,59 @@ def main():
         'EasyAntiCheat',
         '55'
     )
+    
+
+    # Restore path permissions
+    if os.path.exists(eac_path):
+        os.chmod(eac_path, 
+            stat.S_IRUSR | 
+            stat.S_IWUSR | 
+            stat.S_IXUSR | 
+            stat.S_IRGRP | 
+            stat.S_IXGRP | 
+            stat.S_IROTH | 
+            stat.S_IXOTH
+        )
+    if os.path.exists(os.path.join(eac_path, "easyanticheat_wine_x64.eac")):
+        os.chmod(os.path.join(eac_path, "easyanticheat_wine_x64.eac"), 
+            stat.S_IRUSR | 
+            stat.S_IWUSR | 
+            stat.S_IRGRP | 
+            stat.S_IROTH
+        )    
+    if os.path.exists(os.path.join(eac_path, "easyanticheat_wine_x64.eac.metadata")):
+        os.chmod(os.path.join(eac_path, "easyanticheat_wine_x64.eac.metadata"),
+            stat.S_IRUSR |
+            stat.S_IWUSR |
+            stat.S_IRGRP |
+            stat.S_IROTH
+        )    
+
+    util.install_all_from_tgz(URL, extract_path)
+    
+    # Set Paths to readonly
+    os.chmod(
+        os.path.join(eac_path, "easyanticheat_wine_x64.eac"), 
+        stat.S_IRUSR | 
+        stat.S_IRGRP | 
+        stat.S_IROTH
+    )
+    os.chmod(
+        os.path.join(eac_path, "easyanticheat_wine_x64.eac.metadata"), 
+        stat.S_IRUSR | 
+        stat.S_IRGRP | 
+        stat.S_IROTH
+    )
+    os.chmod(eac_path, 
+        stat.S_IRUSR | 
+        stat.S_IXUSR | 
+        stat.S_IRGRP | 
+        stat.S_IXGRP | 
+        stat.S_IROTH | 
+        stat.S_IXOTH
+    )
+
+    # Force Temp path to readonly
     temp_path = os.path.join(
         util.protonprefix(),
         'drive_c',
@@ -32,11 +85,12 @@ def main():
         'steamuser',
         'Temp'
     )
-
-    util.install_all_from_tgz(URL, extract_path)
-    
-    # Set Paths to readonly
-    os.chmod(os.path.join(eac_path, "easyanticheat_wine_x64.eac"), stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
-    os.chmod(os.path.join(eac_path, "easyanticheat_wine_x64.eac.metadata"), stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
-    os.chmod(eac_path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
-    os.chmod(temp_path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+    os.chmod(
+        temp_path, 
+        stat.S_IRUSR | 
+        stat.S_IXUSR | 
+        stat.S_IRGRP | 
+        stat.S_IXGRP | 
+        stat.S_IROTH | 
+        stat.S_IXOTH
+    )
