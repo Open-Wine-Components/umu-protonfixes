@@ -13,10 +13,3 @@ def main():
     util.protontricks('wmp11')
     util.protontricks('gfw')
 
-    installpath = os.path.abspath(os.getcwd())
-    videopath =  os.path.join(installpath,'nativePC_MT','movie')
-
-    for video in os.listdir(videopath):
-        if video.endswith(".wmv") and os.path.getsize(os.path.join(videopath, video)) > 0:
-            shutil.move(os.path.join(videopath, video), os.path.join(videopath, video + '.bak'))
-            subprocess.call(['touch', os.path.join(videopath, video), os.path.join(videopath)])
