@@ -7,6 +7,7 @@ import sys
 import re
 import shutil
 import signal
+import tarfile
 import zipfile
 import subprocess
 import urllib.request
@@ -622,7 +623,23 @@ def install_battleye_runtime():
     """ Install Proton BattlEye Runtime
     """
     install_app(1161040)
-        
+
+def install_all_from_tgz(url, path=os.getcwd()):
+    """ Install all files from a downloaded tar.gz
+    """
+ 
+    cache_dir = config.cache_dir
+    tgz_file_name = os.path.basename(url)
+    tgz_file_path = os.path.join(cache_dir, tgz_file_name)
+
+    if tgz_file_name not in os.listdir(cache_dir):
+        log.info('Downloading ' + tgz_file_name)
+        urllib.request.urlretrieve(url, tgz_file_path)
+    
+    with tarfile.open(tgz_file_path, 'r:gz') as tgz_obj:
+        log.info('Extracting ' + tgz_file_name + ' to ' + path)
+        tgz_obj.extractall(path)
+    
 def install_from_zip(url, filename, path=os.getcwd()):
     """ Install a file from a downloaded zip
     """
