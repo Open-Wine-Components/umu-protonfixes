@@ -10,6 +10,6 @@ from protonfixes import util
 def main():
     """ Installs wmp11
     """
-    util.protontricks('wmp11')
     util.protontricks('gfw')
+    util.protontricks('wmp11')
 
