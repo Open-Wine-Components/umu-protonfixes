@@ -12,7 +12,6 @@ def main():
     util.use_seccomp()
     util.replace_command('launcher.exe', 'mafiadefinitiveedition.exe')
     util.protontricks('d3dcompiler_47')
-    util.set_environment('WINEDLLOVERRIDES','dxgi=n')
     configpath = os.path.join(util.protonprefix(), 'drive_c/users/steamuser/My Documents/My Games/Mafia Definitive Edition/Saves')
     if not os.path.exists(configpath):
         os.makedirs(configpath)
