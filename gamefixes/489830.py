@@ -11,4 +11,5 @@ def main():
     """
 
     if os.path.isfile(os.path.join(os.getcwd(), 'skse64_loader.exe')):
-        util.replace_command('SkyrimSELauncher.exe', 'skse64_loader.exe')
+        if 'MODS' in os.environ:
+            util.replace_command('SkyrimSELauncher.exe', 'skse64_loader.exe')

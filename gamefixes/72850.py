@@ -12,5 +12,6 @@ def main():
 
     # Fixes the startup process.
     if os.path.isfile(os.path.join(os.getcwd(), 'skse_loader.exe')):
-        util.replace_command('SkyrimLauncher.exe', 'skse_loader.exe')
+        if 'MODS' in os.environ:
+            util.replace_command('SkyrimLauncher.exe', 'skse_loader.exe')
 
