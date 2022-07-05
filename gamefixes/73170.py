@@ -1,5 +1,6 @@
 """ Game fix for Darkest Hour: A Hearts of Iron Game
 """
+#pylint: disable=C0103
 
 from protonfixes import util
 
