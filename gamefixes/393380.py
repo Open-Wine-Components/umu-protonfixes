@@ -10,7 +10,7 @@ from protonfixes import util
 def main():
     """ Do the Squad tutorial fix at https://squadfm.org/#installation-linux-only
     """
-    URL = "https://github.com/ValveSoftware/Proton/files/4839724/easyanticheat_wine_x64.tar.gz"
+    URL = "https://github.com/ValveSoftware/Proton/files/8986998/easyanticheat_wine_x64-2020-08-04.tar.gz"
     extract_path = os.path.join(
         util.protonprefix(),
         '..'
