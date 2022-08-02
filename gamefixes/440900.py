@@ -8,4 +8,4 @@ def main():
     """ Launcher workaround
     """
     # Fixes the startup process.
-    util.replace_command('FuncomLauncher.exe', '../ConanSandbox/Binaries/Win64/ConanSandbox.exe')
+    util.replace_command('FuncomLauncher.exe', '../ConanSandbox/Binaries/Win64/ConanSandbox_BE.exe')
