@@ -16,7 +16,7 @@ def main():
     subprocess.call(['ln', '-s', '../../../EasyAntiCheat/easyanticheat_x64.so', 'FallGuys_client_game_Data/Plugins/x86_64/easyanticheat_x64.so'])
 
     #Need to replace the command instead of the ini otherwise it will hang after installing EOS on new prefix
-    util.replace_command('FallGuysEACLauncher.exe', 'FallGuys_client_game.exe')
+    util.replace_command('FallGuys_client.exe', 'FallGuys_client_game.exe')
     # Fixes the ini files.
     #subprocess.call(['sed', '-i', 's/TargetApplicationPath=FallGuysEACLauncher.exe/TargetApplicationPath=FallGuys_client_game.exe/', 'FallGuys_client.ini'])
 
