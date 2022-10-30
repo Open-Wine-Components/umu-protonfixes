@@ -10,7 +10,6 @@ DEFAULT_CONF = '''
 enable_checks = true
 enable_splash = false
 enable_global_fixes = true
-enable_origin_fixes = true
 
 
 [path]
