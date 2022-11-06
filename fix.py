@@ -98,26 +98,6 @@ def run_fix(gameid):
         except ImportError:
             log.info('No protonfix found for ' + game)
 
-    if 'ORIGIN' in os.environ:
-        log.info('link2ea found, checking for origin installation')
-        # execute origin.py
-        if os.path.isfile(os.path.join(localpath, 'origin.py')):
-            open(os.path.join(localpath, '__init__.py'), 'a').close()
-            sys.path.append(os.path.expanduser('~/.config/protonfixes'))
-            try:
-                game_module = import_module('localfixes.origin')
-                log.info('Using origin for ' + game)
-                game_module.main()
-            except ImportError:
-                log.info('No origin profile found for ' + game)
-        elif config.enable_origin_fixes:
-            try:
-                game_module = import_module('protonfixes.gamefixes.origin')
-                log.info('Using origin defaults for ' + game)
-                game_module.main()
-            except ImportError:
-                log.info('No origin defaults found')
-
 
 def main():
     """ Runs the gamefix
