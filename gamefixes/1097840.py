@@ -11,10 +11,12 @@ def main():
     """ This is a workaround that allows the game to be played with EAC disabled.
     """
     # Fix the startup process:
-    if os.path.exists('EasyAntiCheat'):
-        if os.path.exists('EasyAntiCheat-backup'):
-            subprocess.call(['rm', '-Rf', 'EasyAntiCheat-backup'])
-        subprocess.call(['mv', 'EasyAntiCheat', 'EasyAntiCheat-backup'])
+    install_dir = glob.escape(util.get_game_install_path())
+
+    if os.path.exists(install_dir + '/GearGame/Binaries/Steam/EasyAntiCheat'):
+        if os.path.exists(install_dir + '/GearGame/Binaries/Steam/EasyAntiCheat-backup'):
+            subprocess.call(['rm', '-Rf', install_dir + '/GearGame/Binaries/Steam/EasyAntiCheat-backup'])
+        subprocess.call(['mv', install_dir + '/GearGame/Binaries/Steam/EasyAntiCheat', install_dir + '/GearGame/Binaries/Steam/EasyAntiCheat-backup'])
 
     util.replace_command('Gears5_EAC.exe', 'Gears5.exe')
 
@@ -24,7 +26,6 @@ def main():
     util.protontricks('GFSDK_Aftermath_Lib')
 
     tmp = (util.protonprefix() + "drive_c/windows/temp/GFSDK_Aftermath_Lib.x64.dll")
-    install_dir = glob.escape(util.get_game_install_path())
 
     if os.path.exists(install_dir + '/Engine/Binaries/ThirdParty/GFSDK_Aftermath/x64'):
         if not os.path.exists(install_dir + '/Engine/Binaries/ThirdParty/GFSDK_Aftermath/x64-backup'):
