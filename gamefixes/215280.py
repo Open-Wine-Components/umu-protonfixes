@@ -5,6 +5,8 @@
 from protonfixes import util
 import os
 
+import __main__ as protonmain
+
 def main():
     util.protontricks('d3dx9_43')
     util.protontricks('d3dx11_43')
@@ -14,9 +16,9 @@ def main():
     # itself runs well in d3d11 mode with dxvk, so we just do this one override
     # instead of falling completely back to wined3d.
 
-    overrides = os.environ.get('WINEDLLOVERRIDES', "")
+    overrides = protonmain.g_session.env.get('WINEDLLOVERRIDES','')
     if overrides != "":
-        overrides += ','
+        overrides += ';'
 
     overrides += 'd3d9=b'
 
