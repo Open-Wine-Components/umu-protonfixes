@@ -7,7 +7,7 @@ import multiprocessing
 
 
 def main():
-    """ Space Marine chokes on more than 31 cores
+    """ Witcher 2 chokes on more than 31 cores
     """
 
     if multiprocessing.cpu_count() > 24:
