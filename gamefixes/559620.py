@@ -5,8 +5,5 @@
 from protonfixes import util
 
 def main():
-    # Fix the (awesome) cutscenes.
-    util.protontricks('cnc_ddraw')
-
-    # Game ships with a WinMM replacement for CD music.
-    util.winedll_override('winmm', 'n,b')
+    # Override ddraw (cutscenes+menu perf) and WinMM (Music)
+    util.set_environment('WINEDLLOVERRIDES', 'ddraw=n,b;winmm=n,b')
