@@ -1,0 +1,12 @@
+""" Two Worlds Epic Edition - ID 1930
+    https://www.protondb.com/app/1930
+"""
+
+from protonfixes import util
+
+def main():
+
+    util.protontricks('xact')
+
+
+
