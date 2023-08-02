@@ -5,4 +5,4 @@
 from protonfixes import util
 
 def main():
-    util.protontricks('vcrun2019')
+    util.protontricks('vcrun2019_ge')
