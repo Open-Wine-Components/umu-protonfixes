@@ -3,7 +3,7 @@ w_metadata dgvoodoo2 dlls \
     publisher="dege" \
     year="2023" \
     media="download" \
-    file1="dgVoodoo2_81.zip" \
+    file1="dgVoodoo2_81_1.zip" \
     installed_file1="${W_SYSTEM32_DLLS_WIN}/ddraw.dll" \
     installed_file2="${W_SYSTEM32_DLLS_WIN}/d3dimm.dll" \
     installed_file3="${W_SYSTEM32_DLLS_WIN}/d3d9.dll" \
@@ -12,7 +12,7 @@ w_metadata dgvoodoo2 dlls \
 
 load_dgvoodoo2()
 {
-    w_download https://github.com/dege-diosg/dgVoodoo2/releases/download/v2.81/dgVoodoo2_81.zip d1cd94aac9edb52ad5534c97a8866463ce4ff0293bf0737c81434bc9b0519624 ${file1}
+    w_download https://github.com/dege-diosg/dgVoodoo2/releases/download/v2.81.1/dgVoodoo2_81_1.zip 13c84b6e3b19bb5e38afdb67f2d1ee3c1b6291284a0043a6a40061d2c6e7c18c ${file1}
     w_try_unzip "${W_TMP}" "${W_CACHE}/${W_PACKAGE}/${file1}"
     w_try_cp_dll "${W_TMP}/MS/x86/DDraw.dll" "${W_SYSTEM32_DLLS}/ddraw.dll"
     w_try_cp_dll "${W_TMP}/MS/x86/D3DImm.dll" "${W_SYSTEM32_DLLS}/d3dimm.dll"
