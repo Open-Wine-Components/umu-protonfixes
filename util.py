@@ -293,29 +293,41 @@ def protontricks(verb):
     return False
 
 def protontricks_proton_5(verb):
-    """ Game installation path
-    """
-    if not checkinstalled(verb):
-        try:
-            shutil.rmtree(protonprefix())
-        except FileNotFoundError:
-            log.warn('The protonprefix folder was not found')
+    """ Runs winetricks with Proton 5 which is still useful to install some things like .NET"""
+    if checkinstalled(verb):
+        log.debug("Skipping {} as it is marked as installed".format(verb))
+        return
 
-        log.info('Folder Proton 5.0' + str(os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0')))
-        env = dict(protonmain.g_session.env)
-        env['WINEPREFIX'] = protonprefix()
-        env['WINE'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
-        env['WINELOADER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
-        env['WINESERVER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wineserver')
-        env['WINEPATH'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine64')
-        env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
-        env['LD_PRELOAD'] = ''
-        winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
-        winetricks_cmd = [winetricks_bin, '--unattended', '--force'] + verb.split(' ')
-        
+    prefix_path = protonprefix()
+    try:
+        log.info("Removing the prefix at {} to recreate it with Proton 5".format(prefix_path))
+        shutil.rmtree(prefix_path)
+    except FileNotFoundError:
+        log.warn('The protonprefix folder was not found')
 
-        process = subprocess.Popen(winetricks_cmd, env=env)
-        process.wait()
+    log.info('Folder Proton 5.0' + str(os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0')))
+
+    wine_path = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
+    # If this is being used to install Dotnet for example and it doesn't exist, failing silently might not be enough
+    if not os.path.exists(wine_path):
+        message = "Ensure Proton 5.0 is installed. No Proton 5.0 was found at the expected path at {}".format(wine_path)
+        try_show_gui_error(message)
+        raise Exception(message)
+
+    env = dict(protonmain.g_session.env)
+    env['WINEPREFIX'] = prefix_path
+    env['WINE'] = wine_path
+    env['WINELOADER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
+    env['WINESERVER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wineserver')
+    env['WINEPATH'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine64')
+    env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
+    env['LD_PRELOAD'] = ''
+    winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
+    winetricks_cmd = [winetricks_bin, '--unattended', '--force'] + verb.split(' ')
+
+
+    process = subprocess.Popen(winetricks_cmd, env=env)
+    process.wait()
 
 def regedit_add(folder,name=None,type=None,value=None,arch=None):
     """ Add regedit keys
@@ -659,3 +671,13 @@ def install_from_zip(url, filename, path=os.getcwd()):
     with zipfile.ZipFile(zip_file_path, 'r') as zip_obj:
         log.info('Extracting ' + filename + ' to ' + path)
         zip_obj.extract(filename, path=path)
+
+def try_show_gui_error(text):
+    try:  # in case in-use Python doesn't have tkinter, which is likely
+        from tkinter import messagebox
+        messagebox.showerror("Proton Fixes", text)
+    except Exception as e:
+        try:
+            subprocess.run(["notify-send", "protonfixes", text])
+        except:
+            log.info("Failed to show error message with the following text: {}".format(text))
