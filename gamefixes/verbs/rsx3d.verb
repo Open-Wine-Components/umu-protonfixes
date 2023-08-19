@@ -1,0 +1,19 @@
+w_metadata rsx3d dlls \
+    title="Intel RSX 3D" \
+    publisher="Intel" \
+    year="1997" \
+    media="download" \
+    file1="rsx3d.zip" \
+    installed_file1="${W_SYSTEM32_DLLS_WIN}/rsx.dll" \
+    installed_file2="${W_SYSTEM32_DLLS_WIN}/aaudio.dll"
+
+load_rsx3d()
+{
+    w_download https://ilovepaws.nyc3.digitaloceanspaces.com/drivers/RSX3D.zip 1c931e4df0bcd435ce59f7fed5244efe14d84b97847315e4841998936c9afb20 ${file1}
+    w_try_unzip "${W_TMP}" "${W_CACHE}/${W_PACKAGE}/${file1}"
+    w_try_cp_dll "${W_TMP}/RSX3D/RSX.DLL" "${W_SYSTEM32_DLLS}/rsx.dll"
+    w_try_cp_dll "${W_TMP}/RSX3D/AAUDIO.DLL" "${W_SYSTEM32_DLLS}/aaudio.dll"
+    w_override_dlls native rsx aaudio
+    w_try_regsvr rsx.dll
+    w_try_regsvr aaudio.dll
+}

@@ -1,0 +1,27 @@
+w_metadata dgvoodoo2 dlls \
+    title="dgvoodoo2" \
+    publisher="dege" \
+    year="2023" \
+    media="download" \
+    file1="dgVoodoo2_81_1.zip" \
+    installed_file1="${W_SYSTEM32_DLLS_WIN}/ddraw.dll" \
+    installed_file2="${W_SYSTEM32_DLLS_WIN}/d3dimm.dll" \
+    installed_file3="${W_SYSTEM32_DLLS_WIN}/d3d9.dll" \
+    installed_file3="${W_SYSTEM32_DLLS_WIN}/dgd3d9.dll" \
+    installed_file4="${W_SYSTEM32_DLLS_WIN}/dgvoodoo.conf"
+
+load_dgvoodoo2()
+{
+    w_download https://github.com/dege-diosg/dgVoodoo2/releases/download/v2.81.1/dgVoodoo2_81_1.zip 13c84b6e3b19bb5e38afdb67f2d1ee3c1b6291284a0043a6a40061d2c6e7c18c ${file1}
+    w_try_unzip "${W_TMP}" "${W_CACHE}/${W_PACKAGE}/${file1}"
+    w_try_cp_dll "${W_TMP}/MS/x86/DDraw.dll" "${W_SYSTEM32_DLLS}/ddraw.dll"
+    w_try_cp_dll "${W_TMP}/MS/x86/D3DImm.dll" "${W_SYSTEM32_DLLS}/d3dimm.dll"
+    w_try_cp_dll "${W_TMP}/MS/x86/D3D9.dll" "${W_SYSTEM32_DLLS}/d3d9.dll"
+    w_try_cp_dll "${W_TMP}/MS/x86/D3D9.dll" "${W_SYSTEM32_DLLS}/dgd3d9.dll"
+    sed -i '/dgVoodooWatermark/s/true/false/' "${W_TMP}/dgVoodoo.conf"
+    sed -i '/[DirectX]/ {/Filtering/s/appdriven/16/ ; /KeepFilterIfPointSampled/s/false/true/ ; /Resolution/s/unforced/max/ ; /Antialiasing/s/appdriven/8x/}' "${W_TMP}/dgVoodoo.conf"
+    w_try_cp_dll "${W_TMP}/dgVoodoo.conf" "${W_SYSTEM32_DLLS}/dgvoodoo.conf"
+    w_override_dlls native ddraw
+    w_override_dlls native d3d9
+    w_override_dlls native d3dimm
+}
