@@ -5,8 +5,6 @@
 from protonfixes import util
 
 def main():
-    """ Launcherfix and NVIDIA PhysX support.
+    """ Enable NVIDIA PhysX support.
     """
-
-    # Fixes the startup process.
-    util.replace_command('Launcher.exe', '../Mafia II Definitive Edition.exe')
+    util.protontricks('physx')
