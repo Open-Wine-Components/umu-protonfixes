@@ -322,7 +322,9 @@ def protontricks_proton_5(verb):
     env['WINEPATH'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine64')
     env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
     env['LD_PRELOAD'] = ''
-    winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
+    # The reason for the separate Winetricks is newer Winetricks with Proton 5.0 seems to result
+    # in the `winecfg` window popping up and things not getting done.
+    winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks_proton5')
     winetricks_cmd = [winetricks_bin, '--unattended', '--force'] + verb.split(' ')
 
 
