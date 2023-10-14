@@ -12,3 +12,5 @@ def main():
     # Fixes hanging after typing then entering or clicking `search` within the game's terminal menu
     util.set_environment('PROTON_NO_ESYNC', '1')
     util.set_environment('PROTON_NO_FSYNC', '1')
+    # Fixes audio not playing for in-game videos
+    util.set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
