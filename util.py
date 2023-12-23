@@ -420,9 +420,6 @@ def disable_fsync(): # pylint: disable=missing-docstring
 def disable_protonaudioconverter(): # pylint: disable=missing-docstring
     set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
 
-def force_lgadd(): # pylint: disable=missing-docstring
-    set_environment('PROTON_FORCE_LARGE_ADDRESS_AWARE', '1')
-
 def use_seccomp(): # pylint: disable=missing-docstring
     set_environment('PROTON_USE_SECCOMP', '1')
 
