@@ -149,25 +149,6 @@ def _killhanging():
         except IOError:
             continue
 
-def _del_syswow64():
-    """ Deletes the syswow64 folder
-    """
-
-    try:
-        shutil.rmtree(os.path.join(protonprefix(), 'drive_c/windows/syswow64'))
-    except FileNotFoundError:
-        log.warn('The syswow64 folder was not found')
-
-def _mk_syswow64():
-    """ Makes the syswow64 folder
-    """
-
-    try:
-        os.makedirs(os.path.join(protonprefix(), 'drive_c/windows/syswow64'))
-    except FileExistsError:
-        log.warn('The syswow64 folder already exists')
-
-
 def _forceinstalled(verb):
     """ Records verb into the winetricks.log.forced file
     """
