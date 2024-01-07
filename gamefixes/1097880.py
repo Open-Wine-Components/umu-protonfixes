@@ -8,8 +8,6 @@ def main():
     """ installs quartz, wmp9
     """
 
-    util.use_win32_prefix()
-
     # The whole game is only videos and require wmp9 & quartz
     util.protontricks('quartz')
-    util.protontricks('wmp9')
+    util.protontricks('wmp9_x86_64')
