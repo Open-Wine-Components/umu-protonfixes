@@ -7,4 +7,4 @@ No cutscene audio in Daedalic Games (Memoria, The Night of the Rabbit, A New Beg
 from protonfixes import util
 
 def main():
-    util.set_environment('WINEDLLOVERRIDES', 'xaudio2_7=d')
+    util.winedll_override('xaudio2_7', 'd')

@@ -7,5 +7,5 @@ hangs on logo without override
 from protonfixes import util
 
 def main():
-    util.set_environment('WINEDLLOVERRIDES', 'libvkd3d-1=n')
+    util.winedll_override('libvkd3d-1', 'n')
     util.protontricks('wmp11')
