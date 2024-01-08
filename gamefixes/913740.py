@@ -9,4 +9,4 @@ def main():
     """
 
     # esync causes occasional crashing
-    util.set_environment('PROTON_NO_ESYNC', '1')
+    util.disable_esync()

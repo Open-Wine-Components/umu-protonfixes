@@ -4,9 +4,9 @@
 from protonfixes import util
 
 def main():
-    """ Disables ESYNC and FSYNC
+    """ Disable esync and fsync
     """
 
     # Fixes random crashing during gameplay
-    util.set_environment('PROTON_NO_ESYNC', '1')
-    util.set_environment('PROTON_NO_FSYNC', '1')
+    util.disable_esync()
+    util.disable_fsync()

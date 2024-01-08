@@ -15,4 +15,4 @@ def main():
     util.append_argument('-nointro')
 
     # ESYNC causes texture problems and frequent hangs.
-    util.set_environment('PROTON_NO_ESYNC', '1')
+    util.disable_esync()
