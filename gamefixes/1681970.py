@@ -6,6 +6,6 @@ from protonfixes import util
 
 def main():
     util.protontricks('klite')
-    util.set_environment('WINEDLLOVERRIDES', 'winegstreamer=')
+    util.winedll_override('winegstreamer', '')
     # it uses quartz instead of mfplat on win7
     util.protontricks('win7')

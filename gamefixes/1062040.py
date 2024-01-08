@@ -8,4 +8,4 @@ def main():
     """ Dragon Star Varnir fix
     """
     # Fixes the startup process.
-    util.set_environment('WINEDLLOVERRIDES','xactengine3_7=n')
+    util.winedll_override('xactengine3_7', 'n')

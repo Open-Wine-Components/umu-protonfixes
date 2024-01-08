@@ -10,4 +10,4 @@ def main():
 
     # The game crashes if running with more than one CPU thread,
     # adding "-onethread" will force the game to use only one CPU thread
-    sys.argv.append('-onethread')
+    util.append_argument('-onethread')
