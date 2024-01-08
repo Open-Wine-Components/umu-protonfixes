@@ -15,15 +15,7 @@ from protonfixes import util
 def main():
     util.protontricks("xliveless")
 
-    # the core fix is only applied if the user has not provided its own topology mapping
-    if not os.getenv("WINE_CPU_TOPOLOGY"):
-        try:
-            cpu_cores = multiprocessing.cpu_count()
-        except:
-            cpu_cores = 0
-            log("Could not retrieve the number of CPU cores")
-
-        if cpu_cores > 12:
-            util.set_environment("WINE_CPU_TOPOLOGY", f"12:{','.join(str(n) for n in range(12))}")
-
-
+    # According to PCGW, no more than 6 physical cores work
+    # Nevertheless, the game was tested with 12 threads
+    # TODO: Test the game with SMT disabled / use set_cpu_topology_nosmt()
+    util.set_cpu_topology_limit(12)

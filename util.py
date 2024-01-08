@@ -661,3 +661,80 @@ def try_show_gui_error(text):
             subprocess.run(["notify-send", "protonfixes", text])
         except:
             log.info("Failed to show error message with the following text: {}".format(text))
+
+def is_smt_enabled() -> bool:
+    """ Returns whether SMT is enabled.
+        If the check has failed, False is returned.
+    """
+    try:
+        with open('/sys/devices/system/cpu/smt/active') as smt_file:
+            return smt_file.read().strip() == "1"
+    except PermissionError:
+        log.warn('No permission to read SMT status')
+    except OSError as e:
+        log.warn(f'SMT status not supported by the kernel (errno: {e.errno})')
+    return False
+
+def get_cpu_count() -> int:
+    """ Returns the cpu core count, provided by the OS.
+        If the request failed, 0 is returned.
+    """
+    cpu_cores = os.cpu_count()
+    if not cpu_cores or cpu_cores <= 0:
+        log.warn('Can not read count of logical cpu cores')
+        return 0
+    return cpu_cores
+
+def set_cpu_topology(core_count: int, ignore_user_setting: bool = False) -> bool:
+    """ This sets the cpu topology to a fixed core count.
+        By default, a user provided topology is prioritized.
+        You can override this behavior by setting `ignore_user_setting`.
+    """
+
+    # Don't override the user's settings (except, if we override it)
+    user_topo = os.getenv('WINE_CPU_TOPOLOGY')
+    if user_topo and not ignore_user_setting:
+        log.info(f'Using WINE_CPU_TOPOLOGY set by the user: {user_topo}')
+        return False
+
+    # Sanity check
+    if not core_count or core_count <= 0:
+        log.warn('Only positive core_counts can be used to set cpu topology')
+        return False
+
+    # Format (example, 4 cores): 4:0,1,2,3
+    cpu_topology = f'{core_count}:{",".join(map(str, range(core_count)))}'
+    set_environment('WINE_CPU_TOPOLOGY', cpu_topology)
+    log.info(f'Using WINE_CPU_TOPOLOGY: {cpu_topology}')
+    return True
+
+
+def set_cpu_topology_nosmt(core_limit: int = 0, ignore_user_setting: bool = False, threads_per_core: int = 2) -> bool:
+    """ This sets the cpu topology to the count of physical cores.
+        If SMT is enabled, eg. a 4c8t cpu is limited to 4 logical cores.
+        You can limit the core count to the `core_limit` argument.
+    """
+
+    # Check first, if SMT is enabled
+    if is_smt_enabled() is False:
+        log.info('SMT is not active, skipping fix')
+        return False
+
+    # Currently (2024) SMT allows 2 threads per core, this might change in the future
+    cpu_cores = get_cpu_count() // threads_per_core             # Apply divider
+    cpu_cores = max(cpu_cores, min(cpu_cores, core_limit))      # Apply limit
+    return set_cpu_topology(cpu_cores, ignore_user_setting)
+
+def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -> bool:
+    """ This sets the cpu topology to a limited number of logical cores.
+        A limit that exceeds the available cores, will be ignored.
+    """
+
+    cpu_cores = get_cpu_count()
+    if core_limit >= cpu_cores:
+        log.info(f'The count of logical cores ({cpu_cores}) is lower than '
+                 f'or equal to the set limit ({core_limit}), skipping fix')
+        return False
+
+    # Apply the limit
+    return set_cpu_topology(core_limit, ignore_user_setting)
