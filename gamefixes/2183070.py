@@ -13,4 +13,4 @@ def main():
     util.disable_esync()
     util.disable_fsync()
     # Fixes audio not playing for in-game videos
-    util.set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
+    util.disable_protonaudioconverter()
