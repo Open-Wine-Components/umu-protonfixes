@@ -4,10 +4,10 @@
 from protonfixes import util
 
 def main():
-    """ installs xact, disable ESYNC, disable FSYNC
+    """ install xact, disable esync, disable fsync
     """
 
     # Fixes the game from crashing or hanging during intro
     util.protontricks('xact')
-    util.set_environment('PROTON_NO_ESYNC', '1')
-    util.set_environment('PROTON_NO_FSYNC', '1')
+    util.disable_esync()
+    util.disable_fsync()
