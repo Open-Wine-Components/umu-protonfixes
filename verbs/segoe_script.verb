@@ -1,0 +1,15 @@
+w_metadata segoe_script fonts \
+    title="Segoe Script font" \
+    publisher="Microsoft" \
+    year="2006" \
+    media="download" \
+    file1="SegoeScript.zip" \
+    installed_file1=${W_FONTSDIR_WIN}"/segoe script.ttf"
+
+load_segoe_script()
+{
+    w_download http://legionfonts.com/storage/archives/Segoe%20Script.zip e107150c98eabc93897616cccd6ab8ebd778a780ce69a31b5dd47f1991e90507 ${file1}
+    w_try_unzip "${W_TMP}" "${W_CACHE}/${W_PACKAGE}/${file1}"
+    w_try_cp_font_files "${W_TMP}" "${W_FONTSDIR_UNIX}" "*.ttf"
+    w_register_font "segoe script.ttf" "Segoe Script"
+}

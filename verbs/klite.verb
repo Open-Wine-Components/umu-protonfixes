@@ -1,0 +1,44 @@
+w_metadata klite dlls \
+    title="K-Lite codecs" \
+    media="download" \
+    file1="K-Lite_Codec_Pack_1700_Basic.exe" \
+    homepage="https://codecguide.com/download_kl.htm"
+
+load_klite()
+{
+    w_download https://files3.codecguide.com/K-Lite_Codec_Pack_1700_Basic.exe 24ffa374926004d3b7e8e0a3daa2d0f7f18846c8bcbcbddf8af38a7f9a0fb629
+    w_try_cd "${W_CACHE}/${W_PACKAGE}"
+    cat > "klcp_basic_unattended.ini" <<_EOF_
+[Setup]
+Group=K-Lite Codec Pack
+NoIcons=1
+SetupType=custom
+Components=video\lav, video\lav\hevc, video\lav\h264, video\lav\mpeg4, video\lav\mpeg2, video\lav\mpeg1, video\lav\vc1, video\lav\wmv, video\lav\other, audio\lav, audio\lav\ac3dts, audio\lav\truehd, audio\lav\aac, audio\lav\flac, audio\lav\mpeg, audio\lav\wma, audio\lav\other, sourcefilter\lav, sourcefilter\lav\avi, sourcefilter\lav\matroska, sourcefilter\lav\mp4, sourcefilter\lav\mpegps, sourcefilter\lav\mpegts, sourcefilter\lav\wmv, sourcefilter\lav\other, subtitles\vsfilter, tools\codectweaktool, shell\icaros_thumbnail, shell\icaros_property, misc\brokencodecs, misc\brokenfilters
+Tasks=reset_settings\fresh, wmp_reg_formats, adjust_preferred_decoders
+NoRestart=1
+CloseApplications=0
+[Data]
+uim_version=12
+creationdate=20210117
+creationtime=022013
+[Settings]
+abort_if_existing_version_is_newer=1
+keep_existing_settings_on_upgrade=1
+install_only_x64_components=0
+[Thumbnails]
+Extensions=.avi;.divx;.amv;.mpeg;.mpg;.m1v;.m2v;.mp2v;.mpv2;.vob;.wmv;.asf;.mp4;.m4v;.mp4v;.mpv4;.mov;.hdmov;.3g2;.3gp;.3gp2;.3gpp;.mkv;.mk3d;.webm;.ts;.m2ts;.mts;.m2t;.tp;.flv;.f4v;.ogm;.ogv;.rm;.rmvb;.dv;.mxf;.ivf;.evo;.video;.cbr;.cbz;.cb7;.mp3;.wav;.m4a;.ape;.flac;.ogg;.mka;.mpc;.opus;.tak;.wv
+[Audio Configuration]
+audio_passthrough=0
+bitstream_ac3=0
+bitstream_dts=0
+bitstream_eac3=0
+bitstream_dtshd=0
+bitstream_truehd=0
+[Hardware Acceleration]
+hwa_other_auto=1
+[Languages]
+lang_set_preferred=1
+lang_autodetect=1
+_EOF_
+    w_try "${WINE}" start.exe /exec K-Lite_Codec_Pack_1700_Basic.exe /verysilent /norestart /LoadInf="./klcp_basic_unattended.ini"
+}

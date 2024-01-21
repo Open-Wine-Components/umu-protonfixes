@@ -1,0 +1,51 @@
+w_metadata vcrun2019_ge dlls \
+    title="Visual C++ 2015-2019 libraries (concrt140.dll,mfc140.dll,mfc140u.dll,mfcm140.dll,mfcm140u.dll,msvcp140.dll,vcamp140.dll,vccorlib140.dll,vcomp140.dll,vcruntime140.dll) (and vcruntime140_1.dll on win64)" \
+    publisher="Microsoft" \
+    year="2019" \
+    media="download" \
+    conflicts="vcrun2015 vcrun2017 vcrun2019" \
+    file1="VC_redist.x86.exe" \
+    installed_file1="${W_SYSTEM32_DLLS_WIN}/mfc140.dll"
+
+load_vcrun2019_ge()
+{
+    # Grab the last version that still containts ucrtbase
+    w_download https://web.archive.org/web/20210415064013/https://download.visualstudio.microsoft.com/download/pr/85d47aa9-69ae-4162-8300-e6b7e4bf3cf3/14563755AC24A874241935EF2C22C5FCE973ACB001F99E524145113B2DC638C1/VC_redist.x86.exe
+
+    w_override_dlls native,builtin api-ms-win-crt-private-l1-1-0 api-ms-win-crt-conio-l1-1-0 api-ms-win-crt-heap-l1-1-0 api-ms-win-crt-locale-l1-1-0 api-ms-win-crt-math-l1-1-0 api-ms-win-crt-runtime-l1-1-0 api-ms-win-crt-stdio-l1-1-0 api-ms-win-crt-time-l1-1-0 atl140 concrt140 msvcp140 msvcr140 ucrtbase vcomp140 vcruntime140
+
+    w_try_cd "${W_CACHE}"/"${W_PACKAGE}"
+    w_try "${WINE}" start.exe /exec VC_redist.x86.exe ${W_OPT_UNATTENDED:+/q}
+
+    case "${W_ARCH}" in
+        win64)
+            # Also install the 64-bit version
+            # vcruntime140_1 is only shipped on x64:
+            w_override_dlls native,builtin vcruntime140_1
+
+            w_download https://web.archive.org/web/20210414165612/https://download.visualstudio.microsoft.com/download/pr/85d47aa9-69ae-4162-8300-e6b7e4bf3cf3/52B196BBE9016488C735E7B41805B651261FFA5D7AA86EB6A1D0095BE83687B2/VC_redist.x64.exe
+            rm -f "${W_TMP}"/*  # Avoid permission error
+            w_try_cabextract --directory="${W_TMP}" VC_redist.x64.exe
+            w_try_cabextract --directory="${W_TMP}" "${W_TMP}/a10"
+            w_try_cabextract --directory="${W_TMP}" "${W_TMP}/a11"
+            cp "${W_TMP}"/concrt140.dll "${W_SYSTEM64_DLLS}"/concrt140.dll
+            cp "${W_TMP}"/mfc140.dll "${W_SYSTEM64_DLLS}"/mfc140.dll
+            cp "${W_TMP}"/mfc140u.dll "${W_SYSTEM64_DLLS}"/mfc140u.dll
+            cp "${W_TMP}"/mfcm140.dll "${W_SYSTEM64_DLLS}"/mfcm140.dll
+            cp "${W_TMP}"/mfcm140u.dll "${W_SYSTEM64_DLLS}"/mfcm140u.dll
+            cp "${W_TMP}"/msvcp140.dll "${W_SYSTEM64_DLLS}"/msvcp140.dll
+            cp "${W_TMP}"/vcamp140.dll "${W_SYSTEM64_DLLS}"/vcamp140.dll
+            cp "${W_TMP}"/vccorlib140.dll "${W_SYSTEM64_DLLS}"/vccorlib140.dll
+            cp "${W_TMP}"/vcomp140.dll "${W_SYSTEM64_DLLS}"/vcomp140.dll
+            cp "${W_TMP}"/vcruntime140.dll "${W_SYSTEM64_DLLS}"/vcruntime140.dll
+
+            cp "${W_TMP}"/api_ms_win_crt_conio_l1_1_0.dll "${W_SYSTEM64_DLLS}"/api-ms-win-crt-conio-l1-1-0.dll
+            cp "${W_TMP}"/api_ms_win_crt_heap_l1_1_0.dll "${W_SYSTEM64_DLLS}"/api-ms-win-crt-heap-l1-1-0.dll
+            cp "${W_TMP}"/api_ms_win_crt_locale_l1_1_0.dll "${W_SYSTEM64_DLLS}"/api-ms-win-crt-locale-l1-1-0.dll
+            cp "${W_TMP}"/api_ms_win_crt_math_l1_1_0.dll "${W_SYSTEM64_DLLS}"/api-ms-win-crt-math-l1-1-0.dll
+            cp "${W_TMP}"/api_ms_win_crt_runtime_l1_1_0.dll "${W_SYSTEM64_DLLS}"/api-ms-win-crt-runtime-l1-1-0.dll
+            cp "${W_TMP}"/api_ms_win_crt_stdio_l1_1_0.dll "${W_SYSTEM64_DLLS}"/api-ms-win-crt-stdio-l1-1-0.dll
+            cp "${W_TMP}"/ucrtbase.dll "${W_SYSTEM64_DLLS}"/ucrtbase.dll
+            ;;
+    esac
+}

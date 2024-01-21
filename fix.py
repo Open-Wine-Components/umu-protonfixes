@@ -74,7 +74,11 @@ def run_fix(gameid):
             log.info('No local defaults found for ' + game)
     elif config.enable_global_fixes:
         try:
-            game_module = import_module('protonfixes.gamefixes.default')
+            if gameid.isnumeric():
+                game_module = import_module('protonfixes.gamefixes-steam.default')
+            else:
+                log.info('Non-steam game ' + game)
+                game_module = import_module('protonfixes.gamefixes-ULWGL.default')
             log.info('Using global defaults for ' + game)
             game_module.main()
         except ImportError:
@@ -92,7 +96,11 @@ def run_fix(gameid):
             log.info('No local protonfix found for ' + game)
     elif config.enable_global_fixes:
         try:
-            game_module = import_module('protonfixes.gamefixes.' + gameid)
+            if gameid.isnumeric():
+                game_module = import_module('protonfixes.gamefixes-steam.' + gameid)
+            else:
+                log.info('Non-steam game ' + game)
+                game_module = import_module('protonfixes.gamefixes-ULWGL.' + gameid)
             log.info('Using protonfix for ' + game)
             game_module.main()
         except ImportError:

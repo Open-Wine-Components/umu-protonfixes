@@ -214,7 +214,7 @@ def is_custom_verb(verb):
         return os.path.join(verbpath, verb_name)
 
     # check custom verbs
-    verbpath = os.path.join(os.path.dirname(__file__), 'gamefixes', verb_dir)
+    verbpath = os.path.join(os.path.dirname(__file__), verb_dir)
     if os.path.isfile(os.path.join(verbpath, verb_name)):
         log.debug('Using custom winetricks verb from: ' + verbpath)
         return os.path.join(verbpath, verb_name)
