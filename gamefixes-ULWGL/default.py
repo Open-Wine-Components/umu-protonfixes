@@ -1,0 +1,1 @@
+../gamefixes-steam/default.py
