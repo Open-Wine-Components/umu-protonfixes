@@ -5,9 +5,9 @@
 from protonfixes import util
 
 def main():
-    """ installs k-lite
+    """ 
     """
 
-    # Fix pre-rendered cutscene playback
-    util.protontricks('klite')
-
+    util.protontricks('directshow')
+    util.protontricks('cinepak')
+    util.protontricks('lavfilters')

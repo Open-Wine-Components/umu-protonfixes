@@ -5,7 +5,9 @@
 from protonfixes import util
 
 def main():
-    """ installs k-lite
+    """
     """
 
-    util.protontricks('klite')
+    util.protontricks('directshow')
+    util.protontricks('cinepak')
+    util.protontricks('lavfilters')
