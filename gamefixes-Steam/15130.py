@@ -26,5 +26,5 @@ def main():
     """ Add a couple of keys in regedit
     """
 
-    util.regedit_add("HKLM\\Software\\Wow6432Node\\Ubisoft")
-    util.regedit_add("HKLM\\Software\\Wow6432Node\\Ubisoft\\Beyond Good & Evil",'InstallLanguage','REG_DWORD','1')
+    util.regedit_add('HKLM\\Software\\Wow6432Node\\Ubisoft')
+    util.regedit_add('HKLM\\Software\\Wow6432Node\\Ubisoft\\Beyond Good & Evil','InstallLanguage','REG_DWORD','1')

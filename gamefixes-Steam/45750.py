@@ -13,7 +13,7 @@ from protonfixes import util
 
 
 def main():
-    util.protontricks("xliveless")
+    util.protontricks('xliveless')
 
     # According to PCGW, no more than 6 physical cores work
     # Nevertheless, the game was tested with 12 threads
