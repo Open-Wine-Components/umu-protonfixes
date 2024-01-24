@@ -15,7 +15,8 @@ from . import config
 def game_id():
     """ Trys to return the game id from environment variables
     """
-
+    if 'ULWGL_ID' in os.environ:
+        return os.environ['ULWGL_ID']
     if 'SteamAppId' in os.environ:
         return os.environ['SteamAppId']
     if 'SteamGameId' in os.environ:
