@@ -10,3 +10,6 @@ def main():
     """
 
     util.append_argument('-fullscreen -vulkan')
+    # Set SteamGameId so that non-steam versions can pick up steam-specific fixes in proton's wine code
+    util.set_environment('SteamGameId','1174180')
+
