@@ -243,7 +243,7 @@ def protontricks(verb):
         winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
         if verb == 'gui':
-            winetricks_cmd = [winetricks_bin, '-q', '--gui']
+            winetricks_cmd = [winetricks_bin, '--unattended']
 
         # check is verb a custom winetricks verb
         custom_verb = is_custom_verb(verb)
