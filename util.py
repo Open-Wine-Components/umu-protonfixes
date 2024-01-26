@@ -193,6 +193,8 @@ def checkinstalled(verb):
     """ Returns True if the winetricks verb is found in the winetricks log
         or in the 'winetricks.log.forced' file
     """
+    if verb == 'gui':
+        return False
 
     log.info('Checking if winetricks ' + verb + ' is installed')
     if _checkinstalled(verb, 'winetricks.log.forced'):
@@ -203,6 +205,8 @@ def checkinstalled(verb):
 def is_custom_verb(verb):
     """ Returns path to custom winetricks verb, if found
     """
+    if verb == 'gui':
+        return False
 
     verb_name = verb + '.verb'
     verb_dir = 'verbs'
@@ -238,6 +242,8 @@ def protontricks(verb):
         
         winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
+        if verb == 'gui':
+            winetricks_cmd = [winetricks_bin, '--gui']
 
         # check is verb a custom winetricks verb
         custom_verb = is_custom_verb(verb)
