@@ -229,7 +229,6 @@ def protontricks(verb):
     if not checkinstalled(verb):
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
-        env['PROTON_DLL_COPY'] = '*'
         env['WINEPREFIX'] = protonprefix()
         env['WINE'] = protonmain.g_proton.wine_bin
         env['WINELOADER'] = protonmain.g_proton.wine_bin
