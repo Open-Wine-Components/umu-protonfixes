@@ -229,6 +229,7 @@ def protontricks(verb):
     if not checkinstalled(verb):
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
+        env['PROTON_DLL_COPY'] = '*'
         env['WINEPREFIX'] = protonprefix()
         env['WINE'] = protonmain.g_proton.wine_bin
         env['WINELOADER'] = protonmain.g_proton.wine_bin
@@ -272,45 +273,6 @@ def protontricks(verb):
             return True
 
     return False
-
-def protontricks_proton_5(verb):
-    """ Runs winetricks with Proton 5 which is still useful to install some things like .NET"""
-    if checkinstalled(verb):
-        log.debug("Skipping {} as it is marked as installed".format(verb))
-        return
-
-    prefix_path = protonprefix()
-    try:
-        log.info("Removing the prefix at {} to recreate it with Proton 5".format(prefix_path))
-        shutil.rmtree(prefix_path)
-    except FileNotFoundError:
-        log.warn('The protonprefix folder was not found')
-
-    log.info('Folder Proton 5.0' + str(os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0')))
-
-    wine_path = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
-    # If this is being used to install Dotnet for example and it doesn't exist, failing silently might not be enough
-    if not os.path.exists(wine_path):
-        message = "Ensure Proton 5.0 is installed. No Proton 5.0 was found at the expected path at {}".format(wine_path)
-        try_show_gui_error(message)
-        raise Exception(message)
-
-    env = dict(protonmain.g_session.env)
-    env['WINEPREFIX'] = prefix_path
-    env['WINE'] = wine_path
-    env['WINELOADER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine')
-    env['WINESERVER'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wineserver')
-    env['WINEPATH'] = os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'],'..','..','common','Proton 5.0','dist','bin','wine64')
-    env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
-    env['LD_PRELOAD'] = ''
-    # The reason for the separate Winetricks is newer Winetricks with Proton 5.0 seems to result
-    # in the `winecfg` window popping up and things not getting done.
-    winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks_proton5')
-    winetricks_cmd = [winetricks_bin, '--unattended', '--force'] + verb.split(' ')
-
-
-    process = subprocess.Popen(winetricks_cmd, env=env)
-    process.wait()
 
 def regedit_add(folder,name=None,type=None,value=None,arch=None):
     """ Add regedit keys

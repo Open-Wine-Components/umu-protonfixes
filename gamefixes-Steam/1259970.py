@@ -11,5 +11,5 @@ def main():
     # Replace launcher with game exe in proton arguments
     util.protontricks('vcrun2019_ge')
     util.protontricks('allfonts')
-    util.protontricks_proton_5('dotnet462')
+    util.protontricks('dotnet462')
     util.use_seccomp()
