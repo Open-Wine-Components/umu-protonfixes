@@ -1,1 +1,1 @@
-../gamefixes-Steam/397540.py
+../gamefixes-steam/397540.py

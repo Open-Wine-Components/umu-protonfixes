@@ -1,1 +1,1 @@
-../gamefixes-Steam/61500.py
+../gamefixes-steam/61500.py
