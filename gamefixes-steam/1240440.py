@@ -8,4 +8,4 @@ def main():
     """ 
     """
 
-    util.protontricks('vcrun2019_ge')
+    util.protontricks('vcrun2019')

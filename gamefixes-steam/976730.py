@@ -6,4 +6,4 @@ from protonfixes import util
 
 def main():
     # Requires vcrun2019 to launch
-    util.protontricks('vcrun2019_ge')
+    util.protontricks('vcrun2019')
