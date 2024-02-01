@@ -13,4 +13,3 @@ def main():
     util.protontricks('d3dcompiler_43')
     util.protontricks('d3dcompiler_47')
     util.disable_protonaudioconverter()
-    util.winedll_override('winegstreamer', '')
