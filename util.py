@@ -361,7 +361,8 @@ def winedll_override(dll, dtype):
     """
 
     log.info('Overriding ' + dll + '.dll = ' + dtype)
-    protonmain.g_session.dlloverrides[dll] = dtype
+    setting = dll + "=" + dtype
+    protonmain.append_to_env_str(protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';')
 
 def disable_nvapi():
     """ Disable WINE nv* dlls
