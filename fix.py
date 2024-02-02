@@ -31,22 +31,61 @@ def game_id():
 def game_name():
     """ Trys to return the game name from environment variables
     """
+    if 'ULWGL_ID' in os.environ:
+        if os.path.isfile(os.environ['WINEPREFIX'] + "/game_title"):
+            with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
+                return file.readline()
+        else:
+            try:
+                if 'STORE' in os.environ:
+                    url = "https://ulwgl.openwinecomponents.org/ulwgl_api.php?ulwgl_id=" + os.environ['ULWGL_ID'] + "&store=" + os.environ['STORE']
+                    headers = {'User-Agent': 'Mozilla/5.0'}
+                    req = urllib.request.Request(url, headers=headers)
+                    response = urllib.request.urlopen(req)
+                    data = response.read()
+                    json_data = json.loads(data)
+                    title = json_data[0]['title']
+                    file = open(os.environ['WINEPREFIX'] + "/game_title", 'w')
+                    file.write(title)
+                    file.close()
+                else:
+                    url = "https://ulwgl.openwinecomponents.org/ulwgl_api.php?ulwgl_id=" + os.environ['ULWGL_ID'] + "&store=none"
+                    headers = {'User-Agent': 'Mozilla/5.0'}
+                    req = urllib.request.Request(url, headers=headers)
+                    response = urllib.request.urlopen(req)
+                    data = response.read()
+                    json_data = json.loads(data)
+                    title = json_data[0]['title']
+                    file = open(os.environ['WINEPREFIX'] + "/game_title", 'w')
+                    file.write(title)
+                    file.close()
+            except OSError as e:
+                #log.info('OSError occurred: {}'.format(e))  # used for debugging
+                return 'UNKNOWN'
+            except IndexError as e:
+                #log.info('IndexError occurred: {}'.format(e))  # used for debugging
+                return 'UNKNOWN'
+            except UnicodeDecodeError as e:
+                #log.info('UnicodeDecodeError occurred: {}'.format(e))  # used for debugging
+                return 'UNKNOWN'
+            with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
+                return file.readline()
+    else:
+        try:
+            game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
+            game_manifest = os.path.join(game_library, 'appmanifest_' + game_id() + '.acf')
 
-    try:
-        game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
-        game_manifest = os.path.join(game_library, 'appmanifest_' + game_id() + '.acf')
-
-        with io.open(game_manifest, 'r', encoding='utf-8') as appmanifest:
-            for xline in appmanifest.readlines():
-                if 'name' in xline.strip():
-                    name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]
-                    return name
-    except OSError:
-        return 'UNKNOWN'
-    except IndexError:
-        return 'UNKNOWN'
-    except UnicodeDecodeError:
-        return 'UNKNOWN'
+            with io.open(game_manifest, 'r', encoding='utf-8') as appmanifest:
+                for xline in appmanifest.readlines():
+                    if 'name' in xline.strip():
+                        name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]
+                        return name
+        except OSError:
+            return 'UNKNOWN'
+        except IndexError:
+            return 'UNKNOWN'
+        except UnicodeDecodeError:
+            return 'UNKNOWN'
     return 'UNKNOWN'
 
 
