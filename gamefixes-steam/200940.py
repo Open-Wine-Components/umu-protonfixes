@@ -11,5 +11,3 @@ def main():
     util.protontricks('d3dcompiler_43')
     util.protontricks('d3dx9_43')
     util.protontricks('mdx')
-
-    util.set_environment('DXVK_FRAME_RATE', '60')
