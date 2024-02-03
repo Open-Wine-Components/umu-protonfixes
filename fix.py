@@ -6,6 +6,8 @@ import io
 import os
 import re
 import sys
+import urllib
+import json
 from importlib import import_module
 from .util import protonprefix
 from .checks import run_checks
