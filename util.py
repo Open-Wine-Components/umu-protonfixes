@@ -377,6 +377,7 @@ def disable_nvapi():
     winedll_override('nvencodeapi64', '')
 
 def disable_dxvk():  # pylint: disable=missing-docstring
+    log.info('Disabling DXVK/VKD3D')
     winedll_override('d3d12', 'b')
     winedll_override('d3d12core', 'b')
     winedll_override('d3d11', 'b')
@@ -394,9 +395,6 @@ def disable_fsync(): # pylint: disable=missing-docstring
 
 def disable_protonaudioconverter(): # pylint: disable=missing-docstring
     set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
-
-def use_seccomp(): # pylint: disable=missing-docstring
-    set_environment('PROTON_USE_SECCOMP', '1')
 
 @once
 def disable_uplay_overlay():
