@@ -376,13 +376,25 @@ def disable_nvapi():
     winedll_override('nvencodeapi', '')
     winedll_override('nvencodeapi64', '')
 
-def disable_esync():  # pylint: disable=missing-docstring
+def disable_esync():
+    """ Disabling Esync
+    """
+
+    log.info('Disabling Esync')
     set_environment('WINEESYNC', '')
 
-def disable_fsync(): # pylint: disable=missing-docstring
+def disable_fsync():
+    """ Disabling FSync
+    """
+
+    log.info('Disabling FSync')
     set_environment('WINEFSYNC', '')
 
-def disable_protonaudioconverter(): # pylint: disable=missing-docstring
+def disable_protonaudioconverter():
+    """ Disabling Proton Audio Converter
+    """
+
+    log.info('Disabling Proton Audio Converter')
     set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
 
 @once
