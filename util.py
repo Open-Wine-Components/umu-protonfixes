@@ -376,17 +376,6 @@ def disable_nvapi():
     winedll_override('nvencodeapi', '')
     winedll_override('nvencodeapi64', '')
 
-def disable_dxvk():  # pylint: disable=missing-docstring
-    log.info('Disabling DXVK/VKD3D')
-    winedll_override('d3d12', 'b')
-    winedll_override('d3d12core', 'b')
-    winedll_override('d3d11', 'b')
-    winedll_override('d3d10', 'b')
-    winedll_override('d3d10core', 'b')
-    winedll_override('d3d9', 'b')
-    winedll_override('d3d8', 'b')
-    winedll_override('dxgi', 'b')
-
 def disable_esync():  # pylint: disable=missing-docstring
     set_environment('WINEESYNC', '')
 
