@@ -377,13 +377,20 @@ def disable_nvapi():
     winedll_override('nvencodeapi64', '')
 
 def disable_dxvk():  # pylint: disable=missing-docstring
-    set_environment('PROTON_USE_WINED3D', '1')
+    winedll_override('d3d12', 'b')
+    winedll_override('d3d12core', 'b')
+    winedll_override('d3d11', 'b')
+    winedll_override('d3d10', 'b')
+    winedll_override('d3d10core', 'b')
+    winedll_override('d3d9', 'b')
+    winedll_override('d3d8', 'b')
+    winedll_override('dxgi', 'b')
 
 def disable_esync():  # pylint: disable=missing-docstring
-    set_environment('PROTON_NO_ESYNC', '1')
+    set_environment('WINEESYNC', '')
 
 def disable_fsync(): # pylint: disable=missing-docstring
-    set_environment('PROTON_NO_FSYNC', '1')
+    set_environment('WINEFSYNC', '')
 
 def disable_protonaudioconverter(): # pylint: disable=missing-docstring
     set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
