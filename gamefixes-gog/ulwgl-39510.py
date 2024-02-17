@@ -1,0 +1,1 @@
+../gamefixes-steam/39510.py

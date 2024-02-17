@@ -351,10 +351,12 @@ def del_environment(envvar):
 def get_game_install_path():
     """ Game installation path
     """
-
-    log.debug('Detected path to game: ' + os.environ['PWD'])
+    install_path = os.environ['PWD']
+    if 'STEAM_COMPAT_INSTALL_PATH' in os.environ:
+        install_path = os.environ['STEAM_COMPAT_INSTALL_PATH']
+    log.debug('Detected path to game: ' + install_path)
     # only for `waitforexitandrun` command
-    return os.environ['PWD']
+    return install_path 
 
 def winedll_override(dll, dtype):
     """ Add WINE dll override
@@ -451,6 +453,45 @@ def create_dosbox_conf(conf_file, conf_dict):
     with open(conf_file, 'w') as file:
         conf.write(file)
 
+def _get_case_insensitive_name(path):
+    """ Find potentially differently-cased location 
+        e.g /path/to/game/system/gothic.ini -> /path/to/game/System/GOTHIC.INI
+    """
+    if os.path.exists(path):
+        return path
+    root = path
+    # Find first existing directory in the tree 
+    while not os.path.exists(root):
+        root = os.path.split(root)[0]
+    
+    if root[len(root) - 1] not in ["/", "\\"]:
+        root = root + os.sep
+    # Separate missing path from existing root
+    s_working_dir = path.replace(root, "").split(os.sep)
+    paths_to_find = len(s_working_dir)
+    # Keep track of paths we found so far
+    paths_found = 0
+    # Walk through missing paths
+    for directory in s_working_dir:
+        if not os.path.exists(root):
+            break
+        dir_list = os.listdir(root)
+        found = False
+        for existing_dir in dir_list:
+            # Find matching filename on drive
+            if existing_dir.lower() == directory.lower():
+                root = os.path.join(root, existing_dir)
+                paths_found += 1
+                found = True
+        # If path was not found append case that we were looking for
+        if not found:
+            root = os.path.join(root, directory)
+            paths_found += 1
+
+    # Append rest of the path if we were unable to find directory at any level
+    if paths_to_find != paths_found:
+        root = os.path.join(root, os.sep.join(s_working_dir[paths_found:]))
+    return root
 
 def _get_config_full_path(cfile, base_path):
     """ Find game's config file
@@ -464,6 +505,7 @@ def _get_config_full_path(cfile, base_path):
             cfg_path = os.path.join(get_game_install_path(), cfile)
         else:
             cfg_path = cfile
+    cfg_path = _get_case_insensitive_name(cfg_path)
 
     if os.path.exists(cfg_path) and os.access(cfg_path, os.F_OK):
         log.debug('Found config file: ' + cfg_path)
@@ -557,7 +599,7 @@ def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
     conf = configparser.ConfigParser()
     conf.optionxform = str
     section = conf.default_section
-    dxvk_conf = os.path.join(get_game_install_path(), 'dxvk.conf')
+    dxvk_conf = os.path.join(os.environ['PWD'], 'dxvk.conf')
 
     conf.read(cfile)
 
