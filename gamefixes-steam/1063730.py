@@ -8,7 +8,8 @@ import subprocess
 from protonfixes import util
 
 def main():
-    """ Launcher currently broken
+    """ Needs core count limit
     """
     # Fix the startup process:
-    util.replace_command('NewWorldLauncher.exe', 'Bin64/NewWorld.exe')
+    util.set_cpu_topology_limit(12)
+
