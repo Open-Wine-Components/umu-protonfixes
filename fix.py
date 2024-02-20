@@ -167,6 +167,9 @@ def run_fix(gameid):
                   elif os.environ['STORE'].lower() == "ubisoft":
                     log.info('Ubisoft store specified, using Ubisoft database')
                     game_module = import_module('protonfixes.gamefixes-ubisoft.' + gameid)
+                  elif os.environ['STORE'].lower() == "zoomplatform":
+                    log.info('ZOOM Platform store specified, using ZOOM Platform database')
+                    game_module = import_module('protonfixes.gamefixes-zoomplatform.' + gameid)
                   elif os.environ['STORE'].lower() == "none":
                     log.info('No store specified, using ULWGL database')
                     game_module = import_module('protonfixes.gamefixes-ulwgl.' + gameid)
