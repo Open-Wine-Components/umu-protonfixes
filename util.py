@@ -576,13 +576,24 @@ def set_xml_options(base_attibutte, xml_line, cfile, base_path='user'):
         log.info("Config Patch Applied! \n")
 
 def get_resolution():
-    """ Returns screen res width, height
+    """ Returns screen res width, height using xrandr
     """
-
-    with open('/sys/class/graphics/fb0/virtual_size', 'r') as res:
-        screenx, screeny = map(int, res.read().strip('\n').split(','))
-
-        return(screenx,screeny)
+    xrandr_bin = os.path.abspath(__file__).replace('util.py','xrandr')
+    # Execute xrandr command and capture its output
+    xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
+    
+    # Find the line that starts with 'Screen   0:' and extract the resolution
+    for line in xrandr_output.splitlines():
+        if 'primary' in line:
+            resolution = line.split()[3]
+            width_height = resolution.split('x')
+            offset_values = width_height[1].split('+')
+            clean_resolution = width_height[0] + 'x' + offset_values[0]
+            screenx, screeny = clean_resolution.split('x')
+            return int(screenx), int(screeny)
+    
+    # If no resolution is found, return default values or raise an exception
+    return  0,  0  # or raise Exception("Resolution not found")
 
 def read_dxvk_conf(cfp):
     """ Add fake [DEFAULT] section to dxvk.conf
