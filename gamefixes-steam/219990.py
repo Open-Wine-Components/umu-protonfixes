@@ -15,6 +15,7 @@ def main():
         util.replace_command('Grim Dawn.exe', 'GrimInternals64.exe')
 
     
-    """ Fix black screen. Only needed for expansions, not for the base game. """
-    
+    """ Fix black screen """
+
+    # Only needed for expansions, not for the base game.
     util.protontricks('d3dcompiler_43')
