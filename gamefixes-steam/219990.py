@@ -16,6 +16,5 @@ def main():
 
     
     """ Fix black screen """
-
     # Only needed for expansions, not for the base game.
     util.protontricks('d3dcompiler_43')
