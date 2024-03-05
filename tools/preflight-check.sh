@@ -8,7 +8,7 @@ for file in ./{gamefixes-amazon,gamefixes-gog,gamefixes-egs,gamefixes-humble,gam
     if [[ -L "$file" && ! -e "$file" ]]; then
         echo "The following file is not a valid link: ${file}"
         exit 1
-    elif [[ -f "$file" && "$file" != "__init__.py" ]]; then
+    elif [[ -f "$file" && "$file" != "__init__.py" && ! -L "$file" ]]; then
         # Lint
         # Disable these checks:
         # - Long lines from comments
