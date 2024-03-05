@@ -3,7 +3,6 @@
 #pylint: disable=C0103
 
 from protonfixes import util
-import subprocess
 import os
 
 def main():
