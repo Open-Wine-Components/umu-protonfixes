@@ -4,7 +4,7 @@
 # Lint using Pylint and check for valid symbolic links for directories with fixes.
 #
 
-for file in ./{gamefixes-amazon,gamefixes-gog,gamefixes-egs,gamefixes-humble,gamefixes-itchio,gamefixes-ubisoft,gamefixes-ulwgl,gamefixes-zoomplatform}/*; do
+for file in ./{gamefixes-steam,gamefixes-amazon,gamefixes-gog,gamefixes-egs,gamefixes-humble,gamefixes-itchio,gamefixes-ubisoft,gamefixes-ulwgl,gamefixes-zoomplatform}/*; do
     if [[ -L "$file" && ! -e "$file" ]]; then
         echo "The following file is not a valid link: ${file}"
         exit 1
