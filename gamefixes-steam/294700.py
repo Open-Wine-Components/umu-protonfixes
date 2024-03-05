@@ -3,8 +3,8 @@
 
 #pylint: disable=C0103
 
-from protonfixes import util
 import os
+from protonfixes import util
 
 # Putt-Putt: PBS doesn't run unless there is a CD-ROM drive attached.
 def main():

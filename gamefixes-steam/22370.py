@@ -2,10 +2,8 @@
 """
 #pylint: disable=C0103
 
-from protonfixes import util
-import subprocess
 import os
-import shutil
+from protonfixes import util
 
 def main():
     """ Run script extender if it exists.

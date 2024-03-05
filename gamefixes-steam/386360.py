@@ -19,6 +19,3 @@ def main():
 
     if not os.path.exists(install_dir + '/Win32/EasyAntiCheat/easyanticheat_x86.so'):
         subprocess.call(['ln', '-s', install_dir + '/EasyAntiCheat/easyanticheat_x86.so', install_dir + '/Win32/EasyAntiCheat/'])
-
-
-
