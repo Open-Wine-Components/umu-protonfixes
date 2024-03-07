@@ -5,5 +5,5 @@
 from protonfixes import util
 
 def main():
-    # Fix black screen. Needed for the expansions, not for the base game:
+    # Fix black screen. Only needed in a Wine prefix that lacks the DirectX distribution that comes with the game installer.
     util.protontricks('d3dcompiler_43')
