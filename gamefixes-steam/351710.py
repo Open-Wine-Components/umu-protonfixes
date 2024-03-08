@@ -7,4 +7,4 @@ from protonfixes import util
 
 def main():
     util.set_environment('radeonsi_disable_sam', 'true')
-    util.set_environment('AMD_DEBUG', 'nowc') 
+    util.set_environment('AMD_DEBUG', 'nowc')

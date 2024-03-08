@@ -9,4 +9,3 @@ def main():
     """
     # Enable preload options
     util.append_argument('-useembedded')
-

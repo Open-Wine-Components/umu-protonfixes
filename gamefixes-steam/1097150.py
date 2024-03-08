@@ -1,9 +1,6 @@
 """ Game fix for Fall Guys
 """
 #pylint: disable=C0103
-import os
-import glob
-import subprocess
 from protonfixes import util
 
 def main():

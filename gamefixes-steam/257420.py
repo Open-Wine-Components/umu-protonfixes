@@ -4,13 +4,13 @@
 
 import os
 import subprocess
-from protonfixes import util
 
 def main():
     """ Graphics API workaround
     """
     if not os.path.isfile('UserCfg.lua.bak'):
         subprocess.call(['cp', 'UserCfg.lua', 'UserCfg.lua.bak'])
-        f = open('UserCfg.lua',"a+")
-        f.write("sfx_strAPI = \"OpenAL\";")
-        f.close
+
+        # Assume UTF-8
+        with open('UserCfg.lua', "a+", encoding="utf-8") as f:
+            f.write("sfx_strAPI = \"OpenAL\";")

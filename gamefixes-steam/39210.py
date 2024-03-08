@@ -2,8 +2,8 @@
 """
 #pylint: disable=C0103
 
-from protonfixes import util
 import os
+from protonfixes import util
 
 def main():
     """ FFXIV add NOSTEAM option.

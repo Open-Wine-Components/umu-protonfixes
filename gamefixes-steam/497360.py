@@ -8,7 +8,8 @@ Widescreen supported (16:9/21:9, 32:9 not tested)
 
 #pylint: disable=C0103
 
-import os, subprocess
+import os
+import subprocess
 from protonfixes import util
 
 def main():
@@ -26,8 +27,8 @@ def main():
     if util.protontricks('dgvoodoo2'):
         screen_width,screen_height = util.get_resolution()
         width = int(screen_width / screen_height * 768 // 1)
-        subprocess.call(["sed -i '/[DirectX]/ {{/Resolution/s/max/{}x768/}}' {}{}".format(width,syswow64,'/dgvoodoo.conf')], shell=True)
-        subprocess.call(["sed -i '/[DirectXExt]/ {{/ExtraEnumeratedResolutions/s/= /= {}x768,/}}' {}{}".format(width,syswow64,'/dgvoodoo.conf')], shell=True)
+        subprocess.call([f"sed -i '/[DirectX]/ {{/Resolution/s/max/{width}x768/}}' {syswow64}/dgvoodoo.conf"], shell=True)
+        subprocess.call([f"sed -i '/[DirectXExt]/ {{/ExtraEnumeratedResolutions/s/= /= {width}x768,/}}' {syswow64}/dgvoodoo.conf"], shell=True)
         util.regedit_add('HKCU\\Software\\Sierra On-Line')
         util.regedit_add('HKCU\\Software\\Sierra On-Line\\Gabriel Knight 3')
         util.regedit_add('HKCU\\Software\\Sierra On-Line\\Gabriel Knight 3\\App','Run Count','REG_DWORD','0x1')

@@ -15,11 +15,11 @@ def main():
     mms_path = os.path.join(flash_path, 'mms.cfg')
     os.makedirs(flash_path, exist_ok=True)
     if os.path.isfile(mms_path):
-        with open(mms_path) as f:
+        with open(mms_path, encoding='utf-8') as f:
             for line in f:
                 if 'OverrideGPUValidation' in line:
                     fix_installed = True
     if not fix_installed:
-        with open(mms_path, 'a') as f:
+        with open(mms_path, 'a', encoding='utf-8') as f:
             f.write('\n')
             f.write("OverrideGPUValidation=1")

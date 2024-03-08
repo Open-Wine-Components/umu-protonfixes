@@ -4,7 +4,8 @@ Videos still don't work.
 """
 #pylint: disable=C0103
 
-import os, subprocess
+import os
+import subprocess
 from protonfixes import util
 
 def main():

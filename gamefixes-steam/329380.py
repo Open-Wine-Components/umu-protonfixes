@@ -9,6 +9,5 @@ from protonfixes.logger import log
 def main():
     """ dsound is needed for audio
     """
-
     log('Installing dsound')
     util.protontricks('dsound')

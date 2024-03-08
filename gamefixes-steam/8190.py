@@ -12,4 +12,3 @@ def main():
     util.protontricks('d3dcompiler_47')
     util.protontricks('d3dx10')
     util.append_argument('-borderless')
-
