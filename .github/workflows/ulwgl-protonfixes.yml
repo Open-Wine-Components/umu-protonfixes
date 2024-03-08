@@ -1,0 +1,35 @@
+name: ULWGL-protonfixes workflow
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        # The Steam Runtime platform (sniper) uses Python 3.9
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        sudo apt-get install shellcheck
+        python3 -m pip install --upgrade pip
+        pip install pylint
+    - name: Lint with Shellcheck
+      run: |
+        shellcheck tools/lint.sh tools/check-links.sh
+    - name: Check symbolic links
+      run: |
+        bash tools/check-links.sh
+    - name: Lint with Pylint
+      run: |
+        bash tools/lint.sh

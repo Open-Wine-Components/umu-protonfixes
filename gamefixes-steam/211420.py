@@ -1,4 +1,4 @@
-""" Game fix Dark Sould Prepare To Die Edition
+""" Game fix Dark Souls Prepare To Die Edition
 """
 #pylint: disable=C0103
 
@@ -17,5 +17,3 @@ def main():
     util.winedll_override('dinput8', 'n')
 
     util.protontricks('win7')
-    #Avoiding problems with missing syswow64
-    util._mk_syswow64() #pylint: disable=protected-access

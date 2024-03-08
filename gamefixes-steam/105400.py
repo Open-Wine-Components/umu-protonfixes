@@ -6,7 +6,6 @@
 import os
 import shutil
 
-from pathlib import Path
 from protonfixes import util
 from protonfixes.logger import log
 

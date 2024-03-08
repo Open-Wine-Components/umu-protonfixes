@@ -5,7 +5,6 @@
 from protonfixes import util
 
 def main():
-    """ """
     util.protontricks('quartz') # Cutscene fixes
     util.protontricks('amstream')
     util.protontricks('lavfilters')

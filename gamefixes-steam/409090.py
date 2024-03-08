@@ -6,11 +6,13 @@ copy dgvoodoo2 d3d9.dll every time otherwise it gets overwritten
 """
 #pylint: disable=C0103
 
-import os, subprocess, shutil
+import os
+import subprocess
+import shutil
 from protonfixes import util
 
 def main():
-    syswow64 = os.path.join(util.protonprefix(), 'drive_c/windows/syswow64')
+    syswow64 = os.path.join(util.protonprefix(), 'drive_c/windows/syswow64', 'dgvoodoo.conf')
     if util.protontricks('dgvoodoo2'):
-        subprocess.call(["sed -i '/[DirectX]/ {{/Resolution/s/max/unforced/}}' {}{}".format(syswow64,'/dgvoodoo.conf')], shell=True)
+        subprocess.call([f"sed -i '/[DirectX]/ {{/Resolution/s/max/unforced/}}' {syswow64}"], shell=True)
     shutil.copy(os.path.join(syswow64, 'dgd3d9.dll'),os.path.join(syswow64, 'd3d9.dll'))
