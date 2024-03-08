@@ -3,7 +3,6 @@
 #pylint: disable=C0103
 
 from protonfixes import util
-import os
 
 def main():
     util.winedll_override('d3d8', 'n,b')
