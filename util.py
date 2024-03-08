@@ -225,12 +225,25 @@ def is_custom_verb(verb):
 
     return False
 
+def check_internet():
+    """Checks for internet connection."""
+    try:
+        urllib.request.urlopen("https://www.debian.org/", timeout=5)
+        return True
+    except urllib.error.URLError:
+        return False
 
 def protontricks(verb):
     """ Runs winetricks if available
     """
-
     if not checkinstalled(verb):
+        if check_internet():
+            # Proceed with your function logic here
+            pass
+        else:
+            log.info("No internet connection. Winetricks will be skipped.")
+            return False
+
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
         env['WINEPREFIX'] = protonprefix()
