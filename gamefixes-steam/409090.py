@@ -12,7 +12,7 @@ import shutil
 from protonfixes import util
 
 def main():
-    syswow64 = os.path.join(util.protonprefix(), 'drive_c/windows/syswow64', 'dgvoodoo.conf')
+    syswow64 = os.path.join(util.protonprefix(), 'drive_c/windows/syswow64')
     if util.protontricks('dgvoodoo2'):
-        subprocess.call([f"sed -i '/[DirectX]/ {{/Resolution/s/max/unforced/}}' {syswow64}"], shell=True)
+        subprocess.call([f"sed -i '/[DirectX]/ {{/Resolution/s/max/unforced/}}' {syswow64}/dgvoodoo.conf"], shell=True)
     shutil.copy(os.path.join(syswow64, 'dgd3d9.dll'),os.path.join(syswow64, 'd3d9.dll'))
