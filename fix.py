@@ -9,7 +9,7 @@ import sys
 import urllib
 import json
 from importlib import import_module
-from .util import protonprefix
+from .util import protonprefix, check_internet
 from .checks import run_checks
 from .logger import log
 from . import config
@@ -33,34 +33,37 @@ def game_id():
 def game_name():
     """ Trys to return the game name from environment variables
     """
+    is_online = check_internet()
     if 'ULWGL_ID' in os.environ:
         if os.path.isfile(os.environ['WINEPREFIX'] + "/game_title"):
             with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
                 return file.readline()
         else:
             try:
-                if 'STORE' in os.environ:
+                if 'STORE' in os.environ and is_online:
                     url = "https://ulwgl.openwinecomponents.org/ulwgl_api.php?ulwgl_id=" + os.environ['ULWGL_ID'] + "&store=" + os.environ['STORE']
                     headers = {'User-Agent': 'Mozilla/5.0'}
                     req = urllib.request.Request(url, headers=headers)
-                    response = urllib.request.urlopen(req)
+                    response = urllib.request.urlopen(req, timeout=5)
                     data = response.read()
                     json_data = json.loads(data)
                     title = json_data[0]['title']
                     file = open(os.environ['WINEPREFIX'] + "/game_title", 'w')
                     file.write(title)
                     file.close()
-                else:
+                elif 'STORE' not in os.environ and is_online:
                     url = "https://ulwgl.openwinecomponents.org/ulwgl_api.php?ulwgl_id=" + os.environ['ULWGL_ID'] + "&store=none"
                     headers = {'User-Agent': 'Mozilla/5.0'}
                     req = urllib.request.Request(url, headers=headers)
-                    response = urllib.request.urlopen(req)
+                    response = urllib.request.urlopen(req, timeout=5)
                     data = response.read()
                     json_data = json.loads(data)
                     title = json_data[0]['title']
                     file = open(os.environ['WINEPREFIX'] + "/game_title", 'w')
                     file.write(title)
                     file.close()
+                elif not is_online:
+                    raise OSError
             except OSError as e:
                 #log.info('OSError occurred: {}'.format(e))  # used for debugging
                 return 'UNKNOWN'
@@ -69,6 +72,9 @@ def game_name():
                 return 'UNKNOWN'
             except UnicodeDecodeError as e:
                 #log.info('UnicodeDecodeError occurred: {}'.format(e))  # used for debugging
+                return 'UNKNOWN'
+            except TimeoutError:
+                log.info('ulwgl.openwinecomponents.org timed out')
                 return 'UNKNOWN'
             with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
                 return file.readline()
