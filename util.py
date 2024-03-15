@@ -15,6 +15,7 @@ import functools
 from .logger import log
 from .steamhelper import install_app
 from . import config
+from socket import socket, AF_INET, SOCK_DGRAM
 
 try:
     import __main__ as protonmain
@@ -228,9 +229,11 @@ def is_custom_verb(verb):
 def check_internet():
     """Checks for internet connection."""
     try:
-        urllib.request.urlopen("https://www.debian.org/", timeout=5)
+        with socket(AF_INET, SOCK_DGRAM) as sock:
+            sock.settimeout(5)
+            sock.connect(("1.1.1.1", 53))
         return True
-    except urllib.error.URLError:
+    except (TimeoutError, OSError):
         return False
 
 def protontricks(verb):
