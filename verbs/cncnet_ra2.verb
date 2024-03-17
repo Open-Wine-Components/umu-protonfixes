@@ -1,0 +1,13 @@
+w_metadata cncnet_ra2 dlls \
+    title="CnCnet5 Red Alert / Yuri's Revenge - Multiplayer / Game patches" \
+    publisher="CnCnet community" \
+    year="2013" \
+    media="download" \
+    file1="CnCNet5_YR_Installer.exe" \
+    installed_file1="CnCNetYRLauncher.exe"
+
+load_cncnet_ra2()
+{
+    w_download https://github.com/CnCNet/cncnet-yr-client-package/releases/download/yr-8.55/CnCNet5_YR_Installer_8.55.0.exe c1cf19fa40bb07e881ffeea33df8a5961162e009c558b33d91076f51ca3f949c ${file1}
+    w_try "${WINE}" start.exe /exec ${W_CACHE}/${W_PACKAGE}/${file1} /silent /verysilent /norestart /suppressmsgboxes
+}
