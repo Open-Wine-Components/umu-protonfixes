@@ -285,6 +285,12 @@ def protontricks(verb):
             process.wait()
             _killhanging()
 
+            # Check if the verb failed (eg. access denied)
+            retc = process.returncode
+            if retc != 0:
+                log.warn(f'Winetricks failed running verb "{verb}" with status {retc}.')
+                return False
+
             # Check if verb recorded to winetricks log
             if not checkinstalled(verb):
                 log.warn('Not recorded as installed: winetricks ' + verb + ', forcing!')
