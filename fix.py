@@ -17,8 +17,8 @@ from . import config
 def game_id():
     """ Trys to return the game id from environment variables
     """
-    if 'ULWGL_ID' in os.environ:
-        return os.environ['ULWGL_ID']
+    if 'UMU_ID' in os.environ:
+        return os.environ['UMU_ID']
     if 'SteamAppId' in os.environ:
         return os.environ['SteamAppId']
     if 'SteamGameId' in os.environ:
@@ -34,14 +34,14 @@ def game_name():
     """ Trys to return the game name from environment variables
     """
     is_online = check_internet()
-    if 'ULWGL_ID' in os.environ:
+    if 'UMU_ID' in os.environ:
         if os.path.isfile(os.environ['WINEPREFIX'] + "/game_title"):
             with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
                 return file.readline()
         else:
             try:
                 if 'STORE' in os.environ and is_online:
-                    url = "https://ulwgl.openwinecomponents.org/ulwgl_api.php?ulwgl_id=" + os.environ['ULWGL_ID'] + "&store=" + os.environ['STORE']
+                    url = "https://umu.openwinecomponents.org/umu_api.php?umu_id=" + os.environ['UMU_ID'] + "&store=" + os.environ['STORE']
                     headers = {'User-Agent': 'Mozilla/5.0'}
                     req = urllib.request.Request(url, headers=headers)
                     response = urllib.request.urlopen(req, timeout=5)
@@ -52,7 +52,7 @@ def game_name():
                     file.write(title)
                     file.close()
                 elif 'STORE' not in os.environ and is_online:
-                    url = "https://ulwgl.openwinecomponents.org/ulwgl_api.php?ulwgl_id=" + os.environ['ULWGL_ID'] + "&store=none"
+                    url = "https://umu.openwinecomponents.org/umu_api.php?umu_id=" + os.environ['UMU_ID'] + "&store=none"
                     headers = {'User-Agent': 'Mozilla/5.0'}
                     req = urllib.request.Request(url, headers=headers)
                     response = urllib.request.urlopen(req, timeout=5)
@@ -74,7 +74,7 @@ def game_name():
                 #log.info('UnicodeDecodeError occurred: {}'.format(e))  # used for debugging
                 return 'UNKNOWN'
             except TimeoutError:
-                log.info('ulwgl.openwinecomponents.org timed out')
+                log.info('umu.openwinecomponents.org timed out')
                 return 'UNKNOWN'
             with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
                 return file.readline()
@@ -126,7 +126,7 @@ def run_fix(gameid):
                 game_module = import_module('protonfixes.gamefixes-steam.default')
             else:
                 log.info('Non-steam game ' + game)
-                game_module = import_module('protonfixes.gamefixes-ulwgl.default')
+                game_module = import_module('protonfixes.gamefixes-umu.default')
             log.info('Using global defaults for ' + game)
             game_module.main()
         except ImportError:
@@ -177,11 +177,11 @@ def run_fix(gameid):
                     log.info('ZOOM Platform store specified, using ZOOM Platform database')
                     game_module = import_module('protonfixes.gamefixes-zoomplatform.' + gameid)
                   elif os.environ['STORE'].lower() == "none":
-                    log.info('No store specified, using ULWGL database')
-                    game_module = import_module('protonfixes.gamefixes-ulwgl.' + gameid)
+                    log.info('No store specified, using umu database')
+                    game_module = import_module('protonfixes.gamefixes-umu.' + gameid)
                 else:
-                  log.info('No store specified, using ULWGL database')
-                  game_module = import_module('protonfixes.gamefixes-ulwgl.' + gameid)
+                  log.info('No store specified, using umu database')
+                  game_module = import_module('protonfixes.gamefixes-umu.' + gameid)
             log.info('Using protonfix for ' + game)
             game_module.main()
         except ImportError:

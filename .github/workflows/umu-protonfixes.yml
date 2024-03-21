@@ -1,4 +1,4 @@
-name: ULWGL-protonfixes workflow
+name: umu-protonfixes workflow
 
 on:
   push:
