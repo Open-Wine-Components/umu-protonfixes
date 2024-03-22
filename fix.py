@@ -148,7 +148,7 @@ def run_fix(gameid):
                 game_module = import_module('protonfixes.gamefixes-steam.' + gameid)
             else:
                 log.info('Non-steam game ' + game)
-                if 'STORE' in os.environ:
+                if os.environ.get("STORE"):
                   if os.environ['STORE'].lower() == "amazon":
                     log.info('Amazon store specified, using Amazon database')
                     game_module = import_module('protonfixes.gamefixes-amazon.' + gameid)
