@@ -8,6 +8,7 @@ import sys
 import urllib
 import json
 
+from functools import lru_cache
 from importlib import import_module
 from .util import check_internet
 from .checks import run_checks
@@ -15,6 +16,7 @@ from .logger import log
 from . import config
 
 
+@lru_cache
 def get_game_id() -> str:
     """ Trys to return the game id from environment variables
     """
@@ -31,6 +33,7 @@ def get_game_id() -> str:
     return None
 
 
+@lru_cache
 def get_game_name() -> str:
     """ Trys to return the game name from environment variables
     """
@@ -85,97 +88,98 @@ def get_game_name() -> str:
     return 'UNKNOWN'
 
 
+def get_store_name(store: str) -> str:
+    """ Mapping for store identifier to store name
+    """
+    return {
+        'amazon': 'Amazon',
+        'battlenet': 'Battle.net',
+        'ea': 'EA',
+        'egs': 'EGS',
+        'gog': 'GOG',
+        'humble': 'Humble',
+        'itchio': 'Itch.io',
+        'steam': 'Steam',
+        'ubisoft': 'Ubisoft',
+        'zoomplatform': 'ZOOM Platform'
+    }.get(store, None)
+
+
+def get_module_name(game_id: str, default: bool = False, local: bool = False) -> str:
+    """ Creates the name of a gamefix module, which can be imported
+    """
+    if os.environ.get('STORE'):
+        store = os.environ['STORE'].lower()
+    elif game_id.isnumeric():
+        store = 'steam'
+
+    if store != 'steam':
+        log.info(f'Non-steam game {get_game_name()} ({game_id})')
+
+        store_name = get_store_name(store)
+        if store_name:
+            log.info(f'{store_name} store specified, using {store_name} database')
+        else:
+            log.info('No store specified, using UMU database')
+            store = 'umu'
+
+    return (f'protonfixes.gamefixes-{store}.' if not local else 'localfixes.') +\
+           (game_id if not default else 'default')
+
+
+def _run_fix_local(game_id: str, default: bool = False) -> bool:
+    """ Check if a local gamefix is available first and run it
+    """
+    localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
+    module_name =  game_id if not default else 'default'
+
+    # Check if local gamefix exists
+    if not os.path.isfile(os.path.join(localpath, module_name + '.py')):
+        return False
+
+    # Ensure local gamefixes are importable as modules via PATH
+    with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):
+        sys.path.append(os.path.expanduser('~/.config/protonfixes'))
+
+    # Run fix
+    return _run_fix(game_id, default, True)
+
+
+def _run_fix(game_id: str, default: bool = False, local: bool = False) -> bool:
+    """ Private function, which actually executes gamefixes
+    """
+    fix_type = 'protonfix' if not default else 'defaults'
+    scope    = 'global' if not local else 'local'
+
+    try:
+        module_name = get_module_name(game_id, default, local)
+        game_module = import_module(module_name)
+
+        log.info(f'Using {scope} {fix_type} for {get_game_name()} ({game_id})')
+        game_module.main()
+    except ImportError:
+        log.info(f'No {scope} {fix_type} found for {get_game_name()} ({game_id})')
+        return False
+    return True
+
+
 def run_fix(game_id: str) -> None:
     """ Loads a gamefix module by it's gameid
+        local fixes prevent global fixes from being executed
     """
-
     if game_id is None:
         return
 
     if config.enable_checks:
         run_checks()
 
-    game = f'{get_game_name()} ({game_id})'
-    localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
+    # execute default.py (local)
+    if not _run_fix_local(game_id, True) and config.enable_global_fixes:
+        _run_fix(game_id, True) # global
 
-    # execute default.py
-    if os.path.isfile(os.path.join(localpath, 'default.py')):
-        # Ensure local gamefixes are importable as modules via PATH
-        with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):
-            sys.path.append(os.path.expanduser('~/.config/protonfixes'))
-        try:
-            game_module = import_module('localfixes.default')
-            log.info('Using local defaults for ' + game)
-            game_module.main()
-        except ImportError:
-            log.info('No local defaults found for ' + game)
-    elif config.enable_global_fixes:
-        try:
-            if game_id.isnumeric():
-                game_module = import_module('protonfixes.gamefixes-steam.default')
-            else:
-                log.info('Non-steam game ' + game)
-                game_module = import_module('protonfixes.gamefixes-umu.default')
-            log.info('Using global defaults for ' + game)
-            game_module.main()
-        except ImportError:
-            log.info('No global defaults found')
-
-    # execute <game_id>.py
-    if os.path.isfile(os.path.join(localpath, game_id + '.py')):
-        # Ensure local gamefixes are importable as modules via PATH
-        with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):
-            sys.path.append(os.path.expanduser('~/.config/protonfixes'))
-        try:
-            game_module = import_module('localfixes.' + game_id)
-            log.info('Using local protonfix for ' + game)
-            game_module.main()
-        except ImportError:
-            log.info('No local protonfix found for ' + game)
-    elif config.enable_global_fixes:
-        try:
-            if game_id.isnumeric():
-                game_module = import_module('protonfixes.gamefixes-steam.' + game_id)
-            else:
-                log.info('Non-steam game ' + game)
-                if os.environ.get('STORE'):
-                    if os.environ['STORE'].lower() == 'amazon':
-                        log.info('Amazon store specified, using Amazon database')
-                        game_module = import_module('protonfixes.gamefixes-amazon.' + game_id)
-                    elif os.environ['STORE'].lower() == 'battlenet':
-                        log.info('Battle.net store specified, using Battle.net database')
-                        game_module = import_module('protonfixes.gamefixes-battlenet.' + game_id)
-                    elif os.environ['STORE'].lower() == 'ea':
-                        log.info('EA store specified, using EA database')
-                        game_module = import_module('protonfixes.gamefixes-ea.' + game_id)
-                    elif os.environ['STORE'].lower() == 'egs':
-                        log.info('EGS store specified, using EGS database')
-                        game_module = import_module('protonfixes.gamefixes-egs.' + game_id)
-                    elif os.environ['STORE'].lower() == 'gog':
-                        log.info('GOG store specified, using GOG database')
-                        game_module = import_module('protonfixes.gamefixes-gog.' + game_id)
-                    elif os.environ['STORE'].lower() == 'humble':
-                        log.info('Humble store specified, using Humble database')
-                        game_module = import_module('protonfixes.gamefixes-humble.' + game_id)
-                    elif os.environ['STORE'].lower() == 'itchio':
-                        log.info('Itch.io store specified, using Itch.io database')
-                        game_module = import_module('protonfixes.gamefixes-itchio.' + game_id)
-                    elif os.environ['STORE'].lower() == 'ubisoft':
-                        log.info('Ubisoft store specified, using Ubisoft database')
-                        game_module = import_module('protonfixes.gamefixes-ubisoft.' + game_id)
-                    elif os.environ['STORE'].lower() == 'zoomplatform':
-                        log.info('ZOOM Platform store specified, using ZOOM Platform database')
-                        game_module = import_module('protonfixes.gamefixes-zoomplatform.' + game_id)
-                    elif os.environ['STORE'].lower() == 'none':
-                        log.info('No store specified, using umu database')
-                        game_module = import_module('protonfixes.gamefixes-umu.' + game_id)
-                else:
-                    log.info('No store specified, using umu database')
-                    game_module = import_module('protonfixes.gamefixes-umu.' + game_id)
-            log.info('Using protonfix for ' + game)
-            game_module.main()
-        except ImportError:
-            log.info('No protonfix found for ' + game)
+    # execute <game_id>.py (local)
+    if not _run_fix_local(game_id, False) and config.enable_global_fixes:
+        _run_fix(game_id, False) # global
 
 
 def main() -> None:
