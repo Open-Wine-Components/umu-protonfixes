@@ -72,7 +72,7 @@ def protontimeversion() -> int:
 
     fullpath = os.path.join(protondir(), 'version')
     try:
-        with open(fullpath, 'r') as version:
+        with open(fullpath, 'r', encoding='ascii') as version:
             for timestamp in version.readlines():
                 return int(timestamp.strip())
     except OSError:
@@ -124,7 +124,8 @@ def once(func: callable = None, retry: bool = False):
                 raise exc
             exception = exc
 
-        open(file, 'a').close()
+        with open(file, 'a', encoding='ascii') as tmp:
+            tmp.close()
 
         if exception:
             raise exception #pylint: disable=raising-bad-type
@@ -156,7 +157,7 @@ def _forceinstalled(verb: str) -> None:
     """ Records verb into the winetricks.log.forced file
     """
     forced_log = os.path.join(protonprefix(), 'winetricks.log.forced')
-    with open(forced_log, 'a') as forcedlog:
+    with open(forced_log, 'a', encoding='ascii') as forcedlog:
         forcedlog.write(verb + '\n')
 
 
@@ -175,7 +176,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
         wt_verb_param = verb.split('=')[1]
         wt_is_set = False
         try:
-            with open(winetricks_log, 'r') as tricklog:
+            with open(winetricks_log, 'r', encoding='ascii') as tricklog:
                 for xline in tricklog.readlines():
                     if re.findall(r'^' + wt_verb, xline.strip()):
                         wt_is_set = bool(xline.strip() == wt_verb + wt_verb_param)
@@ -184,7 +185,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
             return False
     # Check for regular verbs
     try:
-        with open(winetricks_log, 'r') as tricklog:
+        with open(winetricks_log, 'r', encoding='ascii') as tricklog:
             if verb in reversed([x.strip() for x in tricklog.readlines()]):
                 return True
     except OSError:
@@ -285,8 +286,8 @@ def protontricks(verb: str) -> bool:
 
             log.info('Using winetricks verb ' + verb)
             subprocess.call([env['WINESERVER'], '-w'], env=env)
-            process = subprocess.Popen(winetricks_cmd, env=env)
-            process.wait()
+            with subprocess.Popen(winetricks_cmd, env=env) as process:
+                process.wait()
             _killhanging()
 
             # Check if the verb failed (eg. access denied)
@@ -337,8 +338,8 @@ def regedit_add(folder: str, name: str = None, typ: str = None, value: str = Non
 
         log.info('Adding key: ' + folder)
 
-    process = subprocess.Popen(regedit_cmd, env=env)
-    process.wait()
+    with subprocess.Popen(regedit_cmd, env=env) as process:
+        process.wait()
 
 
 def replace_command(orig: str, repl: str) -> None:
@@ -460,7 +461,7 @@ def disable_uplay_overlay() -> bool:
         return False
 
     try:
-        with open(config_file, 'a+') as file:
+        with open(config_file, 'a+', encoding='ascii') as file:
             file.write('\noverlay:\n  enabled: false\n  forceunhookgame: false'
                         '\n  fps_enabled: false\n  warning_enabled: false\n')
         log.info('Disabled UPlay overlay')
@@ -482,7 +483,7 @@ def create_dosbox_conf(conf_file: str, conf_dict: Mapping[str, Mapping[str, any]
         return
     conf = configparser.ConfigParser()
     conf.read_dict(conf_dict)
-    with open(conf_file, 'w') as file:
+    with open(conf_file, 'w', encoding='ascii') as file:
         conf.write(file)
 
 
@@ -577,7 +578,7 @@ def set_ini_options(ini_opts: str, cfile: str, encoding: str, base_path: str = '
     log.info(f'Addinging INI options into {cfile}:\n{str(ini_opts)}')
     conf.read_string(ini_opts)
 
-    with open(cfg_path, 'w') as configfile:
+    with open(cfg_path, 'w', encoding=encoding) as configfile:
         conf.write(configfile)
     return True
 
@@ -599,20 +600,18 @@ def set_xml_options(base_attibutte: str, xml_line: str, cfile: str, base_path: s
     if base_size != backup_size:
         return False
 
-    ConfigFile = open(xml_path, 'r')
-    contents = ConfigFile.readlines()
-    i = 0
-    for line in contents:
-        i += 1
-        if base_attibutte in line:
-            log.info(f'Adding XML options into {cfile}, line {i}:\n{xml_line}')
-            contents.insert(i, xml_line + '\n')
-    ConfigFile.close()
+    with open(xml_path, 'r', encoding='utf-8') as file:
+        contents = file.readlines()
+        i = 0
+        for line in contents:
+            i += 1
+            if base_attibutte in line:
+                log.info(f'Adding XML options into {cfile}, line {i}:\n{xml_line}')
+                contents.insert(i, xml_line + '\n')
 
-    ConfigFile = open(xml_path, 'w')
-    for eachitem in contents:
-        ConfigFile.write(eachitem)
-    ConfigFile.close()
+    with open(xml_path, 'w', encoding='utf-8') as file:
+        for eachitem in contents:
+            file.write(eachitem)
 
     log.info('XML config patch applied')
     return True
@@ -666,14 +665,15 @@ def set_dxvk_option(opt: str, val: str, cfile: str = '/tmp/protonfixes_dxvk.conf
         conf.set(section, 'session', str(os.getpid()))
 
         if os.access(dxvk_conf, os.F_OK):
-            conf.read_file(read_dxvk_conf(open(dxvk_conf)))
+            with open(dxvk_conf, encoding='ascii') as dxvk:
+                conf.read_file(read_dxvk_conf(dxvk))
         log.debug(conf.items(section))
 
     # set option
     log.info('Addinging DXVK option: '+ str(opt) + ' = ' + str(val))
     conf.set(section, opt, str(val))
 
-    with open(cfile, 'w') as configfile:
+    with open(cfile, 'w', encoding='ascii') as configfile:
         conf.write(configfile)
 
 
@@ -747,7 +747,7 @@ def is_smt_enabled() -> bool:
         If the check has failed, False is returned.
     """
     try:
-        with open('/sys/devices/system/cpu/smt/active') as smt_file:
+        with open('/sys/devices/system/cpu/smt/active', encoding='ascii') as smt_file:
             return smt_file.read().strip() == '1'
     except PermissionError:
         log.warn('No permission to read SMT status')

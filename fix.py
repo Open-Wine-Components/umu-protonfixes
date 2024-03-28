@@ -36,7 +36,7 @@ def get_game_name() -> str:
     """
     if 'UMU_ID' in os.environ:
         if os.path.isfile(os.environ['WINEPREFIX'] + '/game_title'):
-            with open(os.environ['WINEPREFIX'] + '/game_title', 'r') as file:
+            with open(os.environ['WINEPREFIX'] + '/game_title', 'r', encoding='utf-8') as file:
                 return file.readline()
 
         if not check_internet():
@@ -44,28 +44,17 @@ def get_game_name() -> str:
             return 'UNKNOWN'
 
         try:
-            if 'STORE' in os.environ:
-                url = f'https://umu.openwinecomponents.org/umu_api.php?umu_id={os.environ["UMU_ID"]}&store={os.environ["STORE"]}'
-                headers = {'User-Agent': 'Mozilla/5.0'}
-                req = urllib.request.Request(url, headers=headers)
-                response = urllib.request.urlopen(req, timeout=5)
+            # Fallback to 'none', if STORE isn't set
+            store = os.getenv('STORE', 'none')
+            url = f'https://umu.openwinecomponents.org/umu_api.php?umu_id={os.environ["UMU_ID"]}&store={store}'
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=5) as response:
                 data = response.read()
                 json_data = json.loads(data)
                 title = json_data[0]['title']
-                file = open(os.environ['WINEPREFIX'] + '/game_title', 'w')
+            with open(os.environ['WINEPREFIX'] + '/game_title', 'w', encoding='utf-8') as file:
                 file.write(title)
-                file.close()
-            elif 'STORE' not in os.environ:
-                url = f'https://umu.openwinecomponents.org/umu_api.php?umu_id={os.environ["UMU_ID"]}&store=none'
-                headers = {'User-Agent': 'Mozilla/5.0'}
-                req = urllib.request.Request(url, headers=headers)
-                response = urllib.request.urlopen(req, timeout=5)
-                data = response.read()
-                json_data = json.loads(data)
-                title = json_data[0]['title']
-                file = open(os.environ['WINEPREFIX'] + '/game_title', 'w')
-                file.write(title)
-                file.close()
             return title
         except TimeoutError as ex:
             log.info('umu.openwinecomponents.org timed out')
@@ -111,8 +100,9 @@ def run_fix(game_id: str) -> None:
 
     # execute default.py
     if os.path.isfile(os.path.join(localpath, 'default.py')):
-        open(os.path.join(localpath, '__init__.py'), 'a').close()
-        sys.path.append(os.path.expanduser('~/.config/protonfixes'))
+        # Ensure local gamefixes are importable as modules via PATH
+        with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):
+            sys.path.append(os.path.expanduser('~/.config/protonfixes'))
         try:
             game_module = import_module('localfixes.default')
             log.info('Using local defaults for ' + game)
@@ -133,8 +123,9 @@ def run_fix(game_id: str) -> None:
 
     # execute <game_id>.py
     if os.path.isfile(os.path.join(localpath, game_id + '.py')):
-        open(os.path.join(localpath, '__init__.py'), 'a').close()
-        sys.path.append(os.path.expanduser('~/.config/protonfixes'))
+        # Ensure local gamefixes are importable as modules via PATH
+        with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):
+            sys.path.append(os.path.expanduser('~/.config/protonfixes'))
         try:
             game_module = import_module('localfixes.' + game_id)
             log.info('Using local protonfix for ' + game)

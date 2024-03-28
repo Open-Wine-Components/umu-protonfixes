@@ -81,7 +81,7 @@ def _find_regex_groups(path: str, regex: re.Pattern, groupname: str) -> list:
         array of all the matches
     """
     matches = []
-    with open(path) as re_file:
+    with open(path, encoding='ascii') as re_file:
         for line in re_file:
             search = regex.search(line)
             if search:

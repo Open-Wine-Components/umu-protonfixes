@@ -26,17 +26,19 @@ def gdrive_download(gdrive_id: str, path: str) -> None:
     cjar = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cjar))
     urllib.request.install_opener(opener)
+
     req = urllib.request.Request(url)
-    resp = urllib.request.urlopen(req)
-    confirm_cookie = [x for x in resp.getheaders() if
-                      (x[0] == 'Set-Cookie'
-                       and x[1].startswith('download_warning'))][0][1]
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        confirm_cookie = [x for x in resp.getheaders() if
+                        (x[0] == 'Set-Cookie'
+                        and x[1].startswith('download_warning'))][0][1]
     confirm = confirm_cookie.split(';')[0].split('=')[1]
-    req2 = urllib.request.Request(url + '&confirm={}'.format(confirm))
-    resp2 = urllib.request.urlopen(req2)
-    filename = get_filename(resp2.getheaders())
-    with open(os.path.join(path, filename), 'wb') as save_file:
-        save_file.write(resp2.read())
+
+    req = urllib.request.Request(f'{url}&confirm={confirm}')
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        filename = get_filename(resp.getheaders())
+        with open(os.path.join(path, filename), 'wb') as save_file:
+            save_file.write(resp.read())
 
 
 def sha1sum(filename: str) -> str:
