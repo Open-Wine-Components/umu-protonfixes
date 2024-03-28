@@ -14,7 +14,7 @@ from .checks import run_checks
 from .logger import log
 from . import config
 
-def game_id():
+def game_id() -> str:
     """ Trys to return the game id from environment variables
     """
     if 'UMU_ID' in os.environ:
@@ -30,7 +30,7 @@ def game_id():
     return None
 
 
-def game_name():
+def game_name() -> str:
     """ Trys to return the game name from environment variables
     """
     is_online = check_internet()
@@ -97,7 +97,7 @@ def game_name():
     return 'UNKNOWN'
 
 
-def run_fix(gameid):
+def run_fix(gameid: str) -> None:
     """ Loads a gamefix module by it's gameid
     """
 
@@ -188,7 +188,7 @@ def run_fix(gameid):
             log.info('No protonfix found for ' + game)
 
 
-def main():
+def main() -> None:
     """ Runs the gamefix
     """
 

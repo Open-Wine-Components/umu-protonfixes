@@ -12,10 +12,13 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
+
+from socket import socket, AF_INET, SOCK_DGRAM
+from typing import Union, Literal, Mapping
+
 from .logger import log
 from .steamhelper import install_app
 from . import config
-from socket import socket, AF_INET, SOCK_DGRAM
 
 try:
     import __main__ as protonmain
@@ -24,7 +27,7 @@ except ImportError:
 
 # pylint: disable=unreachable
 
-def which(appname):
+def which(appname: str) -> str:
     """ Returns the full path of an executable in $PATH
     """
 
@@ -36,7 +39,7 @@ def which(appname):
     return None
 
 
-def protondir():
+def protondir() -> str:
     """ Returns the path to proton
     """
 
@@ -44,7 +47,7 @@ def protondir():
     return proton_dir
 
 
-def protonprefix():
+def protonprefix() -> str:
     """ Returns the wineprefix used by proton
     """
 
@@ -53,7 +56,7 @@ def protonprefix():
         'pfx/')
 
 
-def protonnameversion():
+def protonnameversion() -> str:
     """ Returns the version of proton from sys.argv[0]
     """
 
@@ -64,7 +67,7 @@ def protonnameversion():
     return None
 
 
-def protontimeversion():
+def protontimeversion() -> int:
     """ Returns the version timestamp of proton from the `version` file
     """
 
@@ -80,15 +83,15 @@ def protontimeversion():
     return 0
 
 
-def protonversion(timestamp=False):
+def protonversion(timestamp: bool = False) -> Union[str, int]:
     """ Returns the version of proton
     """
-
     if timestamp:
         return protontimeversion()
     return protonnameversion()
 
-def once(func=None, retry=None):
+
+def once(func: callable = None, retry: bool = False):
     """ Decorator to use on functions which should only run once in a prefix.
     Error handling:
     By default, when an exception occurs in the decorated function, the
@@ -132,7 +135,7 @@ def once(func=None, retry=None):
     return wrapper
 
 
-def _killhanging():
+def _killhanging() -> None:
     """ Kills processes that hang when installing winetricks
     """
 
@@ -150,7 +153,8 @@ def _killhanging():
         except IOError:
             continue
 
-def _forceinstalled(verb):
+
+def _forceinstalled(verb: str) -> None:
     """ Records verb into the winetricks.log.forced file
     """
     forced_log = os.path.join(protonprefix(), 'winetricks.log.forced')
@@ -158,7 +162,7 @@ def _forceinstalled(verb):
         forcedlog.write(verb + '\n')
 
 
-def _checkinstalled(verb, logfile='winetricks.log'):
+def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
     """ Returns True if the winetricks verb is found in the winetricks log
     """
 
@@ -190,7 +194,7 @@ def _checkinstalled(verb, logfile='winetricks.log'):
     return False
 
 
-def checkinstalled(verb):
+def checkinstalled(verb: str) -> bool:
     """ Returns True if the winetricks verb is found in the winetricks log
         or in the 'winetricks.log.forced' file
     """
@@ -203,7 +207,7 @@ def checkinstalled(verb):
     return _checkinstalled(verb)
 
 
-def is_custom_verb(verb):
+def is_custom_verb(verb: str) -> bool:
     """ Returns path to custom winetricks verb, if found
     """
     if verb == 'gui':
@@ -226,7 +230,8 @@ def is_custom_verb(verb):
 
     return False
 
-def check_internet():
+
+def check_internet() -> bool:
     """Checks for internet connection."""
     try:
         with socket(AF_INET, SOCK_DGRAM) as sock:
@@ -236,7 +241,8 @@ def check_internet():
     except (TimeoutError, OSError):
         return False
 
-def protontricks(verb):
+
+def protontricks(verb: str) -> bool:
     """ Runs winetricks if available
     """
     if not checkinstalled(verb):
@@ -301,7 +307,8 @@ def protontricks(verb):
 
     return False
 
-def regedit_add(folder,name=None,type=None,value=None,arch=None):
+
+def regedit_add(folder: str, name: str = None, typ: str = None, value: str = None, arch: bool = False) -> None:
     """ Add regedit keys
     """
 
@@ -310,14 +317,14 @@ def regedit_add(folder,name=None,type=None,value=None,arch=None):
     env['WINE'] = protonmain.g_proton.wine_bin
     env['WINELOADER'] = protonmain.g_proton.wine_bin
     env['WINESERVER'] = protonmain.g_proton.wineserver_bin
-    
-    if name is not None and type is not None and value is not None:
+
+    if name is not None and typ is not None and value is not None:
 
         # Flag for if we want to force writing to the 64-bit registry sector
-        if arch is not None:
-            regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', '/v', name, '/t', type, '/d', value, '/reg:64']
+        if arch:
+            regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', '/v', name, '/t', typ, '/d', value, '/reg:64']
         else:
-            regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', '/v', name, '/t', type, '/d', value]
+            regedit_cmd = ['wine', 'reg' , 'add', folder, '/f', '/v', name, '/t', typ, '/d', value]
 
         log.info('Adding key: ' + folder)
 
@@ -335,7 +342,8 @@ def regedit_add(folder,name=None,type=None,value=None,arch=None):
     process = subprocess.Popen(regedit_cmd, env=env)
     process.wait()
 
-def replace_command(orig_str, repl_str):
+
+def replace_command(orig_str: str, repl_str: str) -> None:
     """ Make a commandline replacement in sys.argv
     """
 
@@ -344,7 +352,7 @@ def replace_command(orig_str, repl_str):
         if orig_str in arg:
             sys.argv[idx] = arg.replace(orig_str, repl_str)
 
-def append_argument(argument):
+def append_argument(argument: str) -> None:
     """ Append an argument to sys.argv
     """
 
@@ -352,7 +360,8 @@ def append_argument(argument):
     sys.argv.append(argument)
     log.debug('New commandline: ' + str(sys.argv))
 
-def set_environment(envvar, value):
+
+def set_environment(envvar: str, value: str) -> None:
     """ Add or override an environment value
     """
 
@@ -360,7 +369,8 @@ def set_environment(envvar, value):
     os.environ[envvar] = value
     protonmain.g_session.env[envvar] = value
 
-def del_environment(envvar):
+
+def del_environment(envvar: str) -> None:
     """ Remove an environment variable
     """
 
@@ -370,7 +380,8 @@ def del_environment(envvar):
     if envvar in protonmain.g_session.env:
         del protonmain.g_session.env[envvar]
 
-def get_game_install_path():
+
+def get_game_install_path() -> str:
     """ Game installation path
     """
     install_path = os.environ['PWD']
@@ -380,7 +391,8 @@ def get_game_install_path():
     # only for `waitforexitandrun` command
     return install_path 
 
-def winedll_override(dll, dtype):
+
+def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
     """ Add WINE dll override
     """
 
@@ -388,7 +400,8 @@ def winedll_override(dll, dtype):
     setting = dll + "=" + dtype
     protonmain.append_to_env_str(protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';')
 
-def disable_nvapi():
+
+def disable_nvapi() -> None:
     """ Disable WINE nv* dlls
     """
 
@@ -400,29 +413,33 @@ def disable_nvapi():
     winedll_override('nvencodeapi', '')
     winedll_override('nvencodeapi64', '')
 
-def disable_esync():
+
+def disable_esync() -> None:
     """ Disabling Esync
     """
 
     log.info('Disabling Esync')
     set_environment('WINEESYNC', '')
 
-def disable_fsync():
+
+def disable_fsync() -> None:
     """ Disabling FSync
     """
 
     log.info('Disabling FSync')
     set_environment('WINEFSYNC', '')
 
-def disable_protonaudioconverter():
+
+def disable_protonaudioconverter() -> None:
     """ Disabling Proton Audio Converter
     """
 
     log.info('Disabling Proton Audio Converter')
     set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
 
+
 @once
-def disable_uplay_overlay():
+def disable_uplay_overlay() -> bool:
     """Disables the UPlay in-game overlay.
     Creates or appends the UPlay settings.yml file
     with the correct setting to disable the overlay.
@@ -445,7 +462,7 @@ def disable_uplay_overlay():
             + config_dir
             + '" does not exist or is not a directory.'
         )
-        return
+        return False
 
     if not os.path.isfile(config_file):
         f = open(config_file,"w+")
@@ -457,11 +474,14 @@ def disable_uplay_overlay():
             with open(config_file, 'a+') as file:
                 file.write("\noverlay:\n  enabled: false\n  forceunhookgame: false\n  fps_enabled: false\n  warning_enabled: false\n")
             log.info('Disabled UPlay overlay')
-            return
+            return True
         except OSError as err:
             log.warn('Could not disable UPlay overlay: ' + err.strerror)
 
-def create_dosbox_conf(conf_file, conf_dict):
+    return False
+
+
+def create_dosbox_conf(conf_file: str, conf_dict: Mapping[str, Mapping[str, any]]) -> None:
     """Create DOSBox configuration file.
 
     DOSBox accepts multiple configuration files passed with -conf
@@ -475,7 +495,8 @@ def create_dosbox_conf(conf_file, conf_dict):
     with open(conf_file, 'w') as file:
         conf.write(file)
 
-def _get_case_insensitive_name(path):
+
+def _get_case_insensitive_name(path: str) -> str:
     """ Find potentially differently-cased location 
         e.g /path/to/game/system/gothic.ini -> /path/to/game/System/GOTHIC.INI
     """
@@ -515,7 +536,8 @@ def _get_case_insensitive_name(path):
         root = os.path.join(root, os.sep.join(s_working_dir[paths_found:]))
     return root
 
-def _get_config_full_path(cfile, base_path):
+
+def _get_config_full_path(cfile: str, base_path: str) -> str:
     """ Find game's config file
     """
 
@@ -534,9 +556,10 @@ def _get_config_full_path(cfile, base_path):
         return cfg_path
 
     log.warn('Config file not found: ' + cfg_path)
-    return False
+    return None
 
-def create_backup_config(cfg_path):
+
+def create_backup_config(cfg_path: str) -> None:
     """ Create backup config file
     """
 
@@ -545,7 +568,8 @@ def create_backup_config(cfg_path):
         log.info('Creating backup for config file')
         shutil.copyfile(cfg_path, cfg_path + '.protonfixes.bak')
 
-def set_ini_options(ini_opts, cfile, encoding, base_path='user'):
+
+def set_ini_options(ini_opts: str, cfile: str, encoding: str, base_path: str = 'user') -> bool:
     """ Edit game's INI config file
     """
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -567,7 +591,8 @@ def set_ini_options(ini_opts, cfile, encoding, base_path='user'):
         conf.write(configfile)
     return True
 
-def set_xml_options(base_attibutte, xml_line, cfile, base_path='user'):
+
+def set_xml_options(base_attibutte: str, xml_line: str, cfile: str, base_path: str = 'user') -> bool:
     """ Edit game's XML config file
     """
     xml_path = _get_config_full_path(cfile, base_path)
@@ -597,7 +622,7 @@ def set_xml_options(base_attibutte, xml_line, cfile, base_path='user'):
         ConfigFile.close()
         log.info("Config Patch Applied! \n")
 
-def get_resolution():
+def get_resolution() -> tuple[int, int]:
     """ Returns screen res width, height using xrandr
     """
     xrandr_bin = os.path.abspath(__file__).replace('util.py','xrandr')
@@ -612,10 +637,11 @@ def get_resolution():
             offset_values = width_height[1].split('+')
             clean_resolution = width_height[0] + 'x' + offset_values[0]
             screenx, screeny = clean_resolution.split('x')
-            return int(screenx), int(screeny)
-    
+            return (int(screenx), int(screeny))
+
     # If no resolution is found, return default values or raise an exception
-    return  0,  0  # or raise Exception("Resolution not found")
+    return (0, 0)  # or raise Exception('Resolution not found')
+
 
 def read_dxvk_conf(cfp):
     """ Add fake [DEFAULT] section to dxvk.conf
@@ -624,10 +650,9 @@ def read_dxvk_conf(cfp):
     yield from cfp
 
 
-def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
+def set_dxvk_option(opt: str, val: str, cfile: str = '/tmp/protonfixes_dxvk.conf') -> None:
     """ Create custom DXVK config file
-
-    See https://github.com/doitsujin/dxvk/wiki/Configuration for details
+        See https://github.com/doitsujin/dxvk/wiki/Configuration for details
     """
     conf = configparser.ConfigParser()
     conf.optionxform = str
@@ -655,20 +680,22 @@ def set_dxvk_option(opt, val, cfile='/tmp/protonfixes_dxvk.conf'):
     with open(cfile, 'w') as configfile:
         conf.write(configfile)
 
-def install_eac_runtime():
+
+def install_eac_runtime() -> None:
     """ Install Proton Easyanticheat Runtime
     """
     install_app(1826330)
 
-def install_battleye_runtime():
+
+def install_battleye_runtime() -> None:
     """ Install Proton BattlEye Runtime
     """
     install_app(1161040)
 
-def install_all_from_tgz(url, path=os.getcwd()):
+
+def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
     """ Install all files from a downloaded tar.gz
     """
- 
     cache_dir = config.cache_dir
     tgz_file_name = os.path.basename(url)
     tgz_file_path = os.path.join(cache_dir, tgz_file_name)
@@ -680,8 +707,9 @@ def install_all_from_tgz(url, path=os.getcwd()):
     with tarfile.open(tgz_file_path, 'r:gz') as tgz_obj:
         log.info('Extracting ' + tgz_file_name + ' to ' + path)
         tgz_obj.extractall(path)
-    
-def install_from_zip(url, filename, path=os.getcwd()):
+
+
+def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     """ Install a file from a downloaded zip
     """
 
@@ -701,7 +729,13 @@ def install_from_zip(url, filename, path=os.getcwd()):
         log.info('Extracting ' + filename + ' to ' + path)
         zip_obj.extract(filename, path=path)
 
-def try_show_gui_error(text):
+
+def try_show_gui_error(text: str) -> None:
+    """ Trys to show a message box with an error
+        1. Try importing tkinter and show messagebox
+        2. Try executing process 'notify-send'
+        3. Failed, output info to log
+    """
     try:  # in case in-use Python doesn't have tkinter, which is likely
         from tkinter import messagebox
         messagebox.showerror("Proton Fixes", text)
@@ -724,6 +758,7 @@ def is_smt_enabled() -> bool:
         log.warn(f'SMT status not supported by the kernel (errno: {e.errno})')
     return False
 
+
 def get_cpu_count() -> int:
     """ Returns the cpu core count, provided by the OS.
         If the request failed, 0 is returned.
@@ -733,6 +768,7 @@ def get_cpu_count() -> int:
         log.warn('Can not read count of logical cpu cores')
         return 0
     return cpu_cores
+
 
 def set_cpu_topology(core_count: int, ignore_user_setting: bool = False) -> bool:
     """ This sets the cpu topology to a fixed core count.
@@ -773,6 +809,7 @@ def set_cpu_topology_nosmt(core_limit: int = 0, ignore_user_setting: bool = Fals
     cpu_cores = get_cpu_count() // threads_per_core             # Apply divider
     cpu_cores = max(cpu_cores, min(cpu_cores, core_limit))      # Apply limit
     return set_cpu_topology(cpu_cores, ignore_user_setting)
+
 
 def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -> bool:
     """ This sets the cpu topology to a limited number of logical cores.

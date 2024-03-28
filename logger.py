@@ -9,7 +9,7 @@ class Log():
     """Log to stderr for steam dumps
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.pfx = 'ProtonFixes[' + str(os.getpid()) + '] '
         self.colors = {
             'RESET': '\u001b[0m',
@@ -19,13 +19,13 @@ class Log():
             'DEBUG': '\u001b[35m'
         }
 
-    def __call__(self, msg):
+    def __call__(self, msg: str) -> None:
         """ Allows the Log instance to be called directly
         """
 
         self.log(msg)
 
-    def log(self, msg='', level='INFO'):
+    def log(self, msg: str = '', level: str = 'INFO') -> None:
         """ Prints the log message to stdout the same way as Proton
         """
 
@@ -40,25 +40,25 @@ class Log():
             testfile.write(logtext)
 
 
-    def info(self, msg):
+    def info(self, msg: str) -> None:
         """ Wrapper for printing info messages
         """
 
         self.log(msg, 'INFO')
 
-    def warn(self, msg):
+    def warn(self, msg: str) -> None:
         """ Wrapper for printing warning messages
         """
 
         self.log(msg, 'WARN')
 
-    def crit(self, msg):
+    def crit(self, msg: str) -> None:
         """ Wrapper for printing critical messages
         """
 
         self.log(msg, 'CRIT')
 
-    def debug(self, msg):
+    def debug(self, msg: str) -> None:
         """ Wrapper for printing debug messages
         """
 

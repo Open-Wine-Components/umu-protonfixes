@@ -11,7 +11,7 @@ GDRIVE_URL = 'https://drive.google.com/uc?id={}&export=download'
 HASH_BLOCK_SIZE = 65536
 
 
-def get_filename(headers):
+def get_filename(headers: list) -> str:
     """ Retrieve a filename from a request headers via Content-Disposition
     """
     content_disp = [x for x in headers if x[0] == 'Content-Disposition'][0][1]
@@ -19,7 +19,7 @@ def get_filename(headers):
     return raw_filename.replace('filename=', '').replace('"', '')
 
 
-def gdrive_download(gdrive_id, path):
+def gdrive_download(gdrive_id: str, path: str) -> None:
     """ Download a file from gdrive given the fileid and a path to save
     """
     url = GDRIVE_URL.format(gdrive_id)
@@ -39,7 +39,7 @@ def gdrive_download(gdrive_id, path):
         save_file.write(resp2.read())
 
 
-def sha1sum(filename):
+def sha1sum(filename: str) -> str:
     """ Computes the sha1sum of the specified file
     """
     if not os.path.isfile(filename):

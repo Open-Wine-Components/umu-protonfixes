@@ -7,7 +7,7 @@ import subprocess
 from .logger import log
 
 
-def esync_file_limits():
+def esync_file_limits() -> bool:
     """
     Check esync file limits using /proc/sys/fs/file-max
     https://www.reddit.com/r/SteamPlay/comments/9kqisk/tip_for_those_using_proton_no_esync1/
@@ -26,7 +26,8 @@ def esync_file_limits():
             return False
     return True
 
-def run_checks():
+
+def run_checks() -> None:
     """ Run checks to notify of any potential issues
     """
 
