@@ -335,14 +335,28 @@ def regedit_add(folder,name=None,type=None,value=None,arch=None):
     process = subprocess.Popen(regedit_cmd, env=env)
     process.wait()
 
-def replace_command(orig_str, repl_str):
-    """ Make a commandline replacement in sys.argv
-    """
 
-    log.info('Changing ' + orig_str + ' to ' + repl_str)
+def replace_command(orig: str, repl: str, match_flags: re.RegexFlag = re.IGNORECASE) -> bool:
+    """ Make a commandline replacement in sys.argv
+        Returns if there was any match.
+
+        By default the search is case insensitive,
+        you can override this behaviour with re.RegexFlag.NOFLAG
+    """
+    found = False
     for idx, arg in enumerate(sys.argv):
-        if orig_str in arg:
-            sys.argv[idx] = arg.replace(orig_str, repl_str)
+        replaced = re.sub(orig, repl, arg, flags=match_flags)
+        if replaced == arg:
+            continue
+        sys.argv[idx] = replaced
+        found = True
+
+    if found:
+        log.info(f'Changed "{orig}" -> "{repl}"')
+    else:
+        log.warn(f'Can not change "{orig}" -> "{repl}", command not found')
+    return found
+
 
 def append_argument(argument):
     """ Append an argument to sys.argv
