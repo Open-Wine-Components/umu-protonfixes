@@ -10,7 +10,7 @@ from .logger import log
 
 os.environ['DEBUG'] = '1'
 
-def show_debug_info():
+def show_debug_info() -> None:
     """ Show various debug info """
 
     check_args = [
