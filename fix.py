@@ -1,20 +1,21 @@
 """ Gets the game id and applies a fix if found
 """
 
-from __future__ import print_function
 import io
 import os
 import re
 import sys
 import urllib
 import json
+
 from importlib import import_module
-from .util import protonprefix, check_internet
+from .util import check_internet
 from .checks import run_checks
 from .logger import log
 from . import config
 
-def game_id() -> str:
+
+def get_game_id() -> str:
     """ Trys to return the game id from environment variables
     """
     if 'UMU_ID' in os.environ:
@@ -30,58 +31,55 @@ def game_id() -> str:
     return None
 
 
-def game_name() -> str:
+def get_game_name() -> str:
     """ Trys to return the game name from environment variables
     """
-    is_online = check_internet()
     if 'UMU_ID' in os.environ:
-        if os.path.isfile(os.environ['WINEPREFIX'] + "/game_title"):
-            with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
+        if os.path.isfile(os.environ['WINEPREFIX'] + '/game_title'):
+            with open(os.environ['WINEPREFIX'] + '/game_title', 'r') as file:
                 return file.readline()
-        else:
-            try:
-                if 'STORE' in os.environ and is_online:
-                    url = "https://umu.openwinecomponents.org/umu_api.php?umu_id=" + os.environ['UMU_ID'] + "&store=" + os.environ['STORE']
-                    headers = {'User-Agent': 'Mozilla/5.0'}
-                    req = urllib.request.Request(url, headers=headers)
-                    response = urllib.request.urlopen(req, timeout=5)
-                    data = response.read()
-                    json_data = json.loads(data)
-                    title = json_data[0]['title']
-                    file = open(os.environ['WINEPREFIX'] + "/game_title", 'w')
-                    file.write(title)
-                    file.close()
-                elif 'STORE' not in os.environ and is_online:
-                    url = "https://umu.openwinecomponents.org/umu_api.php?umu_id=" + os.environ['UMU_ID'] + "&store=none"
-                    headers = {'User-Agent': 'Mozilla/5.0'}
-                    req = urllib.request.Request(url, headers=headers)
-                    response = urllib.request.urlopen(req, timeout=5)
-                    data = response.read()
-                    json_data = json.loads(data)
-                    title = json_data[0]['title']
-                    file = open(os.environ['WINEPREFIX'] + "/game_title", 'w')
-                    file.write(title)
-                    file.close()
-                elif not is_online:
-                    raise OSError
-            except OSError as e:
-                #log.info('OSError occurred: {}'.format(e))  # used for debugging
-                return 'UNKNOWN'
-            except IndexError as e:
-                #log.info('IndexError occurred: {}'.format(e))  # used for debugging
-                return 'UNKNOWN'
-            except UnicodeDecodeError as e:
-                #log.info('UnicodeDecodeError occurred: {}'.format(e))  # used for debugging
-                return 'UNKNOWN'
-            except TimeoutError:
-                log.info('umu.openwinecomponents.org timed out')
-                return 'UNKNOWN'
-            with open(os.environ['WINEPREFIX'] + "/game_title", 'r') as file:
-                return file.readline()
+
+        if not check_internet():
+            log.warn('No internet connection, can\'t fetch name')
+            return 'UNKNOWN'
+
+        try:
+            if 'STORE' in os.environ:
+                url = f'https://umu.openwinecomponents.org/umu_api.php?umu_id={os.environ["UMU_ID"]}&store={os.environ["STORE"]}'
+                headers = {'User-Agent': 'Mozilla/5.0'}
+                req = urllib.request.Request(url, headers=headers)
+                response = urllib.request.urlopen(req, timeout=5)
+                data = response.read()
+                json_data = json.loads(data)
+                title = json_data[0]['title']
+                file = open(os.environ['WINEPREFIX'] + '/game_title', 'w')
+                file.write(title)
+                file.close()
+            elif 'STORE' not in os.environ:
+                url = f'https://umu.openwinecomponents.org/umu_api.php?umu_id={os.environ["UMU_ID"]}&store=none'
+                headers = {'User-Agent': 'Mozilla/5.0'}
+                req = urllib.request.Request(url, headers=headers)
+                response = urllib.request.urlopen(req, timeout=5)
+                data = response.read()
+                json_data = json.loads(data)
+                title = json_data[0]['title']
+                file = open(os.environ['WINEPREFIX'] + '/game_title', 'w')
+                file.write(title)
+                file.close()
+            return title
+        except TimeoutError as ex:
+            log.info('umu.openwinecomponents.org timed out')
+            log.debug(f'TimeoutError occurred: {ex}')
+        except OSError as ex:
+            log.debug(f'OSError occurred: {ex}')
+        except IndexError as ex:
+            log.debug(f'IndexError occurred: {ex}')
+        except UnicodeDecodeError as ex:
+            log.debug(f'UnicodeDecodeError occurred: {ex}')
     else:
         try:
             game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
-            game_manifest = os.path.join(game_library, 'appmanifest_' + game_id() + '.acf')
+            game_manifest = os.path.join(game_library, f'appmanifest_{get_game_id()}.acf')
 
             with io.open(game_manifest, 'r', encoding='utf-8') as appmanifest:
                 for xline in appmanifest.readlines():
@@ -89,25 +87,26 @@ def game_name() -> str:
                         name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]
                         return name
         except OSError:
-            return 'UNKNOWN'
+            pass
         except IndexError:
-            return 'UNKNOWN'
+            pass
         except UnicodeDecodeError:
-            return 'UNKNOWN'
+            pass
+
     return 'UNKNOWN'
 
 
-def run_fix(gameid: str) -> None:
+def run_fix(game_id: str) -> None:
     """ Loads a gamefix module by it's gameid
     """
 
-    if gameid is None:
+    if game_id is None:
         return
 
     if config.enable_checks:
         run_checks()
 
-    game = game_name() + ' ('+ gameid + ')'
+    game = f'{get_game_name()} ({game_id})'
     localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
 
     # execute default.py
@@ -122,7 +121,7 @@ def run_fix(gameid: str) -> None:
             log.info('No local defaults found for ' + game)
     elif config.enable_global_fixes:
         try:
-            if gameid.isnumeric():
+            if game_id.isnumeric():
                 game_module = import_module('protonfixes.gamefixes-steam.default')
             else:
                 log.info('Non-steam game ' + game)
@@ -132,56 +131,56 @@ def run_fix(gameid: str) -> None:
         except ImportError:
             log.info('No global defaults found')
 
-    # execute <gameid>.py
-    if os.path.isfile(os.path.join(localpath, gameid + '.py')):
+    # execute <game_id>.py
+    if os.path.isfile(os.path.join(localpath, game_id + '.py')):
         open(os.path.join(localpath, '__init__.py'), 'a').close()
         sys.path.append(os.path.expanduser('~/.config/protonfixes'))
         try:
-            game_module = import_module('localfixes.' + gameid)
+            game_module = import_module('localfixes.' + game_id)
             log.info('Using local protonfix for ' + game)
             game_module.main()
         except ImportError:
             log.info('No local protonfix found for ' + game)
     elif config.enable_global_fixes:
         try:
-            if gameid.isnumeric():
-                game_module = import_module('protonfixes.gamefixes-steam.' + gameid)
+            if game_id.isnumeric():
+                game_module = import_module('protonfixes.gamefixes-steam.' + game_id)
             else:
                 log.info('Non-steam game ' + game)
-                if os.environ.get("STORE"):
-                  if os.environ['STORE'].lower() == "amazon":
-                    log.info('Amazon store specified, using Amazon database')
-                    game_module = import_module('protonfixes.gamefixes-amazon.' + gameid)
-                  elif os.environ['STORE'].lower() == "battlenet":
-                    log.info('Battle.net store specified, using Battle.net database')
-                    game_module = import_module('protonfixes.gamefixes-battlenet.' + gameid)
-                  elif os.environ['STORE'].lower() == "ea":
-                    log.info('EA store specified, using EA database')
-                    game_module = import_module('protonfixes.gamefixes-ea.' + gameid)
-                  elif os.environ['STORE'].lower() == "egs":
-                    log.info('EGS store specified, using EGS database')
-                    game_module = import_module('protonfixes.gamefixes-egs.' + gameid)
-                  elif os.environ['STORE'].lower() == "gog":
-                    log.info('GOG store specified, using GOG database')
-                    game_module = import_module('protonfixes.gamefixes-gog.' + gameid)
-                  elif os.environ['STORE'].lower() == "humble":
-                    log.info('Humble store specified, using Humble database')
-                    game_module = import_module('protonfixes.gamefixes-humble.' + gameid)
-                  elif os.environ['STORE'].lower() == "itchio":
-                    log.info('Itch.io store specified, using Itch.io database')
-                    game_module = import_module('protonfixes.gamefixes-itchio.' + gameid)
-                  elif os.environ['STORE'].lower() == "ubisoft":
-                    log.info('Ubisoft store specified, using Ubisoft database')
-                    game_module = import_module('protonfixes.gamefixes-ubisoft.' + gameid)
-                  elif os.environ['STORE'].lower() == "zoomplatform":
-                    log.info('ZOOM Platform store specified, using ZOOM Platform database')
-                    game_module = import_module('protonfixes.gamefixes-zoomplatform.' + gameid)
-                  elif os.environ['STORE'].lower() == "none":
-                    log.info('No store specified, using umu database')
-                    game_module = import_module('protonfixes.gamefixes-umu.' + gameid)
+                if os.environ.get('STORE'):
+                    if os.environ['STORE'].lower() == 'amazon':
+                        log.info('Amazon store specified, using Amazon database')
+                        game_module = import_module('protonfixes.gamefixes-amazon.' + game_id)
+                    elif os.environ['STORE'].lower() == 'battlenet':
+                        log.info('Battle.net store specified, using Battle.net database')
+                        game_module = import_module('protonfixes.gamefixes-battlenet.' + game_id)
+                    elif os.environ['STORE'].lower() == 'ea':
+                        log.info('EA store specified, using EA database')
+                        game_module = import_module('protonfixes.gamefixes-ea.' + game_id)
+                    elif os.environ['STORE'].lower() == 'egs':
+                        log.info('EGS store specified, using EGS database')
+                        game_module = import_module('protonfixes.gamefixes-egs.' + game_id)
+                    elif os.environ['STORE'].lower() == 'gog':
+                        log.info('GOG store specified, using GOG database')
+                        game_module = import_module('protonfixes.gamefixes-gog.' + game_id)
+                    elif os.environ['STORE'].lower() == 'humble':
+                        log.info('Humble store specified, using Humble database')
+                        game_module = import_module('protonfixes.gamefixes-humble.' + game_id)
+                    elif os.environ['STORE'].lower() == 'itchio':
+                        log.info('Itch.io store specified, using Itch.io database')
+                        game_module = import_module('protonfixes.gamefixes-itchio.' + game_id)
+                    elif os.environ['STORE'].lower() == 'ubisoft':
+                        log.info('Ubisoft store specified, using Ubisoft database')
+                        game_module = import_module('protonfixes.gamefixes-ubisoft.' + game_id)
+                    elif os.environ['STORE'].lower() == 'zoomplatform':
+                        log.info('ZOOM Platform store specified, using ZOOM Platform database')
+                        game_module = import_module('protonfixes.gamefixes-zoomplatform.' + game_id)
+                    elif os.environ['STORE'].lower() == 'none':
+                        log.info('No store specified, using umu database')
+                        game_module = import_module('protonfixes.gamefixes-umu.' + game_id)
                 else:
-                  log.info('No store specified, using umu database')
-                  game_module = import_module('protonfixes.gamefixes-umu.' + gameid)
+                    log.info('No store specified, using umu database')
+                    game_module = import_module('protonfixes.gamefixes-umu.' + game_id)
             log.info('Using protonfix for ' + game)
             game_module.main()
         except ImportError:
@@ -191,7 +190,6 @@ def run_fix(gameid: str) -> None:
 def main() -> None:
     """ Runs the gamefix
     """
-
     check_args = [
         'iscriptevaluator.exe' in sys.argv[2],
         'getcompatpath' in sys.argv[1],
@@ -204,4 +202,4 @@ def main() -> None:
         return
 
     log.info('Running protonfixes')
-    run_fix(game_id())
+    run_fix(get_game_id())

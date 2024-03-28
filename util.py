@@ -25,7 +25,6 @@ try:
 except ImportError:
     log.warn('Unable to hook into Proton main script environment')
 
-# pylint: disable=unreachable
 
 def which(appname: str) -> str:
     """ Returns the full path of an executable in $PATH
@@ -105,13 +104,12 @@ def once(func: callable = None, retry: bool = False):
     """
     if func is None:
         return functools.partial(once, retry=retry)
-    retry = retry if retry else False
 
     #pylint: disable=missing-docstring
     def wrapper(*args, **kwargs):
-        func_id = func.__module__ + "." + func.__name__
+        func_id = f'{func.__module__}.{func.__name__}'
         prefix = protonprefix()
-        directory = os.path.join(prefix, "drive_c/protonfixes/run/")
+        directory = os.path.join(prefix, 'drive_c/protonfixes/run/')
         file = os.path.join(directory, func_id)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -201,7 +199,7 @@ def checkinstalled(verb: str) -> bool:
     if verb == 'gui':
         return False
 
-    log.info('Checking if winetricks ' + verb + ' is installed')
+    log.info(f'Checking if winetricks {verb} is installed')
     if _checkinstalled(verb, 'winetricks.log.forced'):
         return True
     return _checkinstalled(verb)
@@ -250,7 +248,7 @@ def protontricks(verb: str) -> bool:
             # Proceed with your function logic here
             pass
         else:
-            log.info("No internet connection. Winetricks will be skipped.")
+            log.info('No internet connection. Winetricks will be skipped.')
             return False
 
         log.info('Installing winetricks ' + verb)
@@ -261,7 +259,7 @@ def protontricks(verb: str) -> bool:
         env['WINESERVER'] = protonmain.g_proton.wineserver_bin
         env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
         env['LD_PRELOAD'] = ''
-        
+
         winetricks_bin = os.path.abspath(__file__).replace('util.py','winetricks')
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
         if verb == 'gui':
@@ -299,7 +297,7 @@ def protontricks(verb: str) -> bool:
 
             # Check if verb recorded to winetricks log
             if not checkinstalled(verb):
-                log.warn('Not recorded as installed: winetricks ' + verb + ', forcing!')
+                log.warn(f'Not recorded as installed: winetricks {verb}, forcing!')
                 _forceinstalled(verb)
 
             log.info('Winetricks complete')
@@ -343,14 +341,15 @@ def regedit_add(folder: str, name: str = None, typ: str = None, value: str = Non
     process.wait()
 
 
-def replace_command(orig_str: str, repl_str: str) -> None:
+def replace_command(orig: str, repl: str) -> None:
     """ Make a commandline replacement in sys.argv
     """
 
-    log.info('Changing ' + orig_str + ' to ' + repl_str)
+    log.info(f'Changing {orig} to {repl}')
     for idx, arg in enumerate(sys.argv):
-        if orig_str in arg:
-            sys.argv[idx] = arg.replace(orig_str, repl_str)
+        if orig in arg:
+            sys.argv[idx] = arg.replace(orig, repl)
+
 
 def append_argument(argument: str) -> None:
     """ Append an argument to sys.argv
@@ -365,7 +364,7 @@ def set_environment(envvar: str, value: str) -> None:
     """ Add or override an environment value
     """
 
-    log.info('Adding env: ' + envvar + '=' + value)
+    log.info(f'Adding env: {envvar}={value}')
     os.environ[envvar] = value
     protonmain.g_session.env[envvar] = value
 
@@ -389,15 +388,15 @@ def get_game_install_path() -> str:
         install_path = os.environ['STEAM_COMPAT_INSTALL_PATH']
     log.debug('Detected path to game: ' + install_path)
     # only for `waitforexitandrun` command
-    return install_path 
+    return install_path
 
 
 def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
     """ Add WINE dll override
     """
 
-    log.info('Overriding ' + dll + '.dll = ' + dtype)
-    setting = dll + "=" + dtype
+    log.info(f'Overriding {dll}.dll = {dtype}')
+    setting = f'{dll}={dtype}'
     protonmain.append_to_env_str(protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';')
 
 
@@ -457,26 +456,17 @@ def disable_uplay_overlay() -> bool:
     config_file = os.path.join(config_dir, 'settings.yml')
 
     if not os.path.isdir(config_dir):
-        log.warn(
-            'Could not disable UPlay overlay: "'
-            + config_dir
-            + '" does not exist or is not a directory.'
-        )
+        log.warn(f'Could not disable UPlay overlay: "{config_dir}" does not exist or is not a directory.')
         return False
 
-    if not os.path.isfile(config_file):
-        f = open(config_file,"w+")
-        f.write("\noverlay:\n  enabled: false\n  forceunhookgame: false\n  fps_enabled: false\n  warning_enabled: false\n")
-        f.close
+    try:
+        with open(config_file, 'a+') as file:
+            file.write('\noverlay:\n  enabled: false\n  forceunhookgame: false'
+                        '\n  fps_enabled: false\n  warning_enabled: false\n')
         log.info('Disabled UPlay overlay')
-    else:
-        try:
-            with open(config_file, 'a+') as file:
-                file.write("\noverlay:\n  enabled: false\n  forceunhookgame: false\n  fps_enabled: false\n  warning_enabled: false\n")
-            log.info('Disabled UPlay overlay')
-            return True
-        except OSError as err:
-            log.warn('Could not disable UPlay overlay: ' + err.strerror)
+        return True
+    except OSError as err:
+        log.warn('Could not disable UPlay overlay: ' + err.strerror)
 
     return False
 
@@ -503,14 +493,14 @@ def _get_case_insensitive_name(path: str) -> str:
     if os.path.exists(path):
         return path
     root = path
-    # Find first existing directory in the tree 
+    # Find first existing directory in the tree
     while not os.path.exists(root):
         root = os.path.split(root)[0]
-    
-    if root[len(root) - 1] not in ["/", "\\"]:
+
+    if root[len(root) - 1] not in ['/', '\\']:
         root = root + os.sep
     # Separate missing path from existing root
-    s_working_dir = path.replace(root, "").split(os.sep)
+    s_working_dir = path.replace(root, '').split(os.sep)
     paths_to_find = len(s_working_dir)
     # Keep track of paths we found so far
     paths_found = 0
@@ -584,7 +574,7 @@ def set_ini_options(ini_opts: str, cfile: str, encoding: str, base_path: str = '
 
     conf.read(cfg_path,encoding)
 
-    log.info('Addinging INI options into '+cfile+':\n'+ str(ini_opts))
+    log.info(f'Addinging INI options into {cfile}:\n{str(ini_opts)}')
     conf.read_string(ini_opts)
 
     with open(cfg_path, 'w') as configfile:
@@ -606,29 +596,35 @@ def set_xml_options(base_attibutte: str, xml_line: str, cfile: str, base_path: s
     base_size = os.path.getsize(xml_path)
     backup_size = os.path.getsize(xml_path + '.protonfixes.bak')
 
-    if base_size == backup_size:
-        ConfigFile = open(xml_path, 'r')
-        contents = ConfigFile.readlines()
-        LINENUM=0
-        for line in contents:
-            LINENUM+=1
-            if base_attibutte in line:
-                log.info('Addinging XML options into '+cfile+':\n'+ str(xml_line))
-                contents.insert(LINENUM, xml_line + "\n")
-        ConfigFile.close()
-        ConfigFile = open(xml_path, 'w')
-        for eachitem in contents:
-            ConfigFile.write(eachitem)
-        ConfigFile.close()
-        log.info("Config Patch Applied! \n")
+    if base_size != backup_size:
+        return False
+
+    ConfigFile = open(xml_path, 'r')
+    contents = ConfigFile.readlines()
+    i = 0
+    for line in contents:
+        i += 1
+        if base_attibutte in line:
+            log.info(f'Adding XML options into {cfile}, line {i}:\n{xml_line}')
+            contents.insert(i, xml_line + '\n')
+    ConfigFile.close()
+
+    ConfigFile = open(xml_path, 'w')
+    for eachitem in contents:
+        ConfigFile.write(eachitem)
+    ConfigFile.close()
+
+    log.info('XML config patch applied')
+    return True
+
 
 def get_resolution() -> tuple[int, int]:
     """ Returns screen res width, height using xrandr
     """
-    xrandr_bin = os.path.abspath(__file__).replace('util.py','xrandr')
     # Execute xrandr command and capture its output
+    xrandr_bin = os.path.abspath(__file__).replace('util.py','xrandr')
     xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
-    
+
     # Find the line that starts with 'Screen   0:' and extract the resolution
     for line in xrandr_output.splitlines():
         if 'primary' in line:
@@ -646,7 +642,7 @@ def get_resolution() -> tuple[int, int]:
 def read_dxvk_conf(cfp):
     """ Add fake [DEFAULT] section to dxvk.conf
     """
-    yield '['+ configparser.ConfigParser().default_section +']'
+    yield f'[{configparser.ConfigParser().default_section}]'
     yield from cfp
 
 
@@ -703,9 +699,9 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
     if tgz_file_name not in os.listdir(cache_dir):
         log.info('Downloading ' + tgz_file_name)
         urllib.request.urlretrieve(url, tgz_file_path)
-    
+
     with tarfile.open(tgz_file_path, 'r:gz') as tgz_obj:
-        log.info('Extracting ' + tgz_file_name + ' to ' + path)
+        log.info(f'Extracting {tgz_file_name} to {path}')
         tgz_obj.extractall(path)
 
 
@@ -714,7 +710,7 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     """
 
     if filename in os.listdir(path):
-        log.info('File ' + filename + ' found in ' + path)
+        log.info(f'File {filename} found in {path}')
         return
 
     cache_dir = config.cache_dir
@@ -722,11 +718,11 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     zip_file_path = os.path.join(cache_dir, zip_file_name)
 
     if zip_file_name not in os.listdir(cache_dir):
-        log.info('Downloading ' + filename + ' to ' + zip_file_path)
+        log.info(f'Downloading {filename} to {zip_file_path}')
         urllib.request.urlretrieve(url, zip_file_path)
 
     with zipfile.ZipFile(zip_file_path, 'r') as zip_obj:
-        log.info('Extracting ' + filename + ' to ' + path)
+        log.info(f'Extracting {filename} to {path}')
         zip_obj.extract(filename, path=path)
 
 
@@ -737,13 +733,14 @@ def try_show_gui_error(text: str) -> None:
         3. Failed, output info to log
     """
     try:  # in case in-use Python doesn't have tkinter, which is likely
-        from tkinter import messagebox
-        messagebox.showerror("Proton Fixes", text)
-    except Exception as e:
+        from tkinter import messagebox # pylint: disable=C0415
+        messagebox.showerror('Proton Fixes', text)
+    except ImportError:
         try:
-            subprocess.run(["notify-send", "protonfixes", text])
-        except:
-            log.info("Failed to show error message with the following text: {}".format(text))
+            subprocess.run(['notify-send', 'protonfixes', text], check=True)
+        except (subprocess.SubprocessError, subprocess.CalledProcessError):
+            log.info('Failed to show error message with the following text: ' + text)
+
 
 def is_smt_enabled() -> bool:
     """ Returns whether SMT is enabled.
@@ -751,11 +748,11 @@ def is_smt_enabled() -> bool:
     """
     try:
         with open('/sys/devices/system/cpu/smt/active') as smt_file:
-            return smt_file.read().strip() == "1"
+            return smt_file.read().strip() == '1'
     except PermissionError:
         log.warn('No permission to read SMT status')
-    except OSError as e:
-        log.warn(f'SMT status not supported by the kernel (errno: {e.errno})')
+    except OSError as ex:
+        log.warn(f'SMT status not supported by the kernel (errno: {ex.errno})')
     return False
 
 

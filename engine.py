@@ -1,7 +1,6 @@
 """ Game engine API
 """
 
-import io
 import os
 import sys
 from .logger import log

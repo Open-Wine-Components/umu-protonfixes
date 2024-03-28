@@ -1,9 +1,6 @@
 """ Run some tests and generate warnings for proton configuration issues
 """
 
-import shutil
-import os
-import subprocess
 from .logger import log
 
 
