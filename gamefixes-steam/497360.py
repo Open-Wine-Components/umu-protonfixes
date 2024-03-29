@@ -16,7 +16,7 @@ def main():
     dosdevice = os.path.join(util.protonprefix(), 'dosdevices/r:')
     if not os.path.exists(dosdevice):
         os.symlink('/tmp', dosdevice) #create symlink for dosdevices
-        util.regedit_add("HKLM\\Software\\Wine\\Drives",'r:','REG_SZ','cdrom', 1) #designate drive as CD-ROM, requires 64-bit access
+        util.regedit_add("HKLM\\Software\\Wine\\Drives",'r:','REG_SZ','cdrom', True) #designate drive as CD-ROM, requires 64-bit access
     util.protontricks('quartz')
     util.protontricks('amstream')
     #No errors but doesn't show videos on SYDNEY

@@ -1,3 +1,8 @@
+""" Default file for Steam game fixes
+    This file is always executed for games that are identified as Steam games,
+    even if no game fix is present. It is run before game fixes are applied.
+"""
+
 import sys
 from protonfixes import util
 
