@@ -376,7 +376,7 @@ disable = ["raw-checker-failed", "bad-inline-option", "locally-disabled", "file-
 [tool.pylint.method_args]
 # List of qualified names (i.e., library.method) which require a timeout
 # parameter e.g. 'requests.api.get,requests.api.post'
-timeout-methods = ["requests.api.delete", "requests.api.get", "requests.api.head", "requests.api.options", "requests.api.patch", "requests.api.post", "requests.api.put", "requests.api.request"]
+timeout-methods = ["urllib.request.urlopen", "requests.api.delete", "requests.api.get", "requests.api.head", "requests.api.options", "requests.api.patch", "requests.api.post", "requests.api.put", "requests.api.request"]
 
 [tool.pylint.miscellaneous]
 # List of note tags to take in consideration, separated by a comma.
