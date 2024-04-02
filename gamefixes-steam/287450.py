@@ -25,5 +25,8 @@ def main():
     # Set sound to alsa
     util.protontricks('sound=alsa')
 
+    # Install DirectPlay for reliable multiplayer connections
+    util.protontricks('directplay')
+
     # Disable launcher
     util.replace_command('patriots.exe', 'riseofnations.exe')
