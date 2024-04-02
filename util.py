@@ -342,14 +342,26 @@ def regedit_add(folder: str, name: str = None, typ: str = None, value: str = Non
         process.wait()
 
 
-def replace_command(orig: str, repl: str) -> None:
+def replace_command(orig: str, repl: str, match_flags: re.RegexFlag = re.IGNORECASE) -> bool:
     """ Make a commandline replacement in sys.argv
-    """
+        Returns if there was any match.
 
-    log.info(f'Changing {orig} to {repl}')
+        By default the search is case insensitive,
+        you can override this behaviour with re.RegexFlag.NOFLAG
+    """
+    found = False
     for idx, arg in enumerate(sys.argv):
-        if orig in arg:
-            sys.argv[idx] = arg.replace(orig, repl)
+        replaced = re.sub(orig, repl, arg, flags=match_flags)
+        if replaced == arg:
+            continue
+        sys.argv[idx] = replaced
+        found = True
+
+    if found:
+        log.info(f'Changed "{orig}" to "{repl}"')
+    else:
+        log.warn(f'Can not change "{orig}" to "{repl}", command not found')
+    return found
 
 
 def append_argument(argument: str) -> None:
