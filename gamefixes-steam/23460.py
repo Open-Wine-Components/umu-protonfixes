@@ -16,4 +16,3 @@ def main():
     if os.path.isdir('./data/shared/videos'):
         subprocess.call(['mv', './data/shared/videos', './data/shared/_videos'])
     util.set_environment('WINEDLLOVERRIDES', 'libvkd3d-1=n')
-
