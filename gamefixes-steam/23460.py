@@ -4,8 +4,7 @@ Videos still don't work.
 """
 #pylint: disable=C0103
 
-import os
-import subprocess
+import os, subprocess
 from protonfixes import util
 
 def main():
@@ -15,3 +14,5 @@ def main():
     #util.protontricks('klite')
     if os.path.isdir('./data/shared/videos'):
         subprocess.call(['mv', './data/shared/videos', './data/shared/_videos'])
+    util.set_environment('WINEDLLOVERRIDES', 'libvkd3d-1=n')
+
