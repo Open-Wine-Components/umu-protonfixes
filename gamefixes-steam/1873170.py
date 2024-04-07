@@ -20,7 +20,7 @@ def main():
     install_dir = glob.escape(util.get_game_install_path())
     if not os.path.isfile(os.path.join(install_dir, 'nw.exe')):
         url = 'https://dl.nwjs.io/v0.86.0/nwjs-v0.86.0-win-x64.zip'
-        hashsum = 'ed2681847162e0fa457dd55e293b6f331ccd58acedd934a98e7fe1406c26dd4f' 
+        hashsum = 'ed2681847162e0fa457dd55e293b6f331ccd58acedd934a98e7fe1406c26dd4f'
         nwjs = os.path.basename(url)
         urllib.request.urlretrieve(url, nwjs)
         with open(nwjs, "rb") as f:
