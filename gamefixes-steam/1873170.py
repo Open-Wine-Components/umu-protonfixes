@@ -11,7 +11,9 @@ import shutil
 import urllib.request
 import zipfile
 import subprocess
+import hashlib
 from protonfixes import util
+from protonfixes.logger import log
 
 def main():
     util.replace_command('CTB.exe', 'nw.exe')
@@ -19,10 +21,16 @@ def main():
     if not os.path.isfile(os.path.join(install_dir, 'nw.exe')):
         url = 'https://dl.nwjs.io/v0.86.0/nwjs-v0.86.0-win-x64.zip'
         nwjs = os.path.basename(url)
-        urllib.request.urlretrieve (url, nwjs)
-        with zipfile.ZipFile(nwjs, 'r') as zip_ref:
-            zip_ref.extractall(install_dir)
-        nwjs = os.path.join(install_dir, nwjs.rsplit('.', 1)[0])
-        shutil.copytree(nwjs, install_dir, dirs_exist_ok=True)
-        shutil.rmtree(nwjs)
+        urllib.request.urlretrieve(url, nwjs)
+        with open(nwjs, "rb") as f:
+            nwjs_sum = hashlib.sha256(f.read()).hexdigest()
+        urllib.request.urlretrieve(f"https://dl.nwjs.io/{nwjs.split('-', 2)[1]}/SHASUMS256.txt", 'SHASUMS256.txt')
+        if subprocess.check_output(f"grep -F '{nwjs}' ./SHASUMS256.txt", shell=True,universal_newlines=True)[:64] == nwjs_sum:
+            with zipfile.ZipFile(nwjs, 'r') as zip_ref:
+                zip_ref.extractall(install_dir)
+            nwjs = os.path.join(install_dir, nwjs.rsplit('.', 1)[0])
+            shutil.copytree(nwjs, install_dir, dirs_exist_ok=True)
+            shutil.rmtree(nwjs)            
+        else:
+            log(f"{nwjs} checksum doesn't match, fix not applied.")
     subprocess.call([f"sed -i 's/\"frame\": true/\"frame\": false/' \"{install_dir}/package.json\""], shell=True)
