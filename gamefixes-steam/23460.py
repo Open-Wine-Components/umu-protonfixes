@@ -15,3 +15,4 @@ def main():
     #util.protontricks('klite')
     if os.path.isdir('./data/shared/videos'):
         subprocess.call(['mv', './data/shared/videos', './data/shared/_videos'])
+    util.winedll_override('libvkd3d-1', 'n')
