@@ -30,7 +30,7 @@ def main():
                 zip_ref.extractall(install_dir)
             nwjs = os.path.join(install_dir, nwjs.rsplit('.', 1)[0])
             shutil.copytree(nwjs, install_dir, dirs_exist_ok=True)
-            shutil.rmtree(nwjs)            
+            shutil.rmtree(nwjs)
         else:
             log(f"{nwjs} checksum doesn't match, fix not applied.")
     subprocess.call([f"sed -i 's/\"frame\": true/\"frame\": false/' \"{install_dir}/package.json\""], shell=True)
