@@ -8,4 +8,4 @@ def main():
     """
 
     # Fixes audio not playing for in-game videos
-    util.disable_protonaudioconverter()
+    util.disable_protonaudioconverterbin()

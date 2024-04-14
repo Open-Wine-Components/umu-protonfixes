@@ -447,8 +447,29 @@ def disable_protonaudioconverter() -> None:
     """
 
     log.info('Disabling Proton Audio Converter')
-    set_environment('GST_PLUGIN_FEATURE_RANK', 'protonaudioconverterbin:NONE')
+    set_environment('PROTON_AUDIO_CONVERT', '0')
 
+
+def disable_protonaudioconverterbin() -> None:
+    """ Disabling Proton Audio Converter
+    """
+
+    log.info('Disabling Proton Audio Converter')
+    set_environment('PROTON_AUDIO_CONVERT_BIN', '0')
+
+def disable_protonvideoconverter() -> None:
+    """ Disabling Proton Audio Converter
+    """
+
+    log.info('Disabling Proton Video Converter')
+    set_environment('PROTON_VIDEO_CONVERT', '0')
+
+def disable_protondemuxer() -> None:
+    """ Disabling Proton Audio Converter
+    """
+
+    log.info('Disabling Proton Demuxer')
+    set_environment('PROTON_DEMUX', '0')
 
 @once
 def disable_uplay_overlay() -> bool:

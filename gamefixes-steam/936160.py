@@ -9,4 +9,4 @@ further stolen from marianoag by bitwolf
 from protonfixes import util
 
 def main():
-    util.disable_protonaudioconverter()
+    util.disable_protonaudioconverterbin()

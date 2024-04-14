@@ -8,4 +8,4 @@ Requires disabling the gstreamer protonaudioconverterbin plugin to get full audi
 from protonfixes import util
 
 def main():
-    util.disable_protonaudioconverter()
+    util.disable_protonaudioconverterbin()
