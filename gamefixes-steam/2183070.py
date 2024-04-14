@@ -13,4 +13,4 @@ def main():
     util.disable_esync()
     util.disable_fsync()
     # Fixes audio not playing for in-game videos
-    util.disable_protonaudioconverterbin()
+    util.disable_protonmediaconverter()

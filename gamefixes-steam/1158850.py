@@ -9,4 +9,4 @@ from protonfixes import util
 
 
 def main():
-    util.disable_protonaudioconverterbin()
+    util.disable_protonmediaconverter()
