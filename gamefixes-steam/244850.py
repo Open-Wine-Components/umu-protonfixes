@@ -7,6 +7,7 @@ from protonfixes import util
 
 
 def main():
+    util.protontricks('xaudio29')
 
     base_attibutte = "<runtime>"
     game_opts = """
