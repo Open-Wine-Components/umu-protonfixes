@@ -7,7 +7,6 @@ UW support: PhantomGamers/shco-wsf
 import os
 import sys
 import glob
-import shutil
 import zipfile
 import tarfile
 import subprocess
