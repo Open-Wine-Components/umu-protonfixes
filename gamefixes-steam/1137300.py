@@ -90,17 +90,17 @@ def load_trainer(trainer: str):
     if not os.path.isfile(os.path.join(path_to_exe, 'xdotool')):
         install_xdotool(path_to_exe)
     #Wait for game to launch before launching trainer
-    pid_game = get_pid(os.path.basename(sys.argv[2]), True)
+    pid = get_pid(os.path.basename(sys.argv[2]), True)
     #Launch trainer
-    with subprocess.Popen([sys.argv[0], 'runinprefix', trainer]) as process:
+    with subprocess.Popen([sys.argv[0], 'runinprefix', trainer]):
         #Get trainer window
         window=None
         while True:
             #Wait for trainer to launch and get pid
-            pid_trainer = get_pid(os.path.basename(trainer), True)
+            pid = get_pid(os.path.basename(trainer), True)
             try:
                 #Get window from pid from trainer
-                window = subprocess.check_output(f'LD_LIBRARY_PATH="{path_to_exe}" "{path_to_exe}"/xdotool search --pid {pid_trainer} --onlyvisible', shell=True, universal_newlines=True)
+                window = subprocess.check_output(f'LD_LIBRARY_PATH="{path_to_exe}" "{path_to_exe}"/xdotool search --pid {pid} --onlyvisible', shell=True, universal_newlines=True)
             except subprocess.CalledProcessError:
                 continue
             #Trainer launches many processes check if the pid found has window
@@ -111,10 +111,10 @@ def load_trainer(trainer: str):
         #Wait for game to finish and then kill trainer process
         while True:
             sleep(5)
-            pid_game = get_pid(os.path.basename(sys.argv[2]))
-            if pid_game is None:
-                pid_trainer = get_pid(os.path.basename(trainer))
-                os.kill(pid_trainer, signal.SIGKILL)
+            pid = get_pid(os.path.basename(sys.argv[2]))
+            if pid is None:
+                pid = get_pid(os.path.basename(trainer))
+                os.kill(pid, signal.SIGKILL)
                 break
 
 def main():
