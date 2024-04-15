@@ -127,14 +127,11 @@ def main():
         path_to_exe = os.path.join(install_dir, bin_path)
         UW_file = os.path.join(path_to_exe, 'Sherlock Holmes CO Ultrawide.exe')
         UW_zip = os.path.join(install_dir,'Sherlock.Holmes.CO.Ultrawide.zip')
-        UW_zipbin = os.path.join(path_to_exe, os.path.basename(UW_zip))
         UW2_file = os.path.join(path_to_exe, 'SUWSF.asi')
         UW2_zip = os.path.join(install_dir, 'SHCO-WSF.zip')
-        UW_found = os.path.isfile(UW_zip) or os.path.isfile(UW_zipbin) or os.path.isfile(UW_file)
-        UW2_found = os.path.isfile(UW2_zip) or os.path.isfile(UW2_file)
         #Previously it didn't download anything, only checked if an UW fix was present.
         #added download since now it checks for UW display.
-        if not (UW_found or UW2_found):
+        if not ((os.path.isfile(UW_zip) or os.path.isfile(UW_file)) or (os.path.isfile(UW2_zip) or os.path.isfile(UW2_file))):
             url = 'https://github.com/RoseTheFlower/SherlockHolmesCOUltrawide/releases/download/v1.0/Sherlock.Holmes.CO.Ultrawide.zip'
             hashsum = '9142cfb7e64b95243e9f5df9f3aae19304128c5def51d9c1b292d23c02321eee'
             file = os.path.join(path_to_exe, os.path.basename(url))
@@ -143,16 +140,12 @@ def main():
                 file_sum = hashlib.sha256(f.read()).hexdigest()
             if hashsum != file_sum:
                 os.remove(file)
-            else:
-                UW_found = True
-        if UW_found:
+        if os.path.isfile(UW_zip) or os.path.isfile(UW_file):
             if not os.path.isfile(UW_file):
-                if not os.path.isfile(UW_zipbin):
-                    shutil.move(UW_zip, UW_zipbin)
-                with zipfile.ZipFile(UW_zipbin, 'r') as zip_ref:
+                with zipfile.ZipFile(UW_zip, 'r') as zip_ref:
                     zip_ref.extract(os.path.basename(UW_file), path_to_exe)
             threading.Thread(target=load_trainer, args=[UW_file]).start()
-        elif UW2_found:
+        elif os.path.isfile(UW2_zip) or os.path.isfile(UW2_file):
             if not os.path.isfile(UW2_file):
                 with zipfile.ZipFile(UW2_zip, 'r') as zip_ref:
                     zip_ref.extractall()
