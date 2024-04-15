@@ -35,9 +35,8 @@ def _get_pid(procname: str) -> int:
 def get_pid(procname: str, untilfound: bool=False) -> int:
     while True:
         pid = _get_pid(procname)
-        if pid != None or not untilfound:
+        if pid is not None or not untilfound:
             return pid
-            break
 
 def install_xdotool(path_to_exe: str):
     if not os.path.isfile(os.path.join(path_to_exe, 'busybox_AR')):
