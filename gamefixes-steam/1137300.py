@@ -17,7 +17,6 @@ import urllib.request
 import hashlib
 from time import sleep
 from protonfixes import util
-from protonfixes.logger import log
 
 def _get_pid(procname: str) -> int:
     procpid = None
@@ -57,7 +56,7 @@ def install_xdotool(path_to_exe: str):
         file_sum = hashlib.sha256(f.read()).hexdigest()
     if hashsum == file_sum:
         os.chdir(path_to_exe)
-        subprocess.Popen(['./busybox_AR', 'x', file, 'data.tar.xz'])
+        subprocess.call(['./busybox_AR', 'x', file, 'data.tar.xz'])
         os.chdir('../../..')
         with tarfile.open(f'{path_to_exe}/data.tar.xz', 'r') as zip_ref:
             for member in zip_ref.getmembers():
@@ -75,7 +74,7 @@ def install_xdotool(path_to_exe: str):
         file_sum = hashlib.sha256(f.read()).hexdigest()
     if hashsum == file_sum:
         os.chdir(path_to_exe)
-        subprocess.Popen(['./busybox_AR', 'x', file, 'data.tar.xz'])
+        subprocess.call(['./busybox_AR', 'x', file, 'data.tar.xz'])
         os.chdir('../../..')
         with tarfile.open(f'{path_to_exe}/data.tar.xz', 'r') as zip_ref:
             for member in zip_ref.getmembers():
@@ -93,33 +92,32 @@ def load_trainer(trainer: str):
     #Wait for game to launch before launching trainer
     pid_game = get_pid(os.path.basename(sys.argv[2]), True)
     #Launch trainer
-    subprocess.Popen([sys.argv[0], 'runinprefix', trainer])
-    #Get trainer window
-    window=None
-    while True:
-        #Wait for trainer to launch and get pid
-        pid_trainer = get_pid(os.path.basename(trainer), True)
-        try:
-            #Get window from pid from trainer
-            window = subprocess.check_output(f'LD_LIBRARY_PATH="{path_to_exe}" "{path_to_exe}"/xdotool search --pid {pid_trainer} --onlyvisible', shell=True, universal_newlines=True)
-        except:
-            continue
-        #Trainer launches many processes check if the pid found has window
-        if window != None:
-            break
-    #Minimize trainer
-    subprocess.Popen(f'LD_LIBRARY_PATH="{path_to_exe}" "{path_to_exe}"/xdotool windowminimize {window}', shell=True)
-    #Wait for game to finish and then kill trainer process
-    while True:
-        sleep(5)
-        pid_game = get_pid(os.path.basename(sys.argv[2]))
-        if pid == None:
-            pid_trainer = get_pid(os.path.basename(trainer))
-            os.kill(pid_trainer, signal.SIGKILL)
-            break
+    with subprocess.Popen([sys.argv[0], 'runinprefix', trainer]) as process:
+        #Get trainer window
+        window=None
+        while True:
+            #Wait for trainer to launch and get pid
+            pid_trainer = get_pid(os.path.basename(trainer), True)
+            try:
+                #Get window from pid from trainer
+                window = subprocess.check_output(f'LD_LIBRARY_PATH="{path_to_exe}" "{path_to_exe}"/xdotool search --pid {pid_trainer} --onlyvisible', shell=True, universal_newlines=True)
+            except subprocess.CalledProcessError:
+                continue
+            #Trainer launches many processes check if the pid found has window
+            if window is not None:
+                break
+        #Minimize trainer
+        subprocess.call(f'LD_LIBRARY_PATH="{path_to_exe}" "{path_to_exe}"/xdotool windowminimize {window}', shell=True)
+        #Wait for game to finish and then kill trainer process
+        while True:
+            sleep(5)
+            pid_game = get_pid(os.path.basename(sys.argv[2]))
+            if pid_game is None:
+                pid_trainer = get_pid(os.path.basename(trainer))
+                os.kill(pid_trainer, signal.SIGKILL)
+                break
 
 def main():
-    #sys.argv[2] = ''
     screen_width,screen_height = util.get_resolution()
     #Checks for UW in case there's an UW fix present but display is not.
     #eg. the monitor changed or the files were moved from a PC to a SteamDeck
@@ -131,8 +129,6 @@ def main():
         UW_zip = os.path.join(install_dir,'Sherlock.Holmes.CO.Ultrawide.zip')
         UW_zipbin = os.path.join(path_to_exe, os.path.basename(UW_zip))
         UW2_file = os.path.join(path_to_exe, 'SUWSF.asi')
-        UW2_fileb = 'SUWSF.ini'
-        UW2_file_dll = 'dsound.dll'
         UW2_zip = os.path.join(install_dir, 'SHCO-WSF.zip')
         UW_found = os.path.isfile(UW_zip) or os.path.isfile(UW_zipbin) or os.path.isfile(UW_file)
         UW2_found = os.path.isfile(UW2_zip) or os.path.isfile(UW2_file)
@@ -160,4 +156,4 @@ def main():
             if not os.path.isfile(UW2_file):
                 with zipfile.ZipFile(UW2_zip, 'r') as zip_ref:
                     zip_ref.extractall()
-            util.winedll_override(UW2_file_dll, 'n')
+            util.winedll_override('dsound', 'n')
