@@ -12,11 +12,10 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
-import config
-
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Union, Literal, Mapping
 
+import config
 from logger import log
 from steamhelper import install_app
 
