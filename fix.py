@@ -7,13 +7,13 @@ import re
 import sys
 import urllib
 import json
+import config
 
 from functools import lru_cache
 from importlib import import_module
-from .util import check_internet
-from .checks import run_checks
-from .logger import log
-from . import config
+from util import check_internet
+from checks import run_checks
+from logger import log
 
 
 @lru_cache
