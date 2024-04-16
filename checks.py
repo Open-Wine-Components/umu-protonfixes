@@ -1,7 +1,7 @@
 """ Run some tests and generate warnings for proton configuration issues
 """
 
-from .logger import log
+from logger import log
 
 
 def esync_file_limits() -> bool:
