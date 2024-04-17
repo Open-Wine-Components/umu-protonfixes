@@ -13,6 +13,9 @@ def main():
     #eac workaround
     util.set_environment('EOS_USE_ANTICHEATCLIENTNULL','1')
 
+    #needed for nvidia vulkan
+    util.set_environment('WINE_HIDE_NVIDIA_GPU','1')
+
     #override for white/black launcher
     util.winedll_override('libglesv2', 'builtin')
     #override for nvidia cards
