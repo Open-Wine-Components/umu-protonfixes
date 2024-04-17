@@ -16,6 +16,9 @@ def main():
     #needed for nvidia vulkan
     util.set_environment('WINE_HIDE_NVIDIA_GPU','1')
 
+    #needed for amd vulkan
+    util.set_environment('dual_color_blend_by_location','true')
+
     #override for white/black launcher
     util.winedll_override('libglesv2', 'builtin')
     #override for nvidia cards
