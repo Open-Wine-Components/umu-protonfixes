@@ -10,10 +10,17 @@ import json
 from functools import lru_cache
 from importlib import import_module
 
-import config
-from util import check_internet
-from checks import run_checks
-from logger import log
+try:
+    from . import config
+    from .util import check_internet
+    from .checks import run_checks
+    from .logger import log
+except ImportError:
+    import config
+    from util import check_internet
+    from checks import run_checks
+    from logger import log
+
 
 
 @lru_cache
