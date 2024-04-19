@@ -113,10 +113,10 @@ def get_module_name(game_id: str, default: bool = False, local: bool = False) ->
     """ Creates the name of a gamefix module, which can be imported
     """
     store = 'umu'
-    if os.environ.get('STORE'):
-        store = os.environ.get('STORE').lower()
-    elif game_id.isnumeric():
+    if game_id.isnumeric():
         store = 'steam'
+    elif os.environ.get('STORE'):
+        store = os.environ.get('STORE').lower()
 
     if store != 'steam':
         log.info(f'Non-steam game {get_game_name()} ({game_id})')
