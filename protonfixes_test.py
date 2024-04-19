@@ -178,5 +178,86 @@ class TestProtonfixes(unittest.TestCase):
         self.assertTrue('SteamAppId' not in os.environ, 'SteamAppId is set')
         result = func()
         self.assertFalse(result, 'None was not returned')
+
+    def testGetStoreNameZoom(self):
+        """Pass zoomplatform as store name
+        
+        The get_store_name function returns a string associated with a
+        supported store in the umu database.
+        
+        The string will be used to display a message in the console to let the
+        user know which fix will be applied.
+        """
+        store = 'zoomplatform'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameAmazon(self):
+        """Pass amazon as store name"""
+        store = 'amazon'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameEA(self):
+        """Pass ea as store name"""
+        store = 'ea'
+        result = fix.get_store_name(store)
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameEGS(self):
+        """Pass egs as store name"""
+        store = 'egs'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameGOG(self):
+        """Pass gog as store name"""
+        store = 'gog'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameHumble(self):
+        """Pass humble as store name"""
+        store = 'humble'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameItchio(self):
+        """Pass itchio as store name"""
+        store = 'itchio'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameSteam(self):
+        """Pass steam as store name"""
+        store = 'steam'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameUbisoft(self):
+        """Pass ubisoft as store name"""
+        store = 'ubisoft'
+        result = fix.get_store_name(store)
+        self.assertIsInstance(result, str, 'Expected a str')
+        self.assertTrue(result, 'Expected a value')
+
+    def testGetStoreNameEmpty(self):
+        """Pass an empty string as store name"""
+        store = ''
+        result = fix.get_store_name(store)
+        self.assertFalse(result, 'Expected None')
+
+    def testGetStoreNameFoo(self):
+        """Pass a store that is not supported in umu"""
+        store = 'jastusa'
+        result = fix.get_store_name(store)
+        self.assertFalse(result, 'Expected None')
 if __name__ == '__main__':
     unittest.main()
