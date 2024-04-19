@@ -127,5 +127,56 @@ class TestProtonfixes(unittest.TestCase):
         result = fix.get_module_name(game_id, local=True, default=True)
         self.assertEqual(result, 'localfixes.default')
 
+    def testGetGameSteamAppId(self):
+        """Only set the SteamAppId
+        
+        Protonfixes depends on being supplied an app id when applying fixes
+        to games.
+        
+        This appid is typically set by a client application, but the user can
+        set it in some cases (e.g., umu-launcher).
+        
+        If the app id is numeric, then protonfixes will refer to the
+        gamefixes-steam folder. Otherwise, the STORE environment variable will
+        be used to determine which fix will be applied.
+        """
+        os.environ['SteamAppId'] = self.game_id
+        result = fix.get_game_id()
+        self.assertEqual(result, self.game_id)
+        self.assertTrue(os.environ.get('SteamAppId'), 'SteamAppId was unset')
+
+    def testGetGameUmuId(self):
+        """Only set the UMU_ID"""
+        os.environ['UMU_ID'] = self.game_id
+        result = fix.get_game_id()
+        self.assertEqual(result, self.game_id)
+        self.assertTrue(os.environ.get('UMU_ID'), 'UMU_ID was unset')
+
+    def testGetGameSteamGameId(self):
+        """Only set the SteamGameId"""
+        os.environ['SteamGameId'] = self.game_id
+        result = fix.get_game_id()
+        self.assertEqual(result, self.game_id)
+        self.assertTrue(os.environ.get('SteamGameId'), 'SteamGameId was unset')
+
+    def testGetGameCompatPath(self):
+        """Only set the STEAM_COMPAT_DATA_PATH"""
+        os.environ['STEAM_COMPAT_DATA_PATH'] = self.game_id
+        result = fix.get_game_id()
+        self.assertEqual(result, self.game_id)
+        self.assertTrue(os.environ.get('STEAM_COMPAT_DATA_PATH'), 'STEAM_COMPAT_DATA_PATH was unset')
+
+    def testGetGameNone(self):
+        """Set no environment variables
+        
+        Expect None to be returned
+        """
+        func = fix.get_game_id.__wrapped__  # Do not reference the cache
+        self.assertTrue('STEAM_COMPAT_DATA_PATH' not in os.environ, 'STEAM_COMPAT_DATA_PATH is set')
+        self.assertTrue('SteamGameId' not in os.environ, 'SteamGameId is set')
+        self.assertTrue('UMU_ID' not in os.environ, 'UMU_ID is set')
+        self.assertTrue('SteamAppId' not in os.environ, 'SteamAppId is set')
+        result = func()
+        self.assertFalse(result, 'None was not returned')
 if __name__ == '__main__':
     unittest.main()
