@@ -3,12 +3,18 @@ import unittest
 import os
 import fix
 
-# pylint: disable=C0115
+# pylint: disable=C0115,R0904
 class TestProtonfixes(unittest.TestCase):
     def setUp(self):
         self.env = {
-            'STORE': ''
+            'STORE': '',
+            'SteamAppId': '',
+            'SteamGameId': '',
+            'STEAM_COMPAT_DATA_PATH': '',
+            'UMU_ID': ''
         }
+        self.game_id = '1293820'
+        self.pfx = Path(tempfile.mkdtemp())
 
     def tearDown(self):
         for key in self.env:
@@ -34,6 +40,30 @@ class TestProtonfixes(unittest.TestCase):
         game_id = '1091500'
         result = fix.get_module_name(game_id)
         self.assertEqual(result, f'protonfixes.gamefixes-steam.{game_id}')
+
+    def testModuleNameNoneAndNumeric(self):
+        """Pass a numeric gameid and set STORE
+        
+        In this case, when the game id is numeric, we always refer to a
+        module in the gamefixes-steam.
+        """
+        game_id = '1091500'
+        os.environ['STORE'] = 'none'
+        result = fix.get_module_name(game_id)
+        self.assertEqual(result, f'protonfixes.gamefixes-steam.{game_id}')
+
+    def testModuleNameStoreAndNumeric(self):
+        """Pass a numeric gameid and set STORE
+        
+        In this case, when the game id is numeric, we always refer to a
+        module in gamefixes-steam
+        When passed a valid store, that value should not be used
+        """
+        game_id = '1091500'
+        os.environ['STORE'] = 'gog'
+        result = fix.get_module_name(game_id)
+        self.assertEqual(result, f'protonfixes.gamefixes-steam.{game_id}')
+
 
     def testModuleNameStore(self):
         """Pass a non-numeric game id and setting valid STORE
