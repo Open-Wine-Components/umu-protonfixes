@@ -75,22 +75,19 @@ def get_game_name() -> str:
             log.debug(f'IndexError occurred: {ex}')
         except UnicodeDecodeError as ex:
             log.debug(f'UnicodeDecodeError occurred: {ex}')
-    else:
-        try:
-            game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
-            game_manifest = os.path.join(game_library, f'appmanifest_{get_game_id()}.acf')
+        return  'UNKNOWN'
+    try:
+        log.debug('UMU_ID is not in environment')
+        game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
+        game_manifest = os.path.join(game_library, f'appmanifest_{get_game_id()}.acf')
 
-            with io.open(game_manifest, 'r', encoding='utf-8') as appmanifest:
-                for xline in appmanifest.readlines():
-                    if 'name' in xline.strip():
-                        name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]
-                        return name
-        except OSError:
-            pass
-        except IndexError:
-            pass
-        except UnicodeDecodeError:
-            pass
+        with io.open(game_manifest, 'r', encoding='utf-8') as appmanifest:
+            for xline in appmanifest.readlines():
+                if 'name' in xline.strip():
+                    name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]
+                    return name
+    except (OSError, IndexError, UnicodeDecodeError):
+        pass
 
     return 'UNKNOWN'
 
