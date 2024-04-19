@@ -1,6 +1,8 @@
 # pylint: disable=C0114
 import unittest
 import os
+import tempfile
+from pathlib import Path
 import fix
 
 # pylint: disable=C0115,R0904
@@ -20,6 +22,9 @@ class TestProtonfixes(unittest.TestCase):
         for key in self.env:
             if key in os.environ:
                 os.environ.pop(key)
+        if self.pfx.is_dir():
+            self.pfx.joinpath('game_title').unlink(missing_ok=True)
+            self.pfx.rmdir()
 
     def testModuleName(self):
         """Pass a non-numeric game id
@@ -259,5 +264,22 @@ class TestProtonfixes(unittest.TestCase):
         store = 'jastusa'
         result = fix.get_store_name(store)
         self.assertFalse(result, 'Expected None')
+
+    def testGetGameName(self):
+        """Set UMU_ID and access the game_title file for its title
+        
+        The get_game_name function returns a string of the running game's
+        title.
+        
+        It checks a few system paths in the user's system to try to
+        determine it, and makes a callout to an owc endpoint to get an
+        official title by its UMU_ID.
+        """
+        os.environ['UMU_ID'] = self.game_id
+        os.environ['WINEPREFIX'] = self.pfx.as_posix()
+        self.pfx.joinpath('game_title').touch()
+        result = fix.get_game_name()
+        self.assertFalse(result, 'Expected an empty string')
+
 if __name__ == '__main__':
     unittest.main()
