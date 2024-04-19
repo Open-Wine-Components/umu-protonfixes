@@ -44,7 +44,7 @@ def get_game_id() -> str:
 def get_game_name() -> str:
     """ Trys to return the game name from environment variables
     """
-    if 'UMU_ID' in os.environ:
+    if os.environ.get('UMU_ID'):
         if os.path.isfile(os.environ['WINEPREFIX'] + '/game_title'):
             with open(os.environ['WINEPREFIX'] + '/game_title', 'r', encoding='utf-8') as file:
                 return file.readline()
