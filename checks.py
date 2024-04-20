@@ -1,7 +1,10 @@
 """ Run some tests and generate warnings for proton configuration issues
 """
 
-from .logger import log
+try:
+    from .logger import log
+except ImportError:
+    from logger import log
 
 
 def esync_file_limits() -> bool:

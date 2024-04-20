@@ -12,13 +12,17 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
-
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Union, Literal, Mapping
 
-from .logger import log
-from .steamhelper import install_app
-from . import config
+try:
+    from . import config
+    from .logger import log
+    from .steamhelper import install_app
+except ImportError:
+    import config
+    from logger import log
+    from steamhelper import install_app
 
 try:
     import __main__ as protonmain

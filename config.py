@@ -2,7 +2,11 @@
 """
 import os
 from configparser import ConfigParser
-from .logger import log
+try:
+    from .logger import log
+except ImportError:
+    from logger import log
+
 
 CONF_FILE = '~/.config/protonfixes/config.ini'
 DEFAULT_CONF = '''
