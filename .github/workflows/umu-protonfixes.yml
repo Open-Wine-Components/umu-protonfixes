@@ -1,4 +1,4 @@
-name: umu-protonfixes workflow
+name: umu-protonfixes
 
 on:
   push:
@@ -33,3 +33,6 @@ jobs:
     - name: Lint with Pylint
       run: |
         bash tools/lint.sh
+    - name: Test with unittest
+      run: |
+        python protonfixes_test.py
