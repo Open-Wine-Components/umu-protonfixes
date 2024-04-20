@@ -75,7 +75,7 @@ def get_game_name() -> str:
             log.debug(f'IndexError occurred: {ex}')
         except UnicodeDecodeError as ex:
             log.debug(f'UnicodeDecodeError occurred: {ex}')
-        return  'UNKNOWN'
+        return 'UNKNOWN'
     try:
         log.debug('UMU_ID is not in environment')
         game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
