@@ -5,10 +5,7 @@
 from protonfixes import util
 
 def main():
-    """ installs devenum, quartz, wmp9
+    """ klite to fix videos
+        prev version of this used devenum, quartz, wmp9 but that caused laggy intros
     """
-
-    # https://appdb.winehq.org/objectManager.php?sClass=version&iId=34367
-    util.protontricks('devenum')
-    util.protontricks('quartz')
-    util.protontricks('wmp9_x86_64')
+    util.protontricks('klite')
