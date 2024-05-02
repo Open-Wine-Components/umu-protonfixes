@@ -270,7 +270,7 @@ def protontricks(verb: str) -> bool:
         if verb == 'gui':
             winetricks_cmd = [winetricks_bin, '--unattended']
 
-        # check is verb a custom winetricks verb
+        # Check is verb a custom winetricks verb
         custom_verb = is_custom_verb(verb)
         if custom_verb:
             winetricks_cmd = [winetricks_bin, '--unattended', custom_verb]
@@ -282,20 +282,18 @@ def protontricks(verb: str) -> bool:
 
             log.debug('Using winetricks command: ' + str(winetricks_cmd))
 
-            # make sure proton waits for winetricks to finish
+            # Make sure proton waits for winetricks to finish
             for idx, arg in enumerate(sys.argv):
                 if 'waitforexitandrun' not in arg:
                     sys.argv[idx] = arg.replace('run', 'waitforexitandrun')
                     log.debug(str(sys.argv))
 
+            # Run winetricks
             log.info('Using winetricks verb ' + verb)
-            subprocess.call([env['WINESERVER'], '-w'], env=env)
-            with subprocess.Popen(winetricks_cmd, env=env) as process:
-                process.wait()
-            _killhanging()
+            subprocess.run([env['WINESERVER'], '-w'], env=env, check=False)
+            retc = run_in_sandbox(winetricks_cmd, env)
 
             # Check if the verb failed (eg. access denied)
-            retc = process.returncode
             if retc != 0:
                 log.warn(f'Winetricks failed running verb "{verb}" with status {retc}.')
                 return False
@@ -839,3 +837,82 @@ def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -
 
     # Apply the limit
     return set_cpu_topology(core_limit, ignore_user_setting)
+
+
+def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
+    """Run a command within a sandbox.
+    The command will run in an environment that is isolated from the host.
+    When the parent process of the command dies, all of its children will die
+    with it. A dictionary that contains the user's environment variables is
+    optional, otherwise the global session environment variables are passed by
+    default
+    """
+    sandbox_bin = '/usr/libexec/steam-runtime-tools-0/srt-bwrap'
+    env = env or dict(protonmain.g_session.env)
+    pfx = os.path.expanduser(os.environ.get('WINEPREFIX') or "")
+    proton = os.path.expanduser(os.environ.get('PROTONPATH') or "")
+
+    if not proton or not pfx:
+        log.warn("WINEPREFIX or PROTONPATH is not set or empty")
+        log.warn("Will not execute command")
+        return 1
+
+    if not os.path.exists(sandbox_bin):
+        log.warn(
+            f'Failed to find sandboxing tool in {os.environ.get("PRESSURE_VESSEL_RUNTIME")}'
+        )
+        log.info('Will execute command on the host')
+        retc = subprocess.run(
+            cmd,
+            check=False,
+            env=env,
+        ).returncode
+        _killhanging()
+        return retc
+
+    # Don't execute in a sandbox when using a Flatpak
+    if os.environ.get('FLATPAK_ID') and os.path.exists(sandbox_bin):
+        log.info(f'Flatpak environment detected: {os.environ.get("FLATPAK_ID")}')
+        log.info('Will not execute command in a sandbox')
+        return subprocess.run(
+            cmd,
+            check=False,
+            env=env,
+        ).returncode
+
+    # Mount the entire filesystem read-only and unshare all namespaces except
+    # the network
+    # The paths /tmp, WINEPREFIX and PROTONPATH will be remounted read-write
+    opts = [
+        '--ro-bind',
+        '/',
+        '/',
+        '--tmpfs',
+        '/tmp',
+        '--dev',
+        '/dev',
+        '--proc',
+        '/proc',
+        '--die-with-parent',
+        '--new-session',
+        '--unshare-all',
+        '--share-net',
+        '--disable-userns',
+        '--unshare-user',
+        '--bind',
+        pfx,
+        pfx,
+        '--bind',
+        proton,
+        proton,
+    ]
+
+    return subprocess.run(
+        [
+            sandbox_bin,
+            *opts,
+            *cmd,
+        ],
+        check=False,
+        env=env,
+    ).returncode
