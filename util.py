@@ -849,8 +849,9 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
     """
     sandbox_bin = '/usr/libexec/steam-runtime-tools-0/srt-bwrap'
     env = env or dict(protonmain.g_session.env)
-    pfx = os.path.expanduser(os.environ.get('WINEPREFIX') or "")
-    proton = os.path.expanduser(os.environ.get('PROTONPATH') or "")
+    pfx = protonprefix()
+    proton = protondir()
+    game = get_game_install_path()
 
     if not proton or not pfx:
         log.warn("WINEPREFIX or PROTONPATH is not set or empty")
