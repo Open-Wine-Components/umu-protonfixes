@@ -290,7 +290,7 @@ def protontricks(verb: str) -> bool:
                     log.debug(str(sys.argv))
 
             # Make sure the cache exists
-            winetricks_cache = os.path.expanduser("~/.cache/winetricks") 
+            winetricks_cache = os.path.expanduser("~/.cache/winetricks")
             if not os.path.exists(winetricks_cache):
                 os.makedirs(winetricks_cache, exist_ok=True)
 
