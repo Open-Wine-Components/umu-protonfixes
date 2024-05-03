@@ -883,7 +883,8 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
 
     # Mount the entire filesystem read-only and unshare all namespaces except
     # the network
-    # The paths /tmp, WINEPREFIX and PROTONPATH will be remounted read-write
+    # The path to the WINE prefix, Proton directory and the game directory
+    # will be remounted read-write
     opts = [
         '--ro-bind',
         '/',
@@ -906,6 +907,9 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
         '--bind',
         proton,
         proton,
+        '--bind',
+        game,
+        game
     ]
 
     return subprocess.run(
