@@ -12,6 +12,7 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
+from pathlib import Path
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Union, Literal, Mapping
 
@@ -287,6 +288,11 @@ def protontricks(verb: str) -> bool:
                 if 'waitforexitandrun' not in arg:
                     sys.argv[idx] = arg.replace('run', 'waitforexitandrun')
                     log.debug(str(sys.argv))
+
+            # Make sure the cache exists
+            winetricks_cache = os.path.expanduser("~/.cache/winetricks") 
+            if not os.path.exists(winetricks_cache):
+                os.makedirs(winetricks_cache, exist_ok=True)
 
             # Run winetricks
             log.info('Using winetricks verb ' + verb)
@@ -852,6 +858,7 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
     pfx = protonprefix()
     proton = protondir()
     game = get_game_install_path()
+    winetricks_cache = Path.home().joinpath(".cache", "winetricks").as_posix()
 
     if not proton or not pfx:
         log.warn("WINEPREFIX or PROTONPATH is not set or empty")
@@ -910,6 +917,9 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
         '--bind',
         game,
         game
+        '--bind-try',
+        winetricks_cache,
+        winetricks_cache
     ]
 
     return subprocess.run(
