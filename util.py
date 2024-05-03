@@ -847,25 +847,29 @@ def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -
 
 def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
     """Run a command within a sandbox.
-    The command will run in an environment that is isolated from the host.
+    The command will run in an temporary environment that is isolated from the
+    host where only the path to the Proton, WINE prefix and game directory are
+    read-write and visible to the running command
+
     When the parent process of the command dies, all of its children will die
     with it. A dictionary that contains the user's environment variables is
     optional, otherwise the global session environment variables are passed by
     default
     """
-    sandbox_bin = '/usr/libexec/steam-runtime-tools-0/srt-bwrap'
+    sandbox_bin = Path('/usr/libexec/steam-runtime-tools-0/srt-bwrap')
     env = env or dict(protonmain.g_session.env)
-    pfx = protonprefix()
+    pfx = os.path.expanduser(os.environ.get("STEAM_COMPAT_DATA_PATH") or "")
     proton = protondir()
     game = get_game_install_path()
     winetricks_cache = Path.home().joinpath(".cache", "winetricks").as_posix()
+    rootfs = []
 
     if not proton or not pfx:
         log.warn("WINEPREFIX or PROTONPATH is not set or empty")
         log.warn("Will not execute command")
         return 1
 
-    if not os.path.exists(sandbox_bin):
+    if not sandbox_bin.is_file():
         log.warn(
             f'Failed to find sandboxing tool in {os.environ.get("PRESSURE_VESSEL_RUNTIME")}'
         )
@@ -879,7 +883,7 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
         return retc
 
     # Don't execute in a sandbox when using a Flatpak
-    if os.environ.get('FLATPAK_ID') and os.path.exists(sandbox_bin):
+    if os.environ.get('FLATPAK_ID') and sandbox_bin.is_file():
         log.info(f'Flatpak environment detected: {os.environ.get("FLATPAK_ID")}')
         log.info('Will not execute command in a sandbox')
         return subprocess.run(
@@ -888,14 +892,19 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
             env=env,
         ).returncode
 
-    # Mount the entire filesystem read-only and unshare all namespaces except
-    # the network
-    # The path to the WINE prefix, Proton directory and the game directory
-    # will be remounted read-write
+    # Mount the root filesystem read-only except for the home directory
+    # The home directory will be invisible except the path to the WINE prefix,
+    # Proton, the game and winetricks cache directory
+    for path in Path("/").glob("*"):
+        if path.name != "home":
+            posix_path = path.as_posix()
+            rootfs.append("--ro-bind")
+            rootfs.append(posix_path)
+            rootfs.append(posix_path)
+
+    # Unshare all namespaces except the network
     opts = [
-        '--ro-bind',
-        '/',
-        '/',
+        *rootfs,
         '--tmpfs',
         '/tmp',
         '--dev',
@@ -916,7 +925,7 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
         proton,
         '--bind',
         game,
-        game
+        game,
         '--bind-try',
         winetricks_cache,
         winetricks_cache
