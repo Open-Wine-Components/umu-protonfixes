@@ -1,12 +1,9 @@
 """ Far Cry 2
 """
-#pylint: disable=C0103
-
-from protonfixes import util
-
-
 def main():
-    """ chokes on more than 31 cores
-    """
+    """ Set CPU limit to upstream core count
+    See https://github.com/ValveSoftware/Proton/blob/proton_9.0/proton#L1154
 
-    util.set_cpu_topology_limit(31)
+    Code block is intentionally empty because this game exists in EGS and
+    Ubisoft (umu-19900)
+    """
