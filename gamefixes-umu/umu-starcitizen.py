@@ -18,13 +18,7 @@ def main():
 
     #needed for amd vulkan
     util.set_environment('dual_color_blend_by_location','true')
-
-    #override for white/black launcher
-    util.winedll_override('libglesv2', 'builtin')
-    #override for nvidia cards
-    util.winedll_override('nvapi,nvapi64', 'disabled')
-    #allow the RSI Launcher to auto-update itself
-    util.winedll_override('powershell.exe', 'disabled')
+    util.set_environment('radv_zero_vram','true')
 
     environments = ["LIVE","PTU","EPTU","TECH-PREVIEW"]
 
