@@ -858,11 +858,14 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
     """
     sandbox_bin = Path('/usr/libexec/steam-runtime-tools-0/srt-bwrap')
     env = env or dict(protonmain.g_session.env)
-    pfx = os.path.expanduser(os.environ.get("STEAM_COMPAT_DATA_PATH") or "")
-    proton = protondir()
-    game = get_game_install_path()
-    winetricks_cache = Path.home().joinpath(".cache", "winetricks").as_posix()
+    pfx = ""
+    proton = Path(protondir()).resolve().as_posix()
+    game = Path(get_game_install_path()).resolve().as_posix()
+    winetricks_cache = Path.home().joinpath(".cache", "winetricks").resolve().as_posix()
     rootfs = []
+
+    if os.environ.get("STEAM_COMPAT_DATA_PATH"):
+        pfx = Path(os.environ.get("STEAM_COMPAT_DATA_PATH")).resolve().as_posix()
 
     if not proton or not pfx:
         log.warn("WINEPREFIX or PROTONPATH is not set or empty")
