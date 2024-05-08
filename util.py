@@ -902,9 +902,7 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
     for path in Path("/").glob("*"):
         if path.name != "home":
             posix_path = path.as_posix()
-            rootfs.append("--ro-bind")
-            rootfs.append(posix_path)
-            rootfs.append(posix_path)
+            rootfs.extend(["--ro-bind", posix_path, posix_path])
 
     # Unshare all namespaces except the network
     opts = [
