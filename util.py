@@ -897,8 +897,6 @@ def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
         ).returncode
 
     # Mount the root filesystem read-only except for the home directory
-    # The home directory will be invisible except the path to the WINE prefix,
-    # Proton, the game and winetricks cache directory
     for path in Path("/").glob("*"):
         if path.name != "home":
             posix_path = path.as_posix()
