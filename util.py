@@ -848,8 +848,9 @@ def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -
 def run_in_sandbox(cmd: list[str], env: dict[str, str]=None) -> int:
     """Run a command within a sandbox.
     The command will run in an temporary environment that is isolated from the
-    host where only the path to the Proton, WINE prefix and game directory are
-    read-write and visible to the running command
+    host where only the path to the Proton, WINE prefix, game directory and
+    winetricks cache directory are read-write and visible to the running
+    command
 
     When the parent process of the command dies, all of its children will die
     with it. A dictionary that contains the user's environment variables is
