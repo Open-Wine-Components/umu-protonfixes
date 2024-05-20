@@ -13,17 +13,14 @@ def main():
     # Install crypt32 (not required for Proton 3.16-3 and up)
     util.protontricks('crypt32')
 
-    # Install directmusic, set overrides
+    # Install DirectMusic
     util.protontricks('directmusic')
-    util.winedll_override('dmime', 'n')
-    util.winedll_override('dmsynth', 'n')
-    util.winedll_override('dmusic', 'n')
-    util.winedll_override('dsound', 'n')
-    util.winedll_override('dswave ', 'n')
-    util.winedll_override('l3codecx', 'n')
 
     # Set sound to alsa
     util.protontricks('sound=alsa')
+
+    # Install DirectPlay for reliable multiplayer connections
+    util.protontricks('directplay')
 
     # Disable launcher
     util.replace_command('patriots.exe', 'riseofnations.exe')
