@@ -1,8 +1,9 @@
 """Game fix for Flowers - Le Volume Sur Printemps
 
-This fix installs the font that should be bundled with the game. Without this
-fix, the default font will be used which doesn't wrap correctly, resulting in
-the text breaking outside its text box area.
+This fix installs the font that should be bundled with the game in case it
+does not get installed during the setup process. Without this fix, the default
+font will be used which doesn't wrap correctly, resulting in the text breaking
+outside its text box area.
 """
 
 import os
