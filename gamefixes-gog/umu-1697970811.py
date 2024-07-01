@@ -39,21 +39,9 @@ def main():
             log.warn(f"Expected '{hashsum}', skipping...")
             return
 
-    # Run the font installer. Unfortunately a small window should popup...
-    # and it doesn't seem like there's a way around that
     log.info("Installing font 'Overlock-Mod.ttf' in prefix")
-
-    # Ensure DISPLAY=:0 to ensure we do not crash when running the installer
-    # when using gamescope
-    env["DISPLAY"] = ":0"
-
     retc = run(
-        [
-            wine,
-            "start",
-            "/unix",
-            f"{install_dir}/font/{font_installer}",
-        ],
+        [wine, "start", "/unix", f"{install_dir}/font/{font_installer}", "/silent"],
         check=False,
         env=env,
     ).returncode
