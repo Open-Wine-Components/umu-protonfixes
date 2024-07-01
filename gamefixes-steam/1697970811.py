@@ -27,7 +27,7 @@ def main():
     hashsum = "d3bd48162d91322c3d2861cdccc538955336eff7f0fe50eeafee1b7551a52152"
 
     if os.path.isfile(f"{util.protonprefix()}/drive_c/windows/Fonts/Overlock-Mod.ttf"):
-        log.info("Overlock-Mod.ttf already installed in prefix")
+        log.info("Font 'Overlock-Mod.ttf' already installed in prefix, skipping...")
         return
 
     if not os.path.isfile(f"{install_dir}/font/{font_installer}"):
@@ -40,7 +40,7 @@ def main():
             log.warn(f"Expected '{hashsum}', skipping...")
             return
 
-    log.info("Installing font 'Overlock-Mod.ttf' in prefix")
+    log.info("Installing font 'Overlock-Mod.ttf' in prefix...")
     retc = run(
         [wine, "start", "/unix", f"{install_dir}/font/{font_installer}", "/silent"],
         check=False,
