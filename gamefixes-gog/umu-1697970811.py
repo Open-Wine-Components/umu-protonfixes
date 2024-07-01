@@ -6,9 +6,10 @@ the text breaking outside its text box area.
 """
 
 import os
-import __main__ as protonmain
 from hashlib import sha256
 from subprocess import run
+
+import __main__ as protonmain
 from protonfixes import util
 from protonfixes.logger import log
 
