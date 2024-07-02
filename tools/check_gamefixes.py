@@ -33,7 +33,6 @@ class UMUEntry(TypedDict):  # pylint: disable=C0115
     notes: Union[None, str]
 
 
-# HTTP request headers
 headers = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0",
     "Accept": "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8",
