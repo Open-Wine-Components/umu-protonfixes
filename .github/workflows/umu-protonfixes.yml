@@ -24,12 +24,16 @@ jobs:
         sudo apt-get install shellcheck
         python3 -m pip install --upgrade pip
         pip install pylint
+        pip install ijson
     - name: Lint with Shellcheck
       run: |
         shellcheck tools/lint.sh tools/check-links.sh
     - name: Check symbolic links
       run: |
         bash tools/check-links.sh
+    - name: Check gamefix module IDs
+      run: |
+        python tools/check_gamefixes.py
     - name: Lint with Pylint
       run: |
         bash tools/lint.sh
