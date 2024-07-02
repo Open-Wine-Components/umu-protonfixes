@@ -4,7 +4,7 @@ import pathlib
 from util import get_game_install_path
 
 def main():
-	if not pathlib.Path(f"{get_game_install_path()}/DLC.bdt").exists():
+	if not pathlib.Path(f"{get_game_install_path()}/Game/DLC.bdt").exists():
 		# Create the DLC.bdt file if it doesn't already exist, which is known to fix Easy AntiCheat not working for players that don't own the DLC
 		# A blank file is enough to get multiplayer working
-		open(f"{get_game_install_path()}/DLC.bdt", 'w').close()
+		open(f"{get_game_install_path()}/Game/DLC.bdt", 'w').close()
