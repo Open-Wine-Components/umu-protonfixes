@@ -130,7 +130,10 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         conn.close()
 
     if appids:
-        err = f"The following GOG app ids are invalid or are missing entries: {appids}"
+        err = (
+            "The following GOG app ids are invalid or are missing entries"
+            f" in the umu database: {appids}"
+        )
         raise ValueError(err)
 
 
