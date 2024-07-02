@@ -160,8 +160,10 @@ def main() -> None:
     # Top-level project directory that is expected to contain gamefix directories
     project = Path(__file__).parent.parent
 
-    # Steam API to acquire a single id. Unforutnately, this endpoint does not accept
-    # a comma separated list of IDs so we have to make one request per ID
+    # Steam API to acquire a single id. Used as fallback in case some IDs could
+    # not be validated. Unforutnately, this endpoint does not accept a comma
+    # separated list of IDs so we have to make one request per ID after making
+    # making a request to `api.steampowered.com`.
     # NOTE: There's neither official nor unofficial documentation. Only forum posts
     # See https://stackoverflow.com/questions/46330864/steam-api-all-games
     steamapi: ApiEndpoint = ("store.steampowered.com", "/api/appdetails?appids=")
@@ -171,6 +173,7 @@ def main() -> None:
     umudb_gog: ApiEndpoint = ("umu.openwinecomponents.org", "/umu_api.php?store=gog")
 
     # Steam API
+    # Main API used to validate steam gamefixes
     # NOTE: There's neither official nor unofficial documentation. Only forum posts
     # See https://stackoverflow.com/questions/46330864/steam-api-all-games
     steampowered = (
