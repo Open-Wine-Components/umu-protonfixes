@@ -1,4 +1,4 @@
-# pylint: disable=C0114,C0114
+# pylint: disable=C0114
 from pathlib import Path
 from urllib.request import urlopen, Request
 from http.client import HTTPSConnection
