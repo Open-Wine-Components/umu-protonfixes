@@ -144,13 +144,13 @@ def _batch_generator(gamefix: Path, size=50) -> set[str]:
     # Process only umu-* app ids
     for file in gamefix.glob("*"):
         appid = file.name.removeprefix("umu-").removesuffix(".py")
-
         appids.add(appid)
-
         if count == size:
             yield appids
             appids.clear()
             count = 0
+            continue
+        count += 1
 
     yield appids
 
