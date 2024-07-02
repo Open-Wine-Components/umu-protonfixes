@@ -33,14 +33,6 @@ class UMUEntry(TypedDict):  # pylint: disable=C0115
     notes: Union[None, str]
 
 
-# HTTP request headers
-headers = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0",
-    "Accept": "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5",
-}
-
-
 def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
     """Verifies if the name of Steam gamefix modules are valid entries.
 
@@ -56,7 +48,7 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         appids.add(int(appid))
 
     # Check the IDs against ours
-    with urlopen(Request(url, headers=headers), timeout=500) as r:
+    with urlopen(Request(url), timeout=500) as r:
         for obj in ijson.items(r, "applist.apps.item"):
             if obj["appid"] in appids:
                 appids.remove(obj["appid"])
@@ -101,9 +93,7 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         sep = "%2C"  # Required comma separator character. See the docs.
         appids = gogids.copy()
 
-        with urlopen(
-            Request(f"{url}{sep.join(appids)}", headers=headers), timeout=500
-        ) as r:
+        with urlopen(Request(f"{url}{sep.join(appids)}"), timeout=500) as r:
             for obj in ijson.items(r, "item"):
                 # Like Steam's, app ids are integers
                 if (appid := str(obj["id"])) in appids:
