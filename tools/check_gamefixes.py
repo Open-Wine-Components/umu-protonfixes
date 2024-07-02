@@ -77,6 +77,8 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
                 if prefix == f"{appid}.success" and isinstance(value, bool) and value:
                     appids.remove(appid)
                     break
+                if not appids:
+                    break
             r.read()
 
         conn.close()
@@ -107,12 +109,16 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
                 # Like Steam's, app ids are integers
                 if (appid := str(obj["id"])) in appids:
                     appids.remove(appid)
+                if not appids:
+                    break
 
     # IDs may be links to Steam fixes.
     if appids:
         for file in project.joinpath("gamefixes-steam").glob("*"):
             if (appid := file.name.removesuffix(".py")) in appids:
                 appids.remove(appid)
+            if not appids:
+                break
 
     # IDs may not be using upstream's ID (e.g., Alien Breed). Check all ids against the umu database
     if appids:
@@ -125,6 +131,8 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
             obj: UMUEntry = _
             if (appid := str(obj["umu_id"]).removeprefix("umu-")) in appids:
                 appids.remove(appid)
+            if not appids:
+                break
 
         conn.close()
 
