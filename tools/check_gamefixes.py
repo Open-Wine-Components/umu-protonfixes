@@ -71,14 +71,15 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         for appid in appids.copy():
             conn.request("GET", f"{endpoint}{appid}")
             r = conn.getresponse()
-
             parser: Iterator[tuple[str, str, Any]] = ijson.parse(r)
+
             for prefix, _, value in parser:
                 if prefix == f"{appid}.success" and isinstance(value, bool) and value:
                     appids.remove(appid)
                     break
                 if not appids:
                     break
+
             r.read()
 
         conn.close()
