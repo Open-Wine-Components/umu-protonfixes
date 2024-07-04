@@ -14,6 +14,3 @@ def main():
 
     #Fixes audio sliders in options
     util.protontricks('xact')
-
-    # Audio breaks above 60 fps, game engine issue
-    util.set_environment('DXVK_FRAME_RATE', '60')
