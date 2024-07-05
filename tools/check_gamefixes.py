@@ -39,6 +39,9 @@ headers = {
     "Accept-Language": "en-US,en;q=0.5",
 }
 
+# Steam games that are no longer on sale, but are valid IDs
+whitelist_steam = {231990, 4730, 105400}
+
 
 def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
     """Verifies if the name of Steam gamefix modules are valid entries.
@@ -84,9 +87,10 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
         conn.close()
 
-    if appids:
-        err = f"Steam app ids are invalid: {appids}"
-        raise ValueError(err)
+    for appid in appids:
+        if appid not in whitelist_steam:
+            err = f"Steam app id is invalid: {appid}"
+            raise ValueError(err)
 
 
 def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
