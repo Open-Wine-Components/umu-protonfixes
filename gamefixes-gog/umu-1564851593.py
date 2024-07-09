@@ -44,7 +44,7 @@ def main():  # pylint: disable=R0914
                 file.write(view[:size])
                 hashsum.update(view[:size])
 
-    if hashsum_arc != hash.hexdigest():
+    if hashsum_arc != hashsum.hexdigest():
         log.warning(f"Digest mismatch: {arc}")
         log.warn(f"Expected '{hashsum_arc}', skipping...")
         return
