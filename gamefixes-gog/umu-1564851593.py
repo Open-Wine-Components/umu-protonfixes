@@ -50,7 +50,7 @@ def main():  # pylint: disable=R0914
         return
 
     if not is_zipfile(tmp):
-        log.warn(f"Archive {tmp} is not zip, skipping...")
+        log.warn(f"Archive '{tmp}' is not zip, skipping...")
         return
 
     # Ensure that the text injection files do not already exist before opening
