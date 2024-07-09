@@ -71,7 +71,9 @@ def main():
         sha256(config.read()).hexdigest() == hashsum_config
         and sha256(dll.read()).hexdigest() == hashsum_d3d9
     ):
-        log.info("Fix for in-game font has already been applied, skipping...")
+        log.info(
+            "Fix for 'Flowers - Le Volume Sur Hiver' has already been applied, skipping..."
+        )
         config.close()
         dll.close()
         return
