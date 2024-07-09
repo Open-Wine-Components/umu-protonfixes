@@ -1,6 +1,6 @@
 """Game fix for Flowers - Le Volume Sur Hiver
 
-This fixes the crash on startup by replacing the text injection framework
+This fixes the crash on startup by moving the text injection framework
 files
 """
 
@@ -49,7 +49,7 @@ def main():
         log.warn(f"Archive {tmp} is not zip, skipping...")
         return
 
-    # Ensure that the text injection files do not already exist
+    # Ensure that the text injection files do not already exist before opening
     if not os.path.isfile(path_config):
         log.warn(f"File 'config.json' not found in '{install_dir}', skipping...")
         return
@@ -61,7 +61,7 @@ def main():
     config = open(path_config, mode="rb")
     dll = open(path_dll, mode="rb")
 
-    # Check if the text injecting files have already been replaced
+    # Check if the text injection framework files have already been replaced
     if (
         sha256(config.read()).hexdigest() == hashsum_config
         and sha256(dll.read()).hexdigest() == hashsum_d3d9
