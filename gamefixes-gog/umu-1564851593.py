@@ -29,30 +29,6 @@ def main():  # pylint: disable=R0914
     path_dll = f"{install_dir}/d3d9.dll"
     hashsum = sha256()
 
-    # Download the archive
-    with urlopen(arc, timeout=30) as resp:
-        if resp.status != 200:
-            log.warning(f"github returned the status code: {resp.status}")
-            return
-
-        with open(tmp, mode="wb", buffering=0) as file:
-            chunk_size = 64 * 1024  # 64 KB
-            buffer = bytearray(chunk_size)
-            view = memoryview(buffer)
-
-            while size := resp.readinto(buffer):
-                file.write(view[:size])
-                hashsum.update(view[:size])
-
-    if hashsum_arc != hashsum.hexdigest():
-        log.warning(f"Digest mismatch: {arc}")
-        log.warn(f"Expected '{hashsum_arc}', skipping...")
-        return
-
-    if not is_zipfile(tmp):
-        log.warn(f"Archive '{tmp}' is not zip, skipping...")
-        return
-
     # Ensure that the text injection files do not already exist before opening
     if not os.path.isfile(path_config) or not os.path.isfile(path_dll):
         log.warn(
@@ -77,6 +53,30 @@ def main():  # pylint: disable=R0914
 
     config.close()
     dll.close()
+
+    # Download the archive
+    with urlopen(arc, timeout=30) as resp:
+        if resp.status != 200:
+            log.warning(f"github returned the status code: {resp.status}")
+            return
+
+        with open(tmp, mode="wb", buffering=0) as file:
+            chunk_size = 64 * 1024  # 64 KB
+            buffer = bytearray(chunk_size)
+            view = memoryview(buffer)
+
+            while size := resp.readinto(buffer):
+                file.write(view[:size])
+                hashsum.update(view[:size])
+
+    if hashsum_arc != hashsum.hexdigest():
+        log.warning(f"Digest mismatch: {arc}")
+        log.warn(f"Expected '{hashsum_arc}', skipping...")
+        return
+
+    if not is_zipfile(tmp):
+        log.warn(f"Archive '{tmp}' is not zip, skipping...")
+        return
 
     # Rename the old files and apply the fix
     randstr = os.urandom(16).hex()
