@@ -30,7 +30,7 @@ def main():
     path_dll = f"{install_dir}/d3d9.dll"
 
     # Download the archive
-    with urlopen(arc) as resp:
+    with urlopen(arc, timeout=30) as resp:
         if resp.status != 200:
             log.warning(f"github returned the status code: {resp.status}")
             return
@@ -58,8 +58,8 @@ def main():
         log.warn(f"File 'd3d9.dll' not found in '{install_dir}', skipping...")
         return
 
-    config = open(path_config, mode="rb")
-    dll = open(path_dll, mode="rb")
+    config = open(path_config, mode="rb")  # pylint: disable=R1732
+    dll = open(path_dll, mode="rb")  # pylint: disable=R1732
 
     # Check if the text injection framework files have already been replaced
     if (
@@ -81,8 +81,8 @@ def main():
     os.rename(path_config, f"{install_dir}/.{randstr}.config.json.bak")
     os.rename(path_dll, f"{install_dir}/.{randstr}.d3d9.dll.bak")
 
-    with ZipFile(tmp, mode="r") as zip:
+    with ZipFile(tmp, mode="r") as zipfile:
         log.info("Fixing in-game font for 'Flowers - Le Volume Sur Hiver'...")
-        zip.extractall(install_dir)
+        zipfile.extractall(install_dir)
 
     os.unlink(tmp)
