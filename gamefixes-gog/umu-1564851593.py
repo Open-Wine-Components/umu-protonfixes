@@ -1,7 +1,7 @@
 """Game fix for Flowers - Le Volume Sur Hiver
 
-This fixes the crash on startup by moving the text injection framework
-files
+This fixes the crash on startup and the in-game font by moving the text
+injection framework files
 """
 
 import os
