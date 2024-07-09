@@ -54,12 +54,10 @@ def main():  # pylint: disable=R0914
         return
 
     # Ensure that the text injection files do not already exist before opening
-    if not os.path.isfile(path_config):
-        log.warn(f"File 'config.json' not found in '{install_dir}', skipping...")
-        return
-
-    if not os.path.isfile(path_dll):
-        log.warn(f"File 'd3d9.dll' not found in '{install_dir}', skipping...")
+    if not os.path.isfile(path_config) or not os.path.isfile(path_dll):
+        log.warn(
+            f"File 'config.json' or 'd3d9.dll' not found in '{install_dir}', skipping..."
+        )
         return
 
     config = open(path_config, mode="rb")  # pylint: disable=R1732
