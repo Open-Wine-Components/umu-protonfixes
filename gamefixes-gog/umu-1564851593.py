@@ -13,22 +13,21 @@ from zipfile import ZipFile, is_zipfile
 from protonfixes import util
 from protonfixes.logger import log
 
+# Archive containing the text injecting framework
+arc = "https://github.com/user-attachments/files/16136393/d3d9-2206220222.zip"
 
-def main():
+# Digest of the archive, d3d9.dll proxy and JSON
+hashsum_arc = "caed98ec44d4270290f0652502344a40c1d45216caa8935b41e7d9f461ae2d24"
+hashsum_d3d9 = "17e1c6706c684b19d05e89b588ba5101bf3ee40429cecf803c6e98af9b342129"
+hashsum_config = "aecb441fdc9c9e2ba78df63dfbe14f48c31dfd5ad571adba988ba362fc814377"
+
+
+def main():  # pylint: disable=R0914
     tmp = f"{mkdtemp()}/d3d9-2206220222.zip"
     install_dir = util.get_game_install_path()
-
-    # Archive containing the text injecting framework
-    arc = "https://github.com/user-attachments/files/16136393/d3d9-2206220222.zip"
-
-    # Digest of the archive, d3d9.dll proxy and JSON
-    hash = sha256()
-    hashsum_arc = "caed98ec44d4270290f0652502344a40c1d45216caa8935b41e7d9f461ae2d24"
-    hashsum_d3d9 = "17e1c6706c684b19d05e89b588ba5101bf3ee40429cecf803c6e98af9b342129"
-    hashsum_config = "aecb441fdc9c9e2ba78df63dfbe14f48c31dfd5ad571adba988ba362fc814377"
-
     path_config = f"{install_dir}/config.json"
     path_dll = f"{install_dir}/d3d9.dll"
+    hashsum = sha256()
 
     # Download the archive
     with urlopen(arc, timeout=30) as resp:
@@ -43,7 +42,7 @@ def main():
 
             while size := resp.readinto(buffer):
                 file.write(view[:size])
-                hash.update(view[:size])
+                hashsum.update(view[:size])
 
     if hashsum_arc != hash.hexdigest():
         log.warning(f"Digest mismatch: {arc}")
