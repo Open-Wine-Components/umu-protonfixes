@@ -21,6 +21,10 @@ except ImportError:
     from checks import run_checks
     from logger import log
 
+try:
+    import __main__ as protonmain
+except ImportError:
+    log.warn('Unable to hook into Proton main script environment')
 
 
 @lru_cache
@@ -41,12 +45,14 @@ def get_game_id() -> str:
 
 
 @lru_cache
-def get_game_name() -> str:
+def get_game_name() -> str:  #pylint: disable=R0914
     """ Trys to return the game name from environment variables
     """
+    pfx = protonmain.g_session.env.get('WINEPREFIX')
+
     if os.environ.get('UMU_ID'):
-        if os.path.isfile(os.environ['WINEPREFIX'] + '/game_title'):
-            with open(os.environ['WINEPREFIX'] + '/game_title', 'r', encoding='utf-8') as file:
+        if os.path.isfile(f'{pfx}/game_title'):
+            with open(f'{pfx}/game_title', 'r', encoding='utf-8') as file:
                 return file.readline()
 
         if not check_internet():
