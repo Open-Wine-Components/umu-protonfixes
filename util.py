@@ -481,7 +481,7 @@ def disable_uplay_overlay() -> bool:
     try:
         with open(config_file, 'a+', encoding='ascii') as file:
             file.write('\noverlay:\n  enabled: false\n  forceunhookgame: false'
-                        '\n  fps_enabled: false\n  warning_enabled: false\n')
+                        '\n  fps_enabled: false\n  warning_enabled: false\n  closebehavior: CloseBehavior_Close\n')
         log.info('Disabled UPlay overlay')
         return True
     except OSError as err:
