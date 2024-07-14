@@ -48,7 +48,7 @@ def get_game_id() -> str:
 def get_game_name() -> str:  #pylint: disable=R0914
     """ Trys to return the game name from environment variables
     """
-    pfx = protonmain.g_session.env.get('WINEPREFIX')
+    pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
 
     if os.environ.get('UMU_ID'):
         if os.path.isfile(f'{pfx}/game_title'):
