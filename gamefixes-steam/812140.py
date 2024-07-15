@@ -4,8 +4,6 @@ from protonfixes import util
 
 
 def main():
-    """disable Easy Anti-Cheat and online play, disable uplay overlay and change closebehavior"""
+    # Disable uplay overlay and change close behavior
+    # See https://github.com/Open-Wine-Components/umu-protonfixes/pull/94#issuecomment-2227475597
     util.disable_uplay_overlay()
-
-    # Replace launcher with game exe in proton arguments
-    util.append_argument("-eac_launcher -nosplash")
