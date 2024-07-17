@@ -5,10 +5,7 @@ from protonfixes import util
 
 def main():
     """ installs dsound d3dx9 arial d3dcompiler_47
-        and caps framerate to 60 to prevent audio de-sync
     """
-
-    util.set_environment('DXVK_FRAME_RATE', '60')
 
     util.protontricks('dsound')
     util.protontricks('d3dx9')
