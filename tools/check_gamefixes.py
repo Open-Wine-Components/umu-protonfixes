@@ -4,6 +4,7 @@ from urllib.request import urlopen, Request
 from http.client import HTTPSConnection
 from typing import Any, Iterator
 
+import time
 import ijson
 
 # Represents a valid API endpoint, where the first element is the host, second
@@ -67,10 +68,31 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
         conn.close()
 
-    for appid in appids:
-        if appid not in whitelist_steam:
+    # For sanity check, make a request to steamdb.
+    # Helpful in cases when a fix exists but the game was removed from Steam
+    # or is no longer on sale.
+    host = "steamdb.info"
+    endpoint = "/app"
+    conn = HTTPSConnection(host)
+
+    for appid in appids.copy():
+        conn.request("HEAD", f"{endpoint}/{appid}")
+        r = conn.getresponse()
+
+        # The server will return 404 for invalid IDs
+        if r.getcode() == 404:
             err = f"Steam app id is invalid: {appid}"
             raise ValueError(err)
+
+        appids.remove(appid)
+        # Sleep for a bit to mitigate getting blocked
+        time.sleep(1)
+
+    conn.close()
+
+    if appids:
+        err = f"Steam app ids are invalid: {appid}"
+        raise ValueError(err)
 
 
 def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
