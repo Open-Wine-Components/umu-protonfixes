@@ -91,7 +91,7 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
     conn.close()
 
     if appids:
-        err = f"Steam app ids are invalid: {appid}"
+        err = f"Steam app ids are invalid: {appids}"
         raise ValueError(err)
 
 
