@@ -153,7 +153,7 @@ def main() -> None:
     project = Path(__file__).parent.parent
 
     # Steam API to acquire a single id. Used as fallback in case some IDs could
-    # not be validated. Unforutnately, this endpoint does not accept a comma
+    # not be validated. Unfortunately, this endpoint does not accept a comma
     # separated list of IDs so we have to make one request per ID after making
     # making a request to `api.steampowered.com`.
     # NOTE: There's neither official nor unofficial documentation. Only forum posts
