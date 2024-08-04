@@ -1,4 +1,5 @@
 # pylint: disable=C0114
+import sys
 from pathlib import Path
 from urllib.request import urlopen, Request
 from http.client import HTTPSConnection
@@ -38,9 +39,11 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         appids.add(int(appid))
 
     # Check the IDs against ours
+    print(f"Validating Steam app ids against '{url}'...", file=sys.stderr)
     with urlopen(Request(url, headers=headers), timeout=500) as r:
         for obj in ijson.items(r, 'applist.apps.item'):
             if obj['appid'] in appids:
+                print(f'Removing Steam app id: "{obj["appid"]}"', file=sys.stderr)
                 appids.remove(obj['appid'])
             if not appids:
                 break
@@ -51,6 +54,7 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         host, endpoint = api
         conn = HTTPSConnection(host)
 
+        print(f"Validating Steam app ids against '{host}'...", file=sys.stderr)
         for appid in appids.copy():
             conn.request('GET', f'{endpoint}{appid}')
             r = conn.getresponse()
@@ -58,6 +62,7 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
             for prefix, _, value in parser:
                 if prefix == f'{appid}.success' and isinstance(value, bool) and value:
+                    print(f'Removing Steam app id: "{appid}"', file=sys.stderr)
                     appids.remove(appid)
                     break
 
@@ -68,6 +73,7 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
         conn.close()
 
+    print(f'Remaining Steam app ids: {appids}', file=sys.stderr)
     for appid in appids:
         if appid not in whitelist_steam:
             err = f'Steam app id is invalid: {appid}'
@@ -88,20 +94,24 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         sep = '%2C'  # Required comma separator character. See the docs.
         appids = gogids.copy()
 
+        print(f'Validating GOG app ids against "{url}"...', file=sys.stderr)
         with urlopen(
             Request(f'{url}{sep.join(appids)}', headers=headers), timeout=500
         ) as r:
             for obj in ijson.items(r, 'item'):
                 # Like Steam's, app ids are integers
                 if (appid := str(obj['id'])) in appids:
+                    print(f'Removing GOG app id: "{appid}"', file=sys.stderr)
                     appids.remove(appid)
                 if not appids:
                     break
 
     # IDs may be links to Steam fixes.
     if appids:
+        print('Validating GOG app ids against Steam app ids...', file=sys.stderr)
         for file in project.joinpath('gamefixes-steam').glob('*'):
             if (appid := file.name.removesuffix('.py')) in appids:
+                print(f'Removing GOG app id: "{appid}"', file=sys.stderr)
                 appids.remove(appid)
             if not appids:
                 break
@@ -113,6 +123,7 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         conn.request('GET', endpoint)
         r = conn.getresponse()
 
+        print(f'Validating GOG app ids against "{host}"...', file=sys.stderr)
         for obj in ijson.items(r, 'item'):
             if (appid := str(obj['umu_id']).removeprefix('umu-')) in appids:
                 appids.remove(appid)
@@ -121,6 +132,7 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
         conn.close()
 
+    print(f'Remaining GOG app ids: {appids}', file=sys.stderr)
     if appids:
         err = (
             'The following GOG app ids are invalid or are missing entries'
