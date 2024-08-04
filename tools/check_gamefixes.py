@@ -2,7 +2,7 @@
 from pathlib import Path
 from urllib.request import urlopen, Request
 from http.client import HTTPSConnection
-from typing import Any, Iterator, TypedDict, Union
+from typing import Any, Iterator, Generator
 
 import ijson
 
@@ -11,26 +11,6 @@ import ijson
 # endpoint will be used to validate local gamefix modules IDs against. Assumes
 # that the API is associated to the gamefix directory when passed to a function
 ApiEndpoint = tuple[str, str]
-
-
-# Represents a record in the UMU database
-# e.g.,:
-# {
-#   "title": "Age of Wonders",
-#   "umu_id": "umu-61500",
-#   "acronym": "aow",
-#   "codename": "1207658883",
-#   "store": "gog",
-#   "notes": null
-# }
-class UMUEntry(TypedDict):  # pylint: disable=C0115
-    title: str
-    umu_id: str
-    acronym: str
-    # Unique ID for the title defined in its store
-    codename: str
-    store: str
-    notes: Union[None, str]
 
 
 headers = {
@@ -132,9 +112,8 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         conn.request("GET", endpoint)
         r = conn.getresponse()
 
-        for _ in ijson.items(r, "item"):
-            obj: UMUEntry = _
-            if (appid := str(obj["umu_id"]).removeprefix("umu-")) in appids:
+        for obj in ijson.items(r, 'item'):
+            if (appid := str(obj['umu_id']).removeprefix('umu-')) in appids:
                 appids.remove(appid)
             if not appids:
                 break
