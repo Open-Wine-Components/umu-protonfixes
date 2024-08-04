@@ -60,8 +60,9 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
                 if prefix == f'{appid}.success' and isinstance(value, bool) and value:
                     appids.remove(appid)
                     break
-                if not appids:
-                    break
+
+            if not appids:
+                break
 
             r.read()
 
@@ -135,6 +136,8 @@ def _batch_generator(gamefix: Path, size=50) -> Generator[set[str], Any, Any]:
 
     # Process only umu-* app ids
     for file in gamefix.glob('*'):
+        if not file.name.startswith('umu-'):
+            continue
         appid = file.name.removeprefix('umu-').removesuffix('.py')
         appids.add(appid)
         if count == size:
