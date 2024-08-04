@@ -2,7 +2,7 @@
 from pathlib import Path
 from urllib.request import urlopen, Request
 from http.client import HTTPSConnection
-from typing import Any, Iterator, TypedDict, Union
+from typing import Any, Iterator, Generator
 
 import ijson
 
@@ -13,30 +13,10 @@ import ijson
 ApiEndpoint = tuple[str, str]
 
 
-# Represents a record in the UMU database
-# e.g.,:
-# {
-#   "title": "Age of Wonders",
-#   "umu_id": "umu-61500",
-#   "acronym": "aow",
-#   "codename": "1207658883",
-#   "store": "gog",
-#   "notes": null
-# }
-class UMUEntry(TypedDict):  # pylint: disable=C0115
-    title: str
-    umu_id: str
-    acronym: str
-    # Unique ID for the title defined in its store
-    codename: str
-    store: str
-    notes: Union[None, str]
-
-
 headers = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0",
-    "Accept": "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5",
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0',
+    'Accept': 'application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
 }
 
 # Steam games that are no longer on sale, but are valid IDs
@@ -51,17 +31,17 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
     appids = set()
 
     # Get all IDs
-    for file in project.joinpath("gamefixes-steam").glob("*"):
-        appid = file.name.removesuffix(".py")
+    for file in project.joinpath('gamefixes-steam').glob('*'):
+        appid = file.name.removesuffix('.py')
         if not appid.isnumeric():
             continue
         appids.add(int(appid))
 
     # Check the IDs against ours
     with urlopen(Request(url, headers=headers), timeout=500) as r:
-        for obj in ijson.items(r, "applist.apps.item"):
-            if obj["appid"] in appids:
-                appids.remove(obj["appid"])
+        for obj in ijson.items(r, 'applist.apps.item'):
+            if obj['appid'] in appids:
+                appids.remove(obj['appid'])
             if not appids:
                 break
 
@@ -72,12 +52,12 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         conn = HTTPSConnection(host)
 
         for appid in appids.copy():
-            conn.request("GET", f"{endpoint}{appid}")
+            conn.request('GET', f'{endpoint}{appid}')
             r = conn.getresponse()
             parser: Iterator[tuple[str, str, Any]] = ijson.parse(r)
 
             for prefix, _, value in parser:
-                if prefix == f"{appid}.success" and isinstance(value, bool) and value:
+                if prefix == f'{appid}.success' and isinstance(value, bool) and value:
                     appids.remove(appid)
                     break
                 if not appids:
@@ -89,7 +69,7 @@ def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
     for appid in appids:
         if appid not in whitelist_steam:
-            err = f"Steam app id is invalid: {appid}"
+            err = f'Steam app id is invalid: {appid}'
             raise ValueError(err)
 
 
@@ -103,24 +83,24 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
     # Find all IDs in batches of 50. The gog api enforces 50 ids per request
     # See https://gogapidocs.readthedocs.io/en/latest/galaxy.html#get--products
-    for gogids in _batch_generator(project.joinpath("gamefixes-gog")):
-        sep = "%2C"  # Required comma separator character. See the docs.
+    for gogids in _batch_generator(project.joinpath('gamefixes-gog')):
+        sep = '%2C'  # Required comma separator character. See the docs.
         appids = gogids.copy()
 
         with urlopen(
-            Request(f"{url}{sep.join(appids)}", headers=headers), timeout=500
+            Request(f'{url}{sep.join(appids)}', headers=headers), timeout=500
         ) as r:
-            for obj in ijson.items(r, "item"):
+            for obj in ijson.items(r, 'item'):
                 # Like Steam's, app ids are integers
-                if (appid := str(obj["id"])) in appids:
+                if (appid := str(obj['id'])) in appids:
                     appids.remove(appid)
                 if not appids:
                     break
 
     # IDs may be links to Steam fixes.
     if appids:
-        for file in project.joinpath("gamefixes-steam").glob("*"):
-            if (appid := file.name.removesuffix(".py")) in appids:
+        for file in project.joinpath('gamefixes-steam').glob('*'):
+            if (appid := file.name.removesuffix('.py')) in appids:
                 appids.remove(appid)
             if not appids:
                 break
@@ -129,12 +109,11 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
     if appids:
         host, endpoint = api
         conn = HTTPSConnection(host)
-        conn.request("GET", endpoint)
+        conn.request('GET', endpoint)
         r = conn.getresponse()
 
-        for _ in ijson.items(r, "item"):
-            obj: UMUEntry = _
-            if (appid := str(obj["umu_id"]).removeprefix("umu-")) in appids:
+        for obj in ijson.items(r, 'item'):
+            if (appid := str(obj['umu_id']).removeprefix('umu-')) in appids:
                 appids.remove(appid)
             if not appids:
                 break
@@ -143,20 +122,20 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
 
     if appids:
         err = (
-            "The following GOG app ids are invalid or are missing entries"
-            f" in the umu database: {appids}"
+            'The following GOG app ids are invalid or are missing entries'
+            f' in the umu database: {appids}'
         )
         raise ValueError(err)
 
 
-def _batch_generator(gamefix: Path, size=50) -> set[str]:
+def _batch_generator(gamefix: Path, size=50) -> Generator[set[str], Any, Any]:
     appids = set()
     # Keep track of the count because some APIs enforce limits
     count = 0
 
     # Process only umu-* app ids
-    for file in gamefix.glob("*"):
-        appid = file.name.removeprefix("umu-").removesuffix(".py")
+    for file in gamefix.glob('*'):
+        appid = file.name.removeprefix('umu-').removesuffix('.py')
         appids.add(appid)
         if count == size:
             yield appids
@@ -179,27 +158,27 @@ def main() -> None:
     # making a request to `api.steampowered.com`.
     # NOTE: There's neither official nor unofficial documentation. Only forum posts
     # See https://stackoverflow.com/questions/46330864/steam-api-all-games
-    steamapi: ApiEndpoint = ("store.steampowered.com", "/api/appdetails?appids=")
+    steamapi: ApiEndpoint = ('store.steampowered.com', '/api/appdetails?appids=')
 
     # UMU Database, that will be used to validate umu gamefixes ids against
     # See https://github.com/Open-Wine-Components/umu-database/blob/main/README.md
-    umudb_gog: ApiEndpoint = ("umu.openwinecomponents.org", "/umu_api.php?store=gog")
+    umudb_gog: ApiEndpoint = ('umu.openwinecomponents.org', '/umu_api.php?store=gog')
 
     # Steam API
     # Main API used to validate steam gamefixes
     # NOTE: There's neither official nor unofficial documentation. Only forum posts
     # See https://stackoverflow.com/questions/46330864/steam-api-all-games
     steampowered = (
-        "https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json"
+        'https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json'
     )
 
     # GOG API
     # See https://gogapidocs.readthedocs.io/en/latest/galaxy.html#get--products
-    gogapi = "https://api.gog.com/products?ids="
+    gogapi = 'https://api.gog.com/products?ids='
 
     check_steamfixes(project, steampowered, steamapi)
     check_gogfixes(project, gogapi, umudb_gog)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
