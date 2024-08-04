@@ -126,6 +126,7 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         print(f'Validating GOG app ids against "{host}"...', file=sys.stderr)
         for obj in ijson.items(r, 'item'):
             if (appid := str(obj['umu_id']).removeprefix('umu-')) in appids:
+                print(f'Removing GOG app id: "{appid}"', file=sys.stderr)
                 appids.remove(appid)
             if not appids:
                 break
