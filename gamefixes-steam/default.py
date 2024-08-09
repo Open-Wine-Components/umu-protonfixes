@@ -28,6 +28,6 @@ def main():
 
     use_steam_commands()
 
-    # Ubisoft
+    # Disable the Ubisoft overlay
     if '-uplay_steam_mode' in sys.argv:
         util.disable_uplay_overlay()
