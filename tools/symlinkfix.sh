@@ -1,4 +1,12 @@
 #!/bin/bash
+
+if [[ $(basename "$PWD") != "tools" ]]; then
+	echo "Not executing within subdirectory 'tools', exiting"
+	exit 1
+fi
+
+cd ..
+
 # change symlink targets to lower case if they aren't already
 find . -type l | while read symlink; do
   target=$(readlink "$symlink")
