@@ -481,15 +481,15 @@ def disable_uplay_overlay() -> bool:
         return False
 
     try:
-        data = """
-overlay:
-  enabled: false
-  forceunhookgame: false
-  fps_enabled: false
-  warning_enabled: false
-user:
-  closebehavior: CloseBehavior_Close""".lstrip()
-
+        data = (
+            'overlay:\n'
+            '  enabled: false\n'
+            '  forceunhookgame: false\n'
+            '  fps_enabled: false\n'
+            '  warning_enabled: false\n'
+            'user:\n'
+            '  closebehavior: CloseBehavior_Close'
+        )
         with open(config_file, 'a+', encoding='ascii') as file:
             file.write(data)
         log.info('Disabled UPlay overlay')
