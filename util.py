@@ -466,22 +466,24 @@ def disable_uplay_overlay() -> bool:
     """
     config_dir = os.path.join(
         protonprefix(),
-        'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/'
+        'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/',
     )
+    config_file = os.path.join(config_dir, "settings.yml")
 
-    if not os.path.exists(config_dir):
-        os.makedirs(config_dir)
-
-    config_file = os.path.join(config_dir, 'settings.yml')
-
-    if not os.path.isdir(config_dir):
-        log.warn(f'Could not disable UPlay overlay: "{config_dir}" does not exist or is not a directory.')
-        return False
+    os.makedirs(config_dir, exist_ok=True)
 
     try:
+        data = (
+            'overlay:\n'
+            '  enabled: false\n'
+            '  forceunhookgame: false\n'
+            '  fps_enabled: false\n'
+            '  warning_enabled: false\n'
+            'user:\n'
+            '  closebehavior: CloseBehavior_Close'
+        )
         with open(config_file, 'a+', encoding='ascii') as file:
-            file.write('\noverlay:\n  enabled: false\n  forceunhookgame: false'
-                        '\n  fps_enabled: false\n  warning_enabled: false\n')
+            file.write(data)
         log.info('Disabled UPlay overlay')
         return True
     except OSError as err:
