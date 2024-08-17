@@ -5,11 +5,11 @@ DESTDIR := $(shell pwd)/dist/protonfixes
 
 .PHONY: all
 
-all: xrandr-dist
+all: xrandr-dist cabextract-dist libmspack-dist
 
 .PHONY: install
 
-install: protonfixes-install xrandr-install
+install: protonfixes-install xrandr-install cabextract-install libmspack-install
 
 #
 # protonfixes
