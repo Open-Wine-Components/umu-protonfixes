@@ -67,5 +67,31 @@ cabextract-install: cabextract-dist
 	make DESTDIR=$(DESTDIR) install
 	cp $(DESTDIR)/usr/bin/cabextract $(DESTDIR)
 	rm -r $(DESTDIR)/usr
+
+#
+# libmspack
+#
+
+$(OBJDIR)/.build-libmspack-dist: | $(OBJDIR)
+	$(info :: Building libmspack )
+	cd subprojects/libmspack/libmspack && \
+	autoreconf -vfi && \
+	./configure --prefix=/usr --disable-static --sysconfdir=/etc --localstatedir=/var && \
+	sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool && \
+	make
+	touch $(@)
+
+.PHONY: libmspack-dist
+
+libmspack-dist: $(OBJDIR)/.build-libmspack-dist
+
+libmspack-install: libmspack-dist
+	$(info :: Installing libmspack )
+	cd subprojects/libmspack/libmspack && \
+	make DESTDIR=$(DESTDIR) install
+	cp -d $(DESTDIR)/usr/lib/libmspack* $(DESTDIR)
+	rm -r $(DESTDIR)/usr
+	rm    $(DESTDIR)/libmspack.la
+
 $(OBJDIR):
 	@mkdir -p $(@)
