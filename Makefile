@@ -43,7 +43,12 @@ xrandr-dist: $(OBJDIR)/.build-xrandr-dist
 
 xrandr-install: xrandr-dist
 	$(info :: Installing xrandr )
-	cp subprojects/x11-xserver-utils/xrandr/xrandr $(DESTDIR)
+	# Install
+	cd subprojects/x11-xserver-utils/xrandr $(DESTDIR) && \
+	make DESTDIR=$(DESTDIR) install
+	# Post install
+	cp $(DESTDIR)/usr/bin/xrandr $(DESTDIR)
+	rm -r $(DESTDIR)/usr
 
 #
 # cabextract
