@@ -1,0 +1,11 @@
+""" Game fix for Dirt 2
+"""
+
+from protonfixes import util
+
+
+def main():
+    """ This game uses GFWL, which causes it to fail to launch. xliveless is needed to get this working.
+    """
+
+    util.protontricks('xliveless')
