@@ -8,6 +8,8 @@ w_metadata xliveless dlls \
 
 load_xliveless()
 {
+    w_package_warn_win64 # Only a 32-bit DLL is installed
+
     w_download https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/v7.7.0/Ultimate-ASI-Loader.zip 62778dc40a2f44b1636db3aca5a3d01727a1c7eb40b1c49d42b71472631cd2d7
     w_try_unzip "${W_TMP}" "${W_CACHE}/${W_PACKAGE}/${file1}" "dinput8.dll"
     w_try_cp_dll "${W_TMP}/dinput8.dll" "${W_SYSTEM32_DLLS}/xlive.dll"
