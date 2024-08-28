@@ -10,4 +10,4 @@ def main():
 
     # https://github.com/ValveSoftware/Proton/issues/703#issuecomment-416075961
     util.protontricks('devenum')
-    util.protontricks('wmp9_x86_64')
+    util.protontricks("wmp9")
