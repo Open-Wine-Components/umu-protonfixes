@@ -1,11 +1,10 @@
-""" Game fixes Call of Juarez: Gunslinger
+""" Game fix for Call of Juarez: Gunslinger
 """
-#pylint: disable=C0103
 
 from protonfixes import util
 
 def main():
-    """ installs wmp11
+    """ Fixes missing sound in cutscenes 
     """
-    # Fixes missing cutscenes
-    util.protontricks('wmp11')
+
+    util.disable_protonmediaconverter()
