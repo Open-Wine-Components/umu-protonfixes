@@ -10,4 +10,4 @@ def main():
 
     # The whole game is only videos and require wmp9 & quartz
     util.protontricks('quartz')
-    util.protontricks('wmp9_x86_64')
+    util.protontricks("wmp9")
