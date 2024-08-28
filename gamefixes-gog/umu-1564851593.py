@@ -57,7 +57,7 @@ def main():  # pylint: disable=R0914
     # Download the archive
     with urlopen(arc, timeout=30) as resp:
         if resp.status != 200:
-            log.warning(f"github returned the status code: {resp.status}")
+            log.warn(f"github returned the status code: {resp.status}")
             return
 
         with open(tmp, mode="wb", buffering=0) as file:
@@ -70,7 +70,7 @@ def main():  # pylint: disable=R0914
                 hashsum.update(view[:size])
 
     if hashsum_arc != hashsum.hexdigest():
-        log.warning(f"Digest mismatch: {arc}")
+        log.warn(f"Digest mismatch: {arc}")
         log.warn(f"Expected '{hashsum_arc}', skipping...")
         return
 
