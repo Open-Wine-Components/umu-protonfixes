@@ -1,7 +1,8 @@
 OBJDIR  := builddir
 
-PREFIX  ?= /usr
-DESTDIR := $(shell pwd)/dist/protonfixes
+PREFIX      ?= /usr
+DESTDIR     ?=
+INSTALL_DIR ?= $(shell pwd)/dist/protonfixes
 
 .PHONY: all
 
@@ -19,12 +20,12 @@ install: protonfixes-install xrandr-install cabextract-install libmspack-install
 
 protonfixes-install: protonfixes
 	$(info :: Installing protonfixes )
-	install -d              $(DESTDIR)
-	cp      -r gamefixes-*  $(DESTDIR)
-	cp      -r verbs        $(DESTDIR)
-	cp         *.py         $(DESTDIR)
-	cp         winetricks   $(DESTDIR)
-	rm $(DESTDIR)/protonfixes_test.py
+	install -d              $(INSTALL_DIR)
+	cp      -r gamefixes-*  $(INSTALL_DIR)
+	cp      -r verbs        $(INSTALL_DIR)
+	cp         *.py         $(INSTALL_DIR)
+	cp         winetricks   $(INSTALL_DIR)
+	rm $(INSTALL_DIR)/protonfixes_test.py
 
 #
 # xrandr
@@ -44,11 +45,11 @@ xrandr-dist: $(OBJDIR)/.build-xrandr-dist
 xrandr-install: xrandr-dist
 	$(info :: Installing xrandr )
 	# Install
-	cd subprojects/x11-xserver-utils/xrandr $(DESTDIR) && \
-	make DESTDIR=$(DESTDIR) install
+	cd subprojects/x11-xserver-utils/xrandr $(INSTALL_DIR) && \
+	make DESTDIR=$(INSTALL_DIR) install
 	# Post install
-	cp $(DESTDIR)/usr/bin/xrandr $(DESTDIR)
-	rm -r $(DESTDIR)/usr
+	cp $(INSTALL_DIR)/usr/bin/xrandr $(INSTALL_DIR)
+	rm -r $(INSTALL_DIR)/usr
 
 #
 # cabextract
@@ -69,9 +70,9 @@ cabextract-dist: $(OBJDIR)/.build-cabextract-dist
 cabextract-install: cabextract-dist
 	$(info :: Installing cabextract )
 	cd subprojects/libmspack/cabextract && \
-	make DESTDIR=$(DESTDIR) install
-	cp $(DESTDIR)/usr/bin/cabextract $(DESTDIR)
-	rm -r $(DESTDIR)/usr
+	make DESTDIR=$(INSTALL_DIR) install
+	cp $(INSTALL_DIR)/usr/bin/cabextract $(INSTALL_DIR)
+	rm -r $(INSTALL_DIR)/usr
 
 #
 # libmspack
@@ -93,10 +94,10 @@ libmspack-dist: $(OBJDIR)/.build-libmspack-dist
 libmspack-install: libmspack-dist
 	$(info :: Installing libmspack )
 	cd subprojects/libmspack/libmspack && \
-	make DESTDIR=$(DESTDIR) install
-	cp -d $(DESTDIR)/usr/lib/libmspack* $(DESTDIR)
-	rm -r $(DESTDIR)/usr
-	rm    $(DESTDIR)/libmspack.la
+	make DESTDIR=$(INSTALL_DIR) install
+	cp -d $(INSTALL_DIR)/usr/lib/libmspack* $(INSTALL_DIR)
+	rm -r $(INSTALL_DIR)/usr
+	rm    $(INSTALL_DIR)/libmspack.la
 
 $(OBJDIR):
 	@mkdir -p $(@)
