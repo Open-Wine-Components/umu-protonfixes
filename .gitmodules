@@ -4,3 +4,6 @@
 [submodule "subprojects/libmspack"]
 	path = subprojects/libmspack
 	url = https://github.com/kyz/libmspack.git
+[submodule "subprojects/xutils-dev"]
+	path = subprojects/xutils-dev
+	url = https://salsa.debian.org/xorg-team/app/xutils-dev.git

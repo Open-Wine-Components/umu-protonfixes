@@ -32,6 +32,10 @@ protonfixes-install: protonfixes
 #
 
 $(OBJDIR)/.build-xrandr-dist: | $(OBJDIR)
+	$(info :: Installing xorg-macros )
+	cd subprojects/xutils-dev/util-macros && \
+	./configure --prefix=/usr && \
+	make install
 	$(info :: Building xrandr )
 	cd subprojects/x11-xserver-utils/xrandr && \
 	./configure --prefix=/usr && \
