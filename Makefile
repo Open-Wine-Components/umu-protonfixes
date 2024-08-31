@@ -45,7 +45,7 @@ xrandr-dist: $(OBJDIR)/.build-xrandr-dist
 xrandr-install: xrandr-dist
 	$(info :: Installing xrandr )
 	# Install
-	cd subprojects/x11-xserver-utils/xrandr $(INSTALL_DIR) && \
+	cd subprojects/x11-xserver-utils/xrandr && \
 	make DESTDIR=$(INSTALL_DIR) install
 	# Post install
 	cp $(INSTALL_DIR)/usr/bin/xrandr $(INSTALL_DIR)
