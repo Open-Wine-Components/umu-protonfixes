@@ -1,12 +1,10 @@
-""" Game fix for ATRI -My Dear Moments-
-"""
-#pylint: disable=C0103
+"""Game fix for ATRI -My Dear Moments-"""
 
 from protonfixes import util
 
+
 def main():
-    """ Installs wmp11
-    """
-    util.protontricks('quartz_feb2010')
-    util.protontricks('wmp11')
-    util.protontricks('qasf')
+    # Fix in-game media playback
+    # See https://github.com/Open-Wine-Components/umu-protonfixes/issues/111#issuecomment-2317389123
+    util.disable_protonmediaconverter()
+    util.append_argument("-vomstyle=overlay")
