@@ -4,7 +4,6 @@
 
 import os
 from protonfixes import util
-from protonfixes.logger import log
 
 def main():
     """ EAC Workaround
