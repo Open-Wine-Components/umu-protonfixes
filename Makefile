@@ -34,10 +34,12 @@ protonfixes-install: protonfixes
 $(OBJDIR)/.build-xrandr-dist: | $(OBJDIR)
 	$(info :: Installing xorg-macros )
 	cd subprojects/xutils-dev/util-macros && \
+	autoreconf -iv && \
 	./configure --prefix=/usr && \
-	make install
+	make DESTDIR=$(INSTALL_DIR) install
 	$(info :: Building xrandr )
 	cd subprojects/x11-xserver-utils/xrandr && \
+	autoreconf -iv -I$(INSTALL_DIR)/usr/share/aclocal && \
 	./configure --prefix=/usr && \
 	make
 	touch $(@)
