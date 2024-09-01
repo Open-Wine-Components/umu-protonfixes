@@ -34,13 +34,26 @@ line-length = 88
 indent-width = 4
 
 # Assume Python 3.9
+# Note: Should sync with the SLR's Python
 target-version = "py39"
 
 [lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F", "ANN"]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "ANN",
+    # Detect for unused arguments
+    "ARG",
+    # Enforce f-string instead of str.join
+    "FLY",
+    # Simplify and update syntax to our target Python version
+    "UP",
+]
 ignore = ["ANN101"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -76,4 +89,3 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
-
