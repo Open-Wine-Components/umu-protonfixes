@@ -2,7 +2,8 @@ import sys
 from pathlib import Path
 from urllib.request import urlopen, Request
 from http.client import HTTPSConnection
-from typing import Any, Iterator, Generator
+from typing import Any
+from collections.abc import Iterator, Generator
 
 import ijson
 

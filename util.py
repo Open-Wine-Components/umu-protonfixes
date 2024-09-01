@@ -13,7 +13,8 @@ import subprocess
 import urllib.request
 import functools
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Mapping, Generator, Any, Callable, Union
+from typing import Literal, Any, Callable, Union
+from collections.abc import Mapping, Generator
 
 try:
     from .logger import log
