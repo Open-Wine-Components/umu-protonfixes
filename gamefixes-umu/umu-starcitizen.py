@@ -2,7 +2,6 @@
 """
 #pylint: disable=C0103,E0401
 
-import os
 from protonfixes import util
 
 def main():
