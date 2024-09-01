@@ -706,7 +706,7 @@ def set_dxvk_option(
         if os.access(dxvk_conf, os.F_OK):
             with open(dxvk_conf, encoding='ascii') as dxvk:
                 conf.read_file(read_dxvk_conf(dxvk))
-        log.debug(conf.items(section))
+        log.debug(f'{conf.items(section)}')
 
     # set option
     log.info('Addinging DXVK option: ' + str(opt) + ' = ' + str(val))
@@ -718,12 +718,12 @@ def set_dxvk_option(
 
 def install_eac_runtime() -> None:
     """Install Proton Easyanticheat Runtime"""
-    install_app(1826330)
+    install_app('1826330')
 
 
 def install_battleye_runtime() -> None:
     """Install Proton BattlEye Runtime"""
-    install_app(1161040)
+    install_app('1161040')
 
 
 def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
