@@ -19,7 +19,6 @@ if all(RUN_CONDITIONS):
     try:
         fix.main()
 
-    # pylint: disable=W0702
     # Catch any exceptions and print a traceback
     except:
         sys.stderr.write('ProtonFixes ' + traceback.format_exc())

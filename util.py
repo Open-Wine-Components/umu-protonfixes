@@ -100,7 +100,6 @@ def once(func: callable = None, retry: bool = False):
     if func is None:
         return functools.partial(once, retry=retry)
 
-    # pylint: disable=missing-docstring
     def wrapper(*args, **kwargs):
         func_id = f'{func.__module__}.{func.__name__}'
         prefix = protonprefix()
@@ -114,7 +113,7 @@ def once(func: callable = None, retry: bool = False):
         exception = None
         try:
             func(*args, **kwargs)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             if retry:
                 raise exc
             exception = exc
@@ -123,7 +122,7 @@ def once(func: callable = None, retry: bool = False):
             tmp.close()
 
         if exception:
-            raise exception  # pylint: disable=raising-bad-type
+            raise exception
 
         return
 
@@ -478,7 +477,7 @@ def disable_uplay_overlay() -> bool:
         protonprefix(),
         'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/',
     )
-    config_file = os.path.join(config_dir, "settings.yml")
+    config_file = os.path.join(config_dir, 'settings.yml')
 
     os.makedirs(config_dir, exist_ok=True)
 
@@ -768,7 +767,7 @@ def try_show_gui_error(text: str) -> None:
     3. Failed, output info to log
     """
     try:  # in case in-use Python doesn't have tkinter, which is likely
-        from tkinter import messagebox  # pylint: disable=C0415
+        from tkinter import messagebox
 
         messagebox.showerror('Proton Fixes', text)
     except ImportError:

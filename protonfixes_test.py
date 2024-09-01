@@ -1,4 +1,3 @@
-# pylint: disable=C0114
 import unittest
 import os
 import tempfile
@@ -9,7 +8,6 @@ import urllib.request
 import fix
 
 
-# pylint: disable=C0115,R0904
 class TestProtonfixes(unittest.TestCase):
     def setUp(self):
         self.env = {

@@ -4,7 +4,7 @@ import os
 import sys
 import shutil
 
-# pylint: disable=E0611
+
 from __main__ import CURRENT_PREFIX_VERSION, g_proton
 from .logger import log
 
@@ -33,7 +33,7 @@ def show_debug_info() -> None:
     log.debug('System Python Version:')
     try:
         log.debug(shutil.which(os.readlink(shutil.which('python'))))
-    except:  # pylint: disable=W0702
+    except:
         log.debug(shutil.which('python'))
     log.debug(line)
 

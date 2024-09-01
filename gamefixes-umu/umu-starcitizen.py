@@ -1,5 +1,4 @@
 """Game fix for Star Citizen"""
-,E0401
 
 from protonfixes import util
 

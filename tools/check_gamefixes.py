@@ -1,4 +1,3 @@
-# pylint: disable=C0114
 import sys
 from pathlib import Path
 from urllib.request import urlopen, Request

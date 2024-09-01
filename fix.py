@@ -43,7 +43,7 @@ def get_game_id() -> str:
 
 
 @lru_cache
-def get_game_name() -> str:  # pylint: disable=R0914
+def get_game_name() -> str:
     """Trys to return the game name from environment variables"""
     pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
 

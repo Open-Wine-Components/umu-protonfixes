@@ -22,7 +22,7 @@ hashsum_d3d9 = '17e1c6706c684b19d05e89b588ba5101bf3ee40429cecf803c6e98af9b342129
 hashsum_config = 'aecb441fdc9c9e2ba78df63dfbe14f48c31dfd5ad571adba988ba362fc814377'
 
 
-def main():  # pylint: disable=R0914
+def main():
     tmp = f'{mkdtemp()}/d3d9-2206220222.zip'
     install_dir = util.get_game_install_path()
     path_config = f'{install_dir}/config.json'
@@ -36,8 +36,8 @@ def main():  # pylint: disable=R0914
         )
         return
 
-    config = open(path_config, mode='rb')  # pylint: disable=R1732
-    dll = open(path_dll, mode='rb')  # pylint: disable=R1732
+    config = open(path_config, mode='rb')
+    dll = open(path_dll, mode='rb')
 
     # Check if the text injection framework files have already been replaced
     if (
