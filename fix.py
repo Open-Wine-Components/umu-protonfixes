@@ -1,6 +1,5 @@
 """Gets the game id and applies a fix if found"""
 
-import io
 import os
 import re
 import sys
@@ -86,7 +85,7 @@ def get_game_name() -> str:
         game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
         game_manifest = os.path.join(game_library, f'appmanifest_{get_game_id()}.acf')
 
-        with io.open(game_manifest, 'r', encoding='utf-8') as appmanifest:
+        with open(game_manifest, encoding='utf-8') as appmanifest:
             for xline in appmanifest.readlines():
                 if 'name' in xline.strip():
                     name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]

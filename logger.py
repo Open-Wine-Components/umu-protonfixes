@@ -1,6 +1,5 @@
 """Simple logging to stdout the same way Proton does"""
 
-import io
 import os
 import sys
 
@@ -33,7 +32,7 @@ class Log:
         fulltext = color + pfx + str(msg) + reset + os.linesep
         sys.stderr.write(fulltext)
         sys.stderr.flush()
-        with io.open('/tmp/test', 'a', 1, encoding='utf-8') as testfile:
+        with open('/tmp/test', 'a', 1, encoding='utf-8') as testfile:
             testfile.write(logtext)
 
     def info(self, msg: str) -> None:
