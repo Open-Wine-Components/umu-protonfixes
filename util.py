@@ -145,7 +145,7 @@ def _killhanging() -> None:
                 for exe in badexes:
                     if exe in cmdline.decode():
                         os.kill(int(pid), signal.SIGKILL)
-        except IOError:
+        except OSError:
             continue
 
 
