@@ -6,7 +6,7 @@ import glob
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Allow -northstar option to work"""
     # Define game directory
     install_dir = glob.escape(util.get_game_install_path())

@@ -4,7 +4,7 @@ import os
 import subprocess
 
 
-def main():
+def main() -> None:
     """Graphics API workaround"""
     if not os.path.isfile('UserCfg.lua.bak'):
         subprocess.call(['cp', 'UserCfg.lua', 'UserCfg.lua.bak'])

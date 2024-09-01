@@ -11,7 +11,7 @@ import shutil
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     syswow64 = os.path.join(util.protonprefix(), 'drive_c/windows/syswow64')
     if util.protontricks('dgvoodoo2'):
         subprocess.call(

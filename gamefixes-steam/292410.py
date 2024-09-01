@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('lavfilters')  # fix videos
     util.winedll_override(
         'd3d9', 'n,b'

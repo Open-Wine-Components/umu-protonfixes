@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Uses winetricks to install the ole32 verb"""
 
     util.protontricks('ole32')

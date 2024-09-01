@@ -4,7 +4,7 @@ import os
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Modify ge3.ini"""
 
     game_opts = """

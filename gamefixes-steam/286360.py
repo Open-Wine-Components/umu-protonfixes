@@ -6,6 +6,6 @@ import os
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.replace_command('SotV_Launcher.exe', 'hd/SotV1.exe')
     os.chdir('hd')

@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Disable esync and fsync"""
 
     # Fixes random crashing during gameplay

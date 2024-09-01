@@ -5,5 +5,5 @@ https://www.protondb.com/app/1930
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('xact')

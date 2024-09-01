@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """
     Fixes in-game video playback for the intro and ending.
     """

@@ -7,7 +7,7 @@ from protonfixes import util
 from protonfixes.logger import log
 
 
-def main():
+def main() -> None:
     # https://www.reddit.com/r/SteamDeck/comments/vuagy2/finally_got_fable_3_working/
     util.protontricks('xliveless')
 

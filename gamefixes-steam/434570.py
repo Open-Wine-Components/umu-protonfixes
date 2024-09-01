@@ -3,5 +3,5 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('dotnet40')

@@ -15,7 +15,7 @@ from protonfixes import util
 from protonfixes.logger import log
 
 
-def main():
+def main() -> None:
     env = protonmain.g_session.env.copy()
     wine = f'{util.protondir()}/files/bin/wine64'
     install_dir = util.get_game_install_path()

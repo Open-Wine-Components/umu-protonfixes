@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs xact, disable ESYNC, disable FSYNC"""
 
     # Fixes crash after typing then entering or clicking `search` within the game's terminal menu

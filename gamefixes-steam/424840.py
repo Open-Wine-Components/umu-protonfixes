@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Add launch parameter"""
 
     # The game crashes if running with more than one CPU thread,

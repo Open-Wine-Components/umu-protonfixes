@@ -22,7 +22,7 @@ hashsum_d3d9 = '17e1c6706c684b19d05e89b588ba5101bf3ee40429cecf803c6e98af9b342129
 hashsum_config = 'aecb441fdc9c9e2ba78df63dfbe14f48c31dfd5ad571adba988ba362fc814377'
 
 
-def main():
+def main() -> None:
     tmp = f'{mkdtemp()}/d3d9-2206220222.zip'
     install_dir = util.get_game_install_path()
     path_config = f'{install_dir}/config.json'

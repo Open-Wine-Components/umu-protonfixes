@@ -8,7 +8,7 @@ import zipfile
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Enable preload options"""
 
     # Enable preload options

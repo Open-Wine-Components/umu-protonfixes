@@ -9,7 +9,7 @@ import glob
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     if sys.argv[2].find('winsetup') != -1:
         os.chdir(sys.argv[2][-29:-13])
 

@@ -5,5 +5,5 @@ dgvoodoo2 to force anti-aliasing and higher resolution
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('dgvoodoo2')

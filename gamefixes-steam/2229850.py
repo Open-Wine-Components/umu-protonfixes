@@ -6,7 +6,7 @@ from protonfixes import util
 from protonfixes.logger import log
 
 
-def main():
+def main() -> None:
     """Install and launch the CnCNet Launcher
 
     It fixes several issues, allows multiplayer and provides a working UI,
@@ -34,7 +34,7 @@ def main():
         util.replace_command('RA2MD.exe', 'CnCNetYRLauncher.exe')
 
 
-def use_cnc_ddraw():
+def use_cnc_ddraw() -> None:
     """Install cnc-ddraw, the current replacement from EA isn't working."""
 
     log('Using cnc-ddraw.')

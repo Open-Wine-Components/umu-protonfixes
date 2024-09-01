@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs vcrun2019 and d3dcompiler47"""
 
     # FFVII needs vcrun2019 and d3dcompiler_47

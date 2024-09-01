@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Fixes missing sound in cutscenes"""
 
     util.disable_protonmediaconverter()

@@ -5,7 +5,7 @@ Fixes Multiplayer
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Installs directplay"""
 
     util.protontricks('directplay')

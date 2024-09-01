@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Disables esync and fsync"""
 
     # https://github.com/ValveSoftware/Proton/issues/797#issuecomment-955180056

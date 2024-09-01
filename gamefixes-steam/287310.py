@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Sets the necessary dll overrides for the wrappers that are shipped with the game"""
 
     # Set overrides

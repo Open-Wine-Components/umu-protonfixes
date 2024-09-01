@@ -6,7 +6,7 @@ import subprocess
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Fix EAC location in smite"""
     install_dir = glob.escape(util.get_game_install_path())
 

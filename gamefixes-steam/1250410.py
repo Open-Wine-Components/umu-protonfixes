@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Needs fastlaunch option"""
 
     # Fixes the startup process.

@@ -3,6 +3,6 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     # fix broken or missing font in UI
     util.protontricks('gdiplus')

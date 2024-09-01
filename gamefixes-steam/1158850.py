@@ -6,5 +6,5 @@ Requires disabling the gstreamer protonaudioconverterbin to get full audio
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.disable_protonmediaconverter()

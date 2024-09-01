@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Launcher workaround"""
     # Fixes the startup process.
     util.install_battleye_runtime()

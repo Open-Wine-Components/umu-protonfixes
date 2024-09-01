@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Disable ESYNC, disable intro's"""
 
     # After loading the game, or a save file, a key needs to be pressed

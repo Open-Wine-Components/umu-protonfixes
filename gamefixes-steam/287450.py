@@ -5,7 +5,7 @@ Source: https://github.com/simons-public/protonfixes/issues/24#issue-372384148
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Installs crypt32 and and bypasses launcher"""
 
     # Install crypt32 (not required for Proton 3.16-3 and up)

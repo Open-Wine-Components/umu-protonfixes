@@ -4,5 +4,5 @@ from protonfixes import util
 
 
 # Fix water rendering as black
-def main():
+def main() -> None:
     util.protontricks('d3dx9')

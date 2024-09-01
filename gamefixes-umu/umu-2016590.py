@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Installs wininet and urlmon in order to allow Blacksmith Launcher to properly install the game.
 
     This also has the side effect of breaking voip in DungeonCrawler.exe, so we add registry entries

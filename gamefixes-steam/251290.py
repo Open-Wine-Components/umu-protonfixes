@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('quartz')  # Cutscene fixes
     util.protontricks('amstream')
     util.protontricks('lavfilters')

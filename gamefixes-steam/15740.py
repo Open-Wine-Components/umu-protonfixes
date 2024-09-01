@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """klite to fix videos
     prev version of this used devenum, quartz, wmp9 but that caused laggy intros
     """

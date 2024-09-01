@@ -3,6 +3,6 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.winedll_override('dinput', 'n,b')  # DxWrapper component
     util.winedll_override('winmm', 'n,b')  # Music playback

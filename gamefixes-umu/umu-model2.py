@@ -4,7 +4,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs d3dcompiler_42, d3dx9_42, d3dx9, xact, xact_64"""
 
     util.protontricks('d3dcompiler_42')

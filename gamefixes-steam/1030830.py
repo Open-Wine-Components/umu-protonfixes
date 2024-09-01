@@ -3,6 +3,6 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Enable NVIDIA PhysX support."""
     util.protontricks('physx')

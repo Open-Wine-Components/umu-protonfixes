@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs quartz, wmp9"""
 
     # The whole game is only videos and require wmp9 & quartz

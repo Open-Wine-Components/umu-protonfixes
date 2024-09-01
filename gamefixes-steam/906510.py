@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs d3dcompiler_47"""
 
     # https://github.com/ValveSoftware/Proton/issues/3493#issuecomment-1521636321

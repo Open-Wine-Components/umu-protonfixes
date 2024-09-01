@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """NVIDIA PhysX support."""
 
     # Enables NVIDIA PhysX in Batman Arkham Knight.

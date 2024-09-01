@@ -7,7 +7,7 @@ This game requires two fixes to work:
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('xliveless')
 
     # According to PCGW, no more than 6 physical cores work

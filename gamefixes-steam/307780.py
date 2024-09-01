@@ -3,6 +3,6 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     # Fix pre-rendered cutscene playback
     util.protontricks('xact_x64')

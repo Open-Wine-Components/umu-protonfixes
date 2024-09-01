@@ -4,7 +4,7 @@ import os
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """The file mms.cfg must have the string OverrideGPUValidation=1 written"""
     fix_installed = False
     prefix = util.protonprefix()

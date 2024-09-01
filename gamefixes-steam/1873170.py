@@ -15,7 +15,7 @@ from protonfixes import util
 from protonfixes.logger import log
 
 
-def main():
+def main() -> None:
     util.replace_command('CTB.exe', 'nw.exe')
     install_dir = glob.escape(util.get_game_install_path())
     if not os.path.isfile(os.path.join(install_dir, 'nw.exe')):

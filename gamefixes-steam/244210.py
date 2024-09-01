@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Fixes default launcher and ACM."""
 
     util.protontricks('dotnet452')

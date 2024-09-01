@@ -4,7 +4,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs d3dx9_43, xact"""
 
     # https://steamcommunity.com/app/231990/discussions/0/3198117312260185786/#c3470604115208907456

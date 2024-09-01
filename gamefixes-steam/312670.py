@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """This bypasses Strange Brigade's Launcher, which renders all black."""
     # Fixes the startup process.
     util.replace_command('StrangeBrigade.exe', 'StrangeBrigade_Vulkan.exe')

@@ -7,5 +7,5 @@ fixed Persona 5 Strikers by Swish in Protondb
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.disable_protonmediaconverter()

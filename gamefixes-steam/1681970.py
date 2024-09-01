@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('klite')
     util.winedll_override('winegstreamer', '')
     # it uses quartz instead of mfplat on win7

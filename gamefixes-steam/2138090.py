@@ -8,5 +8,5 @@ further stolen from marianoag by bitwolf
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.disable_protonmediaconverter()

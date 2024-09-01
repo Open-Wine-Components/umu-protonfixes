@@ -9,7 +9,7 @@ import subprocess
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('rsx3d')
     if util.protontricks('lavfilters'):
         util.regedit_add(

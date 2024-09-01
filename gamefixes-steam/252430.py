@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Install vcrun2010"""
     util.protontricks('vcrun2010')
     util.protontricks('dsound')

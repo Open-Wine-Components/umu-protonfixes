@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Installs directmusic and directplay"""
 
     util.protontricks('dmband')

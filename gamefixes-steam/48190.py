@@ -6,5 +6,5 @@ Game uses an old customized Ubisoft launcher that's currently not working with P
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.append_argument('-playoffline')

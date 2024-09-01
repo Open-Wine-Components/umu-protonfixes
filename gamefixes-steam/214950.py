@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs d3dx11_42, d3dcompiler_42, directplay
     Disable esync and fsync
     """

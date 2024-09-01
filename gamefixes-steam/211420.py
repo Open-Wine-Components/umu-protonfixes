@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Needs WMP9, devenum, quartz, dinput and win7"""
 
     # For main menu, intro and outro playback

@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Installs d3dxof"""
 
     # https://github.com/ValveSoftware/Proton/issues/970#issuecomment-420421289

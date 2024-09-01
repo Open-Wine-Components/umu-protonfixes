@@ -4,7 +4,7 @@ import json
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Change setting FSAA to 0 in graphics.config"""
 
     config = (

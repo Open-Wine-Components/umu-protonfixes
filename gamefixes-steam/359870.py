@@ -4,7 +4,7 @@ import os
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     # disable new character intro cutscene to prevent black screen loop
     configpath = os.path.join(
         util.protonprefix(),

@@ -15,7 +15,7 @@ from protonfixes import util
 from protonfixes.logger import log
 
 
-def main():
+def main() -> None:
     arc = 'https://github.com/user-attachments/files/16788423/xaudio2_8.dll.gz'
     hashsum_file = '173cac0a7931989d66338e0d7779e451f2f01b2377903df7954d86c07c1bc8fb'
     tmp = f'{mkdtemp()}/xaudio2_8.dll.gz'

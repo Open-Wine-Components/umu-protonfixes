@@ -7,7 +7,7 @@ Sometimes the game is crashing.
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Set virtual desktop"""
 
     # https://github.com/ValveSoftware/Proton/issues/872

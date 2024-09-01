@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Enable Glide emulation in dosbox config"""
 
     conf_dict = {'glide': {'glide': 'emu'}}

@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs dsound d3dx9 arial d3dcompiler_47"""
 
     util.protontricks('dsound')

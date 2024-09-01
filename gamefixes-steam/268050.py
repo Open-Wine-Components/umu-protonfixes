@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Changes the proton argument from the launcher to the game"""
 
     util.protontricks('win7')

@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Install xact"""
 
     # Fixes audio not playing and some background music

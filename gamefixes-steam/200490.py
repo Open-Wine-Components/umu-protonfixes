@@ -6,6 +6,6 @@ hangs on logo without override
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.winedll_override('libvkd3d-1', 'n')
     util.protontricks('wmp11')

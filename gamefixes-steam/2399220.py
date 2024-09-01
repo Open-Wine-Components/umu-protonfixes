@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Disable protonaudioconverterbin plugin"""
 
     # Fixes audio not playing for in-game videos

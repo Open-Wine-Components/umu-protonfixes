@@ -5,7 +5,7 @@ METAL GEAR SOLID
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """
     override for wrapper shipped with the game
     """

@@ -5,7 +5,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Needs windxp, dotnet35, phyzx, d3dx9"""
 
     # Probably not needed when proton will be merged with newer wine

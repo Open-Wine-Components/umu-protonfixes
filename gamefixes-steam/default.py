@@ -7,11 +7,11 @@ import sys
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """global defaults"""
 
     # Steam commandline
-    def use_steam_commands():
+    def use_steam_commands() -> None:
         """Parse aliases from Steam launch options"""
         pf_alias_list = list(filter(lambda item: '-pf_' in item, sys.argv))
 

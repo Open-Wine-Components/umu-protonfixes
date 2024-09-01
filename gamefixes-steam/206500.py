@@ -3,5 +3,5 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.append_argument('/dx11')

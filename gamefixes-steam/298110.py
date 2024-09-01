@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """FarCry 4 chokes on more than 24 cores"""
 
     util.protontricks('d3dcompiler_43')

@@ -3,5 +3,5 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('vcrun2022')  # Game crashes without it

@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.replace_command(
         'NARUTO.exe', 'NARUTO/Binaries/Win64/NARUTO-Win64-Shipping.exe'
     )

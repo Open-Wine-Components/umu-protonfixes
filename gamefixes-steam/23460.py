@@ -8,7 +8,7 @@ import subprocess
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('dotnet35sp1')
     # Videos play and audio works but screen is black.
     # util.protontricks('quartz')

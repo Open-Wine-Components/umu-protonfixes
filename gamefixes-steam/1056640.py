@@ -3,5 +3,5 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.set_environment('WINE_NO_OPEN_FILE_SEARCH', 'pso2_bin/data')

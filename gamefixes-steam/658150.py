@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Fixes shader compilation error"""
 
     util.protontricks('d3dcompiler_43')

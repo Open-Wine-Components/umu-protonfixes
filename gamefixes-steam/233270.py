@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """dx11 version is broken"""
 
     util.set_cpu_topology_limit(24)

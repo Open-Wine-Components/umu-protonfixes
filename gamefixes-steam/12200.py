@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Video playback is working since GE-Proton 9.11 - without audio
     Disabling the media converter fixes this issue
     """

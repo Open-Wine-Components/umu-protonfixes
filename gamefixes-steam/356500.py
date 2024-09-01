@@ -3,6 +3,6 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('icodecs')
     util.protontricks('directplay')

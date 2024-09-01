@@ -4,7 +4,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Disable libglesv2"""
 
     # gpu acelleration on wibed3d https://bugs.winehq.org/show_bug.cgi?id=44985

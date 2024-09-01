@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     # Fix in-game media playback
     # See https://github.com/Open-Wine-Components/umu-protonfixes/issues/111#issuecomment-2317389123
     util.disable_protonmediaconverter()

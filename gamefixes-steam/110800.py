@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs d3dx9_43, d3dcompiler_43, d3dx11_43, d3dcompiler_47
     forces dx11 (enables intro cinematics) without editing settings.ini
     """

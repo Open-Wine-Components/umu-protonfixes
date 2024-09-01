@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     # Black screen without it
     util.protontricks('d3dx9_42')
     util.protontricks('d3dx9_43')

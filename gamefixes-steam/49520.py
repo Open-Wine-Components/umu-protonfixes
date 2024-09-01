@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Launcherfix and NVIDIA PhysX support."""
 
     # Fixes the startup process.

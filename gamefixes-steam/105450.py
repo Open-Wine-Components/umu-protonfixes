@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """installs corefonts, l3codecx, mfc42, winxp"""
 
     # https://github.com/ValveSoftware/Proton/issues/17#issuecomment-415977510

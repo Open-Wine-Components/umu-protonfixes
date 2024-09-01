@@ -3,6 +3,6 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """Installs physx"""
     util.protontricks('physx')

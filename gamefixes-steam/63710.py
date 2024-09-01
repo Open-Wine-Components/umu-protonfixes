@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """From: https://www.protondb.com/app/63710"""
 
     util.protontricks('d3dcompiler_43')

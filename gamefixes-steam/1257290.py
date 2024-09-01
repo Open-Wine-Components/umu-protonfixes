@@ -6,5 +6,5 @@ Requires disabling the gstreamer protonaudioconverterbin plugin to get full audi
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.disable_protonmediaconverter()

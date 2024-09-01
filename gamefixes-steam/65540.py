@@ -5,7 +5,7 @@ Game fix for Gothic II: Gold Classic
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     # Fix resolution, not necessary with 'GD3D11' - but doesn't hurt
     set_resolution()
 

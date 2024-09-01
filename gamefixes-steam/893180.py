@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('directshow')
     util.protontricks('cinepak')
     util.protontricks('lavfilters')

@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('d3dx11_43')
     util.protontricks('wmp9')
     util.protontricks('klite')

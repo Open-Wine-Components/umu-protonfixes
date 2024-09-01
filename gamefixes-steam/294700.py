@@ -5,7 +5,7 @@ from protonfixes import util
 
 
 # Putt-Putt: PBS doesn't run unless there is a CD-ROM drive attached.
-def main():
+def main() -> None:
     dosdevice = os.path.join(util.protonprefix(), 'dosdevices/r:')
     if not os.path.exists(dosdevice):
         os.symlink('/tmp', dosdevice)  # create symlink for dosdevices

@@ -6,6 +6,6 @@ Standalone and Sapien seem to work just fine without d3dcompiler_47 and msxml3, 
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.protontricks('dotnet35')
     util.protontricks('dotnet45')

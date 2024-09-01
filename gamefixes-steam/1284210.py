@@ -4,7 +4,7 @@ import os
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     """GW2 add NOSTEAM option."""
     # Fixes the startup process.
     if 'NOSTEAM' in os.environ:
