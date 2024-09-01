@@ -31,7 +31,7 @@ except Exception:
     log.debug('Unable to read config file ' + CONF_FILE)
 
 
-def opt_bool(opt):
+def opt_bool(opt: str) -> bool:
     """Convert bool ini strings to actual boolean values"""
 
     return opt.lower() in ['yes', 'y', 'true', '1']
