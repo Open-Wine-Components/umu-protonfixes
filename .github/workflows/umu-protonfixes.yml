@@ -23,7 +23,7 @@ jobs:
       run: |
         sudo apt-get install shellcheck
         python3 -m pip install --upgrade pip
-        pip install pylint
+        pip install ruff
         pip install ijson
     - name: Lint with Shellcheck
       run: |
@@ -34,9 +34,9 @@ jobs:
     - name: Check gamefix module IDs
       run: |
         python tools/check_gamefixes.py
-    - name: Lint with Pylint
+    - name: Lint with Ruff
       run: |
-        bash tools/lint.sh
+        ruff check .
     - name: Test with unittest
       run: |
         python protonfixes_test.py
