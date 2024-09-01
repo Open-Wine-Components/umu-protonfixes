@@ -27,7 +27,7 @@ jobs:
         pip install ijson
     - name: Lint with Shellcheck
       run: |
-        shellcheck tools/lint.sh tools/check-links.sh
+        shellcheck tools/check-links.sh
     - name: Check symbolic links
       run: |
         bash tools/check-links.sh
