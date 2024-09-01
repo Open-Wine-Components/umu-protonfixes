@@ -1,5 +1,4 @@
 """Game fix for Chronophantasma Extend"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

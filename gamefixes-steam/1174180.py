@@ -1,6 +1,5 @@
 """Game fix for Red Dead Redemption 2"""
 
-# pylint: disable=C0103
 from protonfixes import util
 
 

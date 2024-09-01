@@ -1,5 +1,5 @@
 """Game fix for Star Citizen"""
-# pylint: disable=C0103,E0401
+,E0401
 
 from protonfixes import util
 

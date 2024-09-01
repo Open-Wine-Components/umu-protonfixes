@@ -1,5 +1,4 @@
 """Oddworld: Stranger's Wrath HD"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

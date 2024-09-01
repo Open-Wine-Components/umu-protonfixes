@@ -1,5 +1,4 @@
 """Game fix Tree Of Savior"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

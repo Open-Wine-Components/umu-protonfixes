@@ -1,5 +1,4 @@
 """Ship Graveyard Simulator Prologue"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

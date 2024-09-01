@@ -1,7 +1,6 @@
 """Game fix for Gothic 1 Classic
 Game fix for Gothic II: Gold Classic
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

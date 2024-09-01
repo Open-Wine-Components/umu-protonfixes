@@ -1,6 +1,5 @@
 """Dragon Star Varnir"""
 
-# pylint: disable=C0103
 from protonfixes import util
 
 

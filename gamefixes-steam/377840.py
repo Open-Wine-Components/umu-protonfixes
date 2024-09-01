@@ -1,5 +1,4 @@
 """Game fix for FINAL FANTASY IX"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

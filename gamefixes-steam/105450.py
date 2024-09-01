@@ -1,5 +1,4 @@
 """Game fix for Age Of Empire 3: Complete Collection"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

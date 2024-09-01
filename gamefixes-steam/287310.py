@@ -1,7 +1,5 @@
 """Game fix for Re-Volt (287310)"""
 
-# pylint: disable=C0103
-
 from protonfixes import util
 
 

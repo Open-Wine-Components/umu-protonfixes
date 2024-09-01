@@ -3,7 +3,6 @@ Digital Sound Initialization Error (Intel RSX 3D drivers are not installed)
 LAV Filters for video and DgVoodoo for textures
 edit registry to avoid ffdshow compatibility manager popup
 """
-# pylint: disable=C0103
 
 import os
 import subprocess

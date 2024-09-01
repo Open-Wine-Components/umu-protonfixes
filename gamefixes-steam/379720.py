@@ -1,6 +1,5 @@
 """Game fix for Doom 2016"""
 
-# pylint: disable=C0103
 import os
 import shutil
 import urllib.request

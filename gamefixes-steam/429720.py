@@ -1,7 +1,5 @@
 """Game fix for IMSCARED"""
 
-# pylint: disable=C0103
-
 import os
 import getpass
 from protonfixes import util

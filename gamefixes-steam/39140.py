@@ -1,5 +1,4 @@
 """Game fix for Final Fantasy VII"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

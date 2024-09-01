@@ -1,5 +1,4 @@
 """Game fix for Chantelise - A Tale of Two Sisters"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

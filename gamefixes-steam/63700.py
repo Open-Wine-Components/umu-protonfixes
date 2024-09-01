@@ -1,7 +1,5 @@
 """Game fix for BIT.TRIP BEAT"""
 
-# pylint: disable=C0103
-
 from protonfixes import util
 
 

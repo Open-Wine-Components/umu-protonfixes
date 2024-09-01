@@ -1,5 +1,4 @@
 """Game fix for The Legend of Heroes: Trails in the Sky the 3rd"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

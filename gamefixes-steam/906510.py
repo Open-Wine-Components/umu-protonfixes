@@ -1,5 +1,4 @@
 """Game fix for Conception PLUS: Maidens of the Twelve Stars"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

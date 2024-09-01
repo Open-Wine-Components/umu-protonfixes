@@ -1,6 +1,5 @@
 """Game fix for Megadimension Neptunia VII"""
 
-# pylint: disable=C0103
 #
 from protonfixes import util
 

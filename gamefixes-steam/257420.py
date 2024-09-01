@@ -1,5 +1,4 @@
 """Game fix for Serious Sam 4"""
-# pylint: disable=C0103
 
 import os
 import subprocess

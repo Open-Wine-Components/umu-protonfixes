@@ -1,6 +1,5 @@
 """Game fix for Spider-Man: Shattered Dimensions"""
 
-# pylint: disable=C0103
 #
 from protonfixes import util
 

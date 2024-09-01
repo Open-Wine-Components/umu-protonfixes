@@ -1,5 +1,4 @@
 """Game fix for Serious Sam: The Random Encounter"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

@@ -1,5 +1,4 @@
 """Bionic Commander Rearmed"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

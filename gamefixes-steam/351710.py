@@ -1,7 +1,6 @@
 """Hyperdimension Neptunia Re;Birth2
 Poor performance on some AMD hardware
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

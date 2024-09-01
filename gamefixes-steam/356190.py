@@ -1,5 +1,4 @@
 """Game fix Shadow of War"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

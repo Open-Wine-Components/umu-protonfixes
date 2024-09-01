@@ -1,6 +1,5 @@
 """Game fix for Star Trek Online launcher"""
 
-# pylint: disable=C0103
 from protonfixes import util
 
 

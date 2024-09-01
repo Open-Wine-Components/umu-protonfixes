@@ -1,7 +1,5 @@
 """Game fix for Fable III"""
 
-# pylint: disable=C0103
-
 import os
 import shutil
 

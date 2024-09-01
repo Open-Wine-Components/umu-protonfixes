@@ -1,5 +1,4 @@
 """Just Cause 2"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

@@ -1,5 +1,4 @@
 """They Are Billions"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

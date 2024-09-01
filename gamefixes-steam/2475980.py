@@ -1,7 +1,6 @@
 """Gobliiins 5
 Setup doesn't work and language is default to french
 """
-# pylint: disable=C0103
 
 import os
 import sys

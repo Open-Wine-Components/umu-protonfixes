@@ -1,7 +1,6 @@
 """
 Silent Hill 4: The Room
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

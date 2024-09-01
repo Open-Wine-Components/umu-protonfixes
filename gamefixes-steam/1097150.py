@@ -1,6 +1,5 @@
 """Game fix for Fall Guys"""
 
-# pylint: disable=C0103
 from protonfixes import util
 
 

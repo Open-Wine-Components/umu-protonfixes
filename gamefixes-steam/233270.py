@@ -1,5 +1,4 @@
 """Far Cry Blood Dragon"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

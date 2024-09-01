@@ -1,5 +1,4 @@
 """Game fix for You Need a Budget 4"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

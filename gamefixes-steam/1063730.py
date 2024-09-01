@@ -1,5 +1,4 @@
 """Game fix for New World"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

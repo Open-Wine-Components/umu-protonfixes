@@ -1,5 +1,4 @@
 """Game fix for Syberia"""
-# pylint: disable=C0103
 
 import os
 import subprocess

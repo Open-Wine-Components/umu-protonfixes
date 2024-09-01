@@ -1,5 +1,4 @@
 """Game fix for Age of Empires: DE"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

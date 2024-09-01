@@ -1,5 +1,4 @@
 """Game fix for Smite"""
-# pylint: disable=C0103
 
 import glob
 import os

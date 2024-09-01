@@ -1,5 +1,4 @@
 """Game fix for Gothic 3 Forsaken Gods Enhanced Edition"""
-# pylint: disable=C0103
 
 import os
 from protonfixes import util

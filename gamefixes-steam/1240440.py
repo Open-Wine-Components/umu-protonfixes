@@ -1,5 +1,4 @@
 """Halo Infinite needs vcrun2019"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

@@ -1,5 +1,4 @@
 """Game fix for Command & Conquer Red Alert™ 2 and Yuri's Revenge™"""
-# pylint: disable=C0103
 
 import os
 

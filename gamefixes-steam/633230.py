@@ -1,5 +1,4 @@
 """Game fix for Naruto To Boruto"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

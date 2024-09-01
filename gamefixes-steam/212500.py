@@ -1,6 +1,5 @@
 """Game fix The Lord of the Rings Online"""
 
-# pylint: disable=C0103
 #
 from protonfixes import util
 

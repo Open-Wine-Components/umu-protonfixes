@@ -1,5 +1,4 @@
 """Game fix for The Evil Within(268050)"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

@@ -1,5 +1,4 @@
 """Game fix for DEAD OR ALIVE 5 Last Round"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

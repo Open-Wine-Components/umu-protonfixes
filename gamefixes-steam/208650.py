@@ -1,5 +1,4 @@
 """Game fix for Batman Arkham Knight"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

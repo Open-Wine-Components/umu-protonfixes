@@ -1,5 +1,4 @@
 """FarCry 4"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

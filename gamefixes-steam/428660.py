@@ -1,5 +1,4 @@
 """Deliver us the Moon fix"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

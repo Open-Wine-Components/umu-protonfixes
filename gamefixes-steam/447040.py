@@ -1,5 +1,4 @@
 """Game fix for Watch_Dogs 2"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

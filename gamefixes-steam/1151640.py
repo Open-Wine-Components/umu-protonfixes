@@ -1,5 +1,4 @@
 """Game fix for Horizon Zero Dawn"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

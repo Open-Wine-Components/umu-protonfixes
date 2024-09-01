@@ -1,5 +1,4 @@
 """Game fix for BioShock 2 Remastered"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

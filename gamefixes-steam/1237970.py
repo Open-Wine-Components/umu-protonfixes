@@ -1,5 +1,4 @@
 """Game fix for Titanfall 2"""
-# pylint: disable=C0103
 
 import os
 import subprocess

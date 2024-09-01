@@ -1,5 +1,4 @@
 """神都不良探 Underdog Detective"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

@@ -2,7 +2,6 @@
 Works with dotnet35sp1 only, now without needing Proton5
 Videos still don't work.
 """
-# pylint: disable=C0103
 
 import os
 import subprocess

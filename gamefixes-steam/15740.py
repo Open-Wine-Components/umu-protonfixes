@@ -1,5 +1,4 @@
 """Game fix for Oddworld: Munch's Oddysee"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

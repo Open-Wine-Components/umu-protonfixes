@@ -1,6 +1,5 @@
 """Game fix for Ghostbusters: The Video Game Remastered (2019)"""
 
-# pylint: disable=C0103
 from pathlib import Path
 from protonfixes import util
 from protonfixes.logger import log

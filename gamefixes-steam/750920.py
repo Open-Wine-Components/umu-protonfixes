@@ -1,5 +1,4 @@
 """Shadow of the Tomb Raider"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

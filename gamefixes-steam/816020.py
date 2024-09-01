@@ -1,5 +1,4 @@
 """Game fix for JUMP FORCE"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

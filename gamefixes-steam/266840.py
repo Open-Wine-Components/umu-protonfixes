@@ -1,7 +1,6 @@
 """Game fix for Age of Mythology: Extended Edition
 Source: https://github.com/JamesHealdUK/protonfixes/blob/master/fixes/266840.sh
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

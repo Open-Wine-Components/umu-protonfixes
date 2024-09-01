@@ -2,7 +2,6 @@
 wmp11 (Fixes missing logo videos and problems with working videos)
 hangs on logo without override
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

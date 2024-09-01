@@ -1,7 +1,6 @@
 """Game fix for Carnage Cross
 Proton issue: https://github.com/ValveSoftware/Proton/issues/6645
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

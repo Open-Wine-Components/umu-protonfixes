@@ -4,7 +4,6 @@ Requires disabling the gstreamer protonaudioconverterbin plugin to get full audi
 fixed by Swish in Protondb
 further stolen from marianoag by bitwolf
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

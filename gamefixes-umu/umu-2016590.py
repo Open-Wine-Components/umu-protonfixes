@@ -1,5 +1,4 @@
 """Game fix for Dark and Darker"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

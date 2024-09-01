@@ -1,6 +1,5 @@
 """Game fix for Super Meat Boy"""
 
-# pylint: disable=C0103
 #
 from protonfixes import util
 

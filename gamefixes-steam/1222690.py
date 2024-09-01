@@ -1,6 +1,5 @@
 """Game fix for Dragon Age Inquisition"""
 
-# pylint: disable=C0103
 from protonfixes import util
 
 

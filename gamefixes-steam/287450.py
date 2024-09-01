@@ -2,8 +2,6 @@
 Source: https://github.com/simons-public/protonfixes/issues/24#issue-372384148
 """
 
-# pylint: disable=C0103
-
 from protonfixes import util
 
 

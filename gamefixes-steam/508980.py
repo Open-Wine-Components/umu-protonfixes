@@ -1,7 +1,5 @@
 """Game fix for Crashday Redline Edition"""
 
-# pylint: disable=C0103
-
 import json
 from protonfixes import util
 

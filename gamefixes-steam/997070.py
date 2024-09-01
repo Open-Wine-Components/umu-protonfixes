@@ -1,5 +1,4 @@
 """Game fix Marvel's Avengers"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

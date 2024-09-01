@@ -1,7 +1,6 @@
 """Game fix Batman Arkham Asylum
 (Currently no contollers)
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

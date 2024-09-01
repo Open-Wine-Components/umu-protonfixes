@@ -1,5 +1,4 @@
 """Game fix for LEGO Batman 2: DC Super Heroes"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

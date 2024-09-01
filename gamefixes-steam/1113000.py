@@ -1,5 +1,4 @@
 """Game fix for Persona 4 Golden"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

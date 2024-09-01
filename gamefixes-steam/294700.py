@@ -1,7 +1,5 @@
 """Game fix for Putt-Putt: Pep's Birthday Surprise"""
 
-# pylint: disable=C0103
-
 import os
 from protonfixes import util
 

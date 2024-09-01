@@ -1,7 +1,5 @@
 """Game fix for The Forest"""
 
-# pylint: disable=C0103
-
 from protonfixes import util
 
 

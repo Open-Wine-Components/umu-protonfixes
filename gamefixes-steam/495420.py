@@ -1,5 +1,4 @@
 """Game fix for State of Decay 2"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

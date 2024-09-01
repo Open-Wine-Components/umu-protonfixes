@@ -1,5 +1,4 @@
 """GWENT: The Witcher Card Game"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

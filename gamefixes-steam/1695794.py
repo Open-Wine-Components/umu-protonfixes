@@ -1,5 +1,4 @@
 """Game fix Halo 3: ODST mod tools"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

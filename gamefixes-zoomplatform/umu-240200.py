@@ -1,5 +1,4 @@
 """Duke Nukem: Manhattan Project - Enhanced Edition"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

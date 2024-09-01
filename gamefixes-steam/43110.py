@@ -1,5 +1,4 @@
 """Game fix for Metro 2033"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

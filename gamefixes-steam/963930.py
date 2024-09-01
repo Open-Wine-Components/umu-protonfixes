@@ -1,5 +1,4 @@
 """Contractors VR"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

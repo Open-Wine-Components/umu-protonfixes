@@ -1,5 +1,4 @@
 """Game fix for Tomb Raider I"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

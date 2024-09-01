@@ -4,7 +4,6 @@ PROTON_USE_WINED3D=1 fixes the problem but removes the antialising
 dgvoodoo2 fixes the cursors and keeps the antialising
 copy dgvoodoo2 d3d9.dll every time otherwise it gets overwritten
 """
-# pylint: disable=C0103
 
 import os
 import subprocess

@@ -3,7 +3,6 @@ Note: It does not work with WINED3D.
 After the game start fullscreen and resolution can be set from game display settings.
 Sometimes the game is crashing.
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

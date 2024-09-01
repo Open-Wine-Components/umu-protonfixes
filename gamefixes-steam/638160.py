@@ -1,5 +1,4 @@
 """Game fix for Moero Chronicle"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

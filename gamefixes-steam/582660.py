@@ -1,5 +1,4 @@
 """Game fix for Black Desert Online"""
-# pylint: disable=C0103
 
 import os
 from protonfixes import util

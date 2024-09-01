@@ -1,7 +1,6 @@
 """The Blind Prophet
 garbled fonts & No cursive font (Segoe Script)
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

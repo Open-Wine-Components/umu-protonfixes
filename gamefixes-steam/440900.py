@@ -1,5 +1,4 @@
 """Game fix for Conan Exiles"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

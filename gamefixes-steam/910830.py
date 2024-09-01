@@ -1,5 +1,4 @@
 """Game fix for Rebel Galaxy Outlaw"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

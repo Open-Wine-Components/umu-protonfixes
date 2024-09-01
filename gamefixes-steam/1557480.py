@@ -1,5 +1,4 @@
 """Project MIKHAIL: A Muv-Luv War Story"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

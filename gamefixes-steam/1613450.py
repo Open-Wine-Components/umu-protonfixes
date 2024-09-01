@@ -1,5 +1,4 @@
 """Game fix for Halo 2 mod tools"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

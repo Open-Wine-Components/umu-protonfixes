@@ -1,5 +1,4 @@
 """Game fix for The Bureau: XCOM Declassified"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

@@ -1,5 +1,4 @@
 """Game fix for The Quintessential Quintuplets - Five Memories Spent With You"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

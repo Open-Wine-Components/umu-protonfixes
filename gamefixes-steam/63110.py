@@ -1,7 +1,6 @@
 """Alter Ego
 Launcher crashes immediately without displaying any windows
 """
-# pylint: disable=C0103
 
 from protonfixes import util
 

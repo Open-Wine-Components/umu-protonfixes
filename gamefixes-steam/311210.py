@@ -1,5 +1,4 @@
 """Game fix for Black Ops III"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

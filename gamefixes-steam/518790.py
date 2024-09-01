@@ -1,5 +1,4 @@
 """The Hunter: Call of the Wild"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

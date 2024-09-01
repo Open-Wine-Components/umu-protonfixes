@@ -1,5 +1,4 @@
 """Outrun 2006: Coast 2 Coast"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

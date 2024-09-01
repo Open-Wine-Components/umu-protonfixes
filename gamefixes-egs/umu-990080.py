@@ -1,5 +1,4 @@
 """Game fix Hogwarts Legacy"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

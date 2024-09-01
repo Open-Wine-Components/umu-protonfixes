@@ -1,5 +1,4 @@
 """Game fix for Recettear: An Item Shop's Tale"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

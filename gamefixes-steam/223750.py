@@ -1,5 +1,4 @@
 """Fixes for DCS World Steam Edition"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

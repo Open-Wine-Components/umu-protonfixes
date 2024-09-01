@@ -1,7 +1,5 @@
 """Game fix for Space Engineers"""
 
-# pylint: disable=C0103
-
 from protonfixes import util
 
 

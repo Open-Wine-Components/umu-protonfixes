@@ -1,5 +1,4 @@
 """Game fix Mortal Kombat 11"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

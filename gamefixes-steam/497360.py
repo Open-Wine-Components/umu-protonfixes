@@ -6,8 +6,6 @@ Fixes email issues in Sydney
 Widescreen supported (16:9/21:9, 32:9 not tested)
 """
 
-# pylint: disable=C0103
-
 import os
 import subprocess
 from protonfixes import util

@@ -1,5 +1,4 @@
 """Game fix Dark Souls Prepare To Die Edition"""
-# pylint: disable=C0103
 
 from protonfixes import util
 

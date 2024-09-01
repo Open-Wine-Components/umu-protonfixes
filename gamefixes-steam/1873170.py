@@ -3,7 +3,6 @@ Replace included nwjs(0.71) wich doesn't work with 0.86
 Fix cursor hitbox (set frame=false in package.json)
 Updated from 0.85 that didn't display custom cursors.
 """
-# pylint: disable=C0103
 
 import os
 import glob
