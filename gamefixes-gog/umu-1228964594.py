@@ -1,8 +1,8 @@
-""" Game fix for Soldier of Fortune II: Double Helix - Gold Edition 
-"""
-#pylint: disable=C0103
+"""Game fix for Soldier of Fortune II: Double Helix - Gold Edition"""
+# pylint: disable=C0103
 
 from protonfixes import util
+
 
 def main():
     # Fix display issues

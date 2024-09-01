@@ -1,9 +1,9 @@
-""" Game fix for BIT.TRIP BEAT
-"""
+"""Game fix for BIT.TRIP BEAT"""
 
-#pylint: disable=C0103
+# pylint: disable=C0103
 
 from protonfixes import util
+
 
 def main():
     util.protontricks('d3dcompiler_43')

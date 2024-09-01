@@ -1,12 +1,11 @@
-""" Just Cause 2
-"""
-#pylint: disable=C0103
+"""Just Cause 2"""
+# pylint: disable=C0103
 
 from protonfixes import util
 
+
 def main():
-    """ Requires seccomp
-    """
+    """Requires seccomp"""
 
     util.protontricks('d3dcompiler_43')
     util.protontricks('d3dcompiler_47')

@@ -1,7 +1,7 @@
-""" Civilization IV: Colonization
-"""
+"""Civilization IV: Colonization"""
 
 from protonfixes import util
+
 
 def main():
     util.protontricks('oleaut32')

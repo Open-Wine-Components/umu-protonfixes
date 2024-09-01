@@ -1,6 +1,7 @@
-""" Game fix for Sanoba Witch FHD Edition
-"""
+"""Game fix for Sanoba Witch FHD Edition"""
+
 from protonfixes import util
+
 
 def main():
     """Install quartz, wmp11, qasf

@@ -1,4 +1,4 @@
-""" Game fix for Stronghold HD
+"""Game fix for Stronghold HD
 Fixes Multiplayer
 """
 # pylint: disable=C0103
@@ -7,7 +7,6 @@ from protonfixes import util
 
 
 def main():
-    """ Installs directplay
-    """
+    """Installs directplay"""
 
     util.protontricks('directplay')

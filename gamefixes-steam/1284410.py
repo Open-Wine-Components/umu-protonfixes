@@ -1,11 +1,11 @@
-""" GWENT: The Witcher Card Game
-"""
-#pylint: disable=C0103
+"""GWENT: The Witcher Card Game"""
+# pylint: disable=C0103
 
 from protonfixes import util
 
+
 def main():
-    """ installs mfc140
+    """installs mfc140
 
     mfc140 is necessary to start the game up. GOG login happens inside the Steam overlay.
 

@@ -1,9 +1,10 @@
-""" Alter Ego
+"""Alter Ego
 Launcher crashes immediately without displaying any windows
 """
-#pylint: disable=C0103
+# pylint: disable=C0103
 
 from protonfixes import util
+
 
 def main():
     util.replace_command('AlterEgo.exe', './RunDev.exe')

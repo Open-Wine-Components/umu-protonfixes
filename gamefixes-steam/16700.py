@@ -1,4 +1,4 @@
-""" Game fix for Stronghold Crusader Extreme HD
+"""Game fix for Stronghold Crusader Extreme HD
 Fixes Multiplayer
 """
 
@@ -8,7 +8,6 @@ from protonfixes import util
 
 
 def main():
-    """ Installs directplay
-    """
+    """Installs directplay"""
 
     util.protontricks('directplay')

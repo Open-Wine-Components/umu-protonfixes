@@ -1,12 +1,11 @@
-""" Game fix for Recettear: An Item Shop's Tale
-"""
-#pylint: disable=C0103
+"""Game fix for Recettear: An Item Shop's Tale"""
+# pylint: disable=C0103
 
 from protonfixes import util
 
+
 def main():
-    """ Install directsound libraries
-    """
+    """Install directsound libraries"""
 
     util.protontricks('dmime')
     util.protontricks('dmloader')

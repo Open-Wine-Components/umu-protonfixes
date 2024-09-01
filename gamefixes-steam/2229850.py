@@ -1,31 +1,31 @@
-""" Game fix for Command & Conquer Red Alert™ 2 and Yuri's Revenge™
-"""
-#pylint: disable=C0103
+"""Game fix for Command & Conquer Red Alert™ 2 and Yuri's Revenge™"""
+# pylint: disable=C0103
 
 import os
 
 from protonfixes import util
 from protonfixes.logger import log
 
+
 def main():
-    """ Install and launch the CnCNet Launcher
+    """Install and launch the CnCNet Launcher
 
-        It fixes several issues, allows multiplayer and provides a working UI,
-        while the game has sometimes problems like missing or shifted buttons.
+    It fixes several issues, allows multiplayer and provides a working UI,
+    while the game has sometimes problems like missing or shifted buttons.
 
-        The game will just show a black screen without cnc-ddraw or the patch in place.
+    The game will just show a black screen without cnc-ddraw or the patch in place.
     """
 
     # Opt out of CnCNet with 'NO_CNCNET=1 %command%'
     no_cncnet = os.getenv('NO_CNCNET', '')
     if str.lower(no_cncnet) in ['y', 'yes', 'true', 'on', '1']:
-        log('Skipping CnCNet on user\'s request.')
+        log("Skipping CnCNet on user's request.")
         use_cnc_ddraw()
         return
 
     # Install the CnCNet Launcher
     if not util.checkinstalled('cncnet_ra2') and not util.protontricks('cncnet_ra2'):
-        log('Failed to install CnCNet Launcher, let\'s try cnc-ddraw.')
+        log("Failed to install CnCNet Launcher, let's try cnc-ddraw.")
         use_cnc_ddraw()
 
     # CnCNet Launcher is in place, run it
@@ -34,9 +34,9 @@ def main():
         util.replace_command('Ra2.exe', 'CnCNetYRLauncher.exe')
         util.replace_command('RA2MD.exe', 'CnCNetYRLauncher.exe')
 
+
 def use_cnc_ddraw():
-    """ Install cnc-ddraw, the current replacement from EA isn't working.
-    """
+    """Install cnc-ddraw, the current replacement from EA isn't working."""
 
     log('Using cnc-ddraw.')
 

@@ -1,8 +1,8 @@
-""" Game fix for Assetto Corsa
-"""
-#pylint: disable=C0103
+"""Game fix for Assetto Corsa"""
+# pylint: disable=C0103
 
 from protonfixes import util
+
 
 def main():
     """Fixes default launcher and ACM."""

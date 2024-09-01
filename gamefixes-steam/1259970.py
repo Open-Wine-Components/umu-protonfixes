@@ -1,8 +1,8 @@
-""" Game fix for Pes 2021
-"""
-#pylint: disable=C0103
+"""Game fix for Pes 2021"""
+# pylint: disable=C0103
 
 from protonfixes import util
+
 
 def main():
     # Replace launcher with game exe in proton arguments

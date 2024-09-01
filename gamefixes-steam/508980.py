@@ -1,5 +1,4 @@
-""" Game fix for Crashday Redline Edition
-"""
+"""Game fix for Crashday Redline Edition"""
 
 # pylint: disable=C0103
 
@@ -8,11 +7,13 @@ from protonfixes import util
 
 
 def main():
-    """ Change setting FSAA to 0 in graphics.config
-    """
+    """Change setting FSAA to 0 in graphics.config"""
 
-    config = (util.protonprefix() + "drive_c/users/steamuser/Local Settings/" +
-              "Application Data/Crashday/config/graphics.config")
+    config = (
+        util.protonprefix()
+        + 'drive_c/users/steamuser/Local Settings/'
+        + 'Application Data/Crashday/config/graphics.config'
+    )
 
     # https://stackoverflow.com/a/45435707
     with open(config, 'r', encoding='utf-8') as file:

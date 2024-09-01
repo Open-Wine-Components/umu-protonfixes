@@ -1,7 +1,6 @@
-""" Game fix for Fable III
-"""
+"""Game fix for Fable III"""
 
-#pylint: disable=C0103
+# pylint: disable=C0103
 
 import os
 import shutil
@@ -15,7 +14,14 @@ def main():
     util.protontricks('xliveless')
 
     # Remove Windows Live folder
-    dirpath = os.path.join(util.protonprefix(),"drive_c","Program Files","Common Files","Microsoft Shared","Windows Live")
+    dirpath = os.path.join(
+        util.protonprefix(),
+        'drive_c',
+        'Program Files',
+        'Common Files',
+        'Microsoft Shared',
+        'Windows Live',
+    )
     if os.path.exists(dirpath):
         shutil.rmtree(dirpath)
     else:

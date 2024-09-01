@@ -1,12 +1,11 @@
-""" Game fix for Borderlands 2
-"""
-#pylint: disable=C0103
+"""Game fix for Borderlands 2"""
+# pylint: disable=C0103
 
 from protonfixes import util
 
+
 def main():
-    """ Launcherfix and NVIDIA PhysX support.
-    """
+    """Launcherfix and NVIDIA PhysX support."""
 
     # Fixes the startup process.
     util.replace_command('Launcher.exe', 'Borderlands2.exe')

@@ -1,9 +1,9 @@
-""" Game fix for MotorGP
-"""
+"""Game fix for MotorGP"""
 
-#pylint: disable=C0103
+# pylint: disable=C0103
 
 from protonfixes import util
+
 
 def main():
     util.protontricks('d3dcompiler_43')

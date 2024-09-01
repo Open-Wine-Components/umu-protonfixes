@@ -1,11 +1,11 @@
-""" Game fix for Beyond Good and Evil
-"""
-#pylint: disable=C0103
+"""Game fix for Beyond Good and Evil"""
+
+# pylint: disable=C0103
 from protonfixes import util
 
+
 def main():
-    """ installs dsound d3dx9 arial d3dcompiler_47
-    """
+    """installs dsound d3dx9 arial d3dcompiler_47"""
 
     util.protontricks('dsound')
     util.protontricks('d3dx9')
@@ -16,4 +16,9 @@ def main():
     """
 
     util.regedit_add('HKLM\\Software\\Wow6432Node\\Ubisoft')
-    util.regedit_add('HKLM\\Software\\Wow6432Node\\Ubisoft\\Beyond Good & Evil','InstallLanguage','REG_DWORD','1')
+    util.regedit_add(
+        'HKLM\\Software\\Wow6432Node\\Ubisoft\\Beyond Good & Evil',
+        'InstallLanguage',
+        'REG_DWORD',
+        '1',
+    )

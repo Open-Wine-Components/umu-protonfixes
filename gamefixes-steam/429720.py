@@ -1,11 +1,11 @@
-""" Game fix for IMSCARED
-"""
+"""Game fix for IMSCARED"""
 
-#pylint: disable=C0103
+# pylint: disable=C0103
 
 import os
 import getpass
 from protonfixes import util
+
 
 def main():
     # IMSCARED relies on a folder on the user's Desktop being accessible

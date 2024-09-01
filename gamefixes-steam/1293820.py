@@ -1,11 +1,10 @@
-""" Game fix for YOU and ME and HER: A Love Story
-"""
+"""Game fix for YOU and ME and HER: A Love Story"""
 
 from protonfixes import util
 
+
 def main():
-    """ install xact, disable esync, disable fsync
-    """
+    """install xact, disable esync, disable fsync"""
 
     # Fixes the game from crashing or hanging during intro
     util.protontricks('xact')
