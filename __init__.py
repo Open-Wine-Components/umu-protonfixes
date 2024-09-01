@@ -17,6 +17,6 @@ if all(RUN_CONDITIONS):
         fix.main()
 
     # Catch any exceptions and print a traceback
-    except:
+    except Exception:
         sys.stderr.write('ProtonFixes ' + traceback.format_exc())
         sys.stderr.flush()
