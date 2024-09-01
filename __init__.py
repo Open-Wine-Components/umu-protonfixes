@@ -3,9 +3,6 @@
 import os
 import sys
 
-if 'DEBUG' in os.environ:
-    from . import debug
-
 RUN_CONDITIONS = [
     'STEAM_COMPAT_DATA_PATH' in os.environ,
     'PROTONFIXES_DISABLE' not in os.environ,
