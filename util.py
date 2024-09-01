@@ -1,6 +1,7 @@
 """Utilities to make gamefixes easier"""
 
 import configparser
+from io import TextIOWrapper
 import os
 import sys
 import re
@@ -12,7 +13,7 @@ import subprocess
 import urllib.request
 import functools
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Union, Literal, Mapping
+from typing import Literal, Mapping, Generator, Any, Callable
 
 try:
     from .logger import log
@@ -27,7 +28,7 @@ except ImportError:
     log.warn('Unable to hook into Proton main script environment')
 
 
-def which(appname: str) -> str:
+def which(appname: str) -> str | None:
     """Returns the full path of an executable in $PATH"""
 
     for path in os.environ['PATH'].split(os.pathsep):
@@ -51,7 +52,7 @@ def protonprefix() -> str:
     return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
 
 
-def protonnameversion() -> str:
+def protonnameversion() -> str | None:
     """Returns the version of proton from sys.argv[0]"""
 
     version = re.search('Proton ([0-9]*\\.[0-9]*)', sys.argv[0])
@@ -76,14 +77,16 @@ def protontimeversion() -> int:
     return 0
 
 
-def protonversion(timestamp: bool = False) -> Union[str, int]:
+def protonversion(timestamp: bool = False) -> str | None | int:
     """Returns the version of proton"""
     if timestamp:
         return protontimeversion()
     return protonnameversion()
 
 
-def once(func: callable = None, retry: bool = False):
+def once(
+    func: Callable | None = None, retry: bool = False
+) -> None | Callable[..., Any]:
     """Decorator to use on functions which should only run once in a prefix.
     Error handling:
     By default, when an exception occurs in the decorated function, the
@@ -98,7 +101,7 @@ def once(func: callable = None, retry: bool = False):
     if func is None:
         return functools.partial(once, retry=retry)
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> None:  # noqa: ANN002, ANN003
         func_id = f'{func.__module__}.{func.__name__}'
         prefix = protonprefix()
         directory = os.path.join(prefix, 'drive_c/protonfixes/run/')
@@ -196,7 +199,7 @@ def checkinstalled(verb: str) -> bool:
     return _checkinstalled(verb)
 
 
-def is_custom_verb(verb: str) -> bool:
+def is_custom_verb(verb: str) -> bool | str:
     """Returns path to custom winetricks verb, if found"""
     if verb == 'gui':
         return False
@@ -296,9 +299,9 @@ def protontricks(verb: str) -> bool:
 
 def regedit_add(
     folder: str,
-    name: str = None,
-    typ: str = None,
-    value: str = None,
+    name: str | None = None,
+    typ: str | None = None,
+    value: str | None = None,
     arch: bool = False,
 ) -> None:
     """Add regedit keys"""
@@ -500,7 +503,7 @@ def disable_uplay_overlay() -> bool:
 
 
 def create_dosbox_conf(
-    conf_file: str, conf_dict: Mapping[str, Mapping[str, any]]
+    conf_file: str, conf_dict: Mapping[str, Mapping[str, Any]]
 ) -> None:
     """Create DOSBox configuration file.
 
@@ -557,7 +560,7 @@ def _get_case_insensitive_name(path: str) -> str:
     return root
 
 
-def _get_config_full_path(cfile: str, base_path: str) -> str:
+def _get_config_full_path(cfile: str, base_path: str) -> str | None:
     """Find game's config file"""
 
     # Start from 'user'/'game' directories or absolute path
@@ -670,7 +673,7 @@ def get_resolution() -> tuple[int, int]:
     return (0, 0)  # or raise Exception('Resolution not found')
 
 
-def read_dxvk_conf(cfp):
+def read_dxvk_conf(cfp: TextIOWrapper) -> Generator[str, None, None]:
     """Add fake [DEFAULT] section to dxvk.conf"""
     yield f'[{configparser.ConfigParser().default_section}]'
     yield from cfp
