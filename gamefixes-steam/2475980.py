@@ -15,7 +15,7 @@ def main() -> None:
 
     install_dir = glob.escape(util.get_game_install_path())
     with open(
-        os.path.join(install_dir, 'Gobliiins5-Part4/acsetup.cfg'), 'r', encoding='utf-8'
+        os.path.join(install_dir, 'Gobliiins5-Part4/acsetup.cfg'), encoding='utf-8'
     ) as f:
         if 'Linear' not in f.read():
             for i in range(1, 5):

@@ -48,7 +48,7 @@ def get_game_name() -> str:
 
     if os.environ.get('UMU_ID'):
         if os.path.isfile(f'{pfx}/game_title'):
-            with open(f'{pfx}/game_title', 'r', encoding='utf-8') as file:
+            with open(f'{pfx}/game_title', encoding='utf-8') as file:
                 return file.readline()
 
         if not check_internet():

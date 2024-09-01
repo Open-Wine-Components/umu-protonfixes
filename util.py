@@ -67,7 +67,7 @@ def protontimeversion() -> int:
 
     fullpath = os.path.join(protondir(), 'version')
     try:
-        with open(fullpath, 'r', encoding='ascii') as version:
+        with open(fullpath, encoding='ascii') as version:
             for timestamp in version.readlines():
                 return int(timestamp.strip())
     except OSError:
@@ -169,7 +169,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
         wt_verb_param = verb.split('=')[1]
         wt_is_set = False
         try:
-            with open(winetricks_log, 'r', encoding='ascii') as tricklog:
+            with open(winetricks_log, encoding='ascii') as tricklog:
                 for xline in tricklog.readlines():
                     if re.findall(r'^' + wt_verb, xline.strip()):
                         wt_is_set = bool(xline.strip() == wt_verb + wt_verb_param)
@@ -178,7 +178,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
             return False
     # Check for regular verbs
     try:
-        with open(winetricks_log, 'r', encoding='ascii') as tricklog:
+        with open(winetricks_log, encoding='ascii') as tricklog:
             if verb in reversed([x.strip() for x in tricklog.readlines()]):
                 return True
     except OSError:
@@ -636,7 +636,7 @@ def set_xml_options(
     if base_size != backup_size:
         return False
 
-    with open(xml_path, 'r', encoding='utf-8') as file:
+    with open(xml_path, encoding='utf-8') as file:
         contents = file.readlines()
         i = 0
         for line in contents:

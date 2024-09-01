@@ -14,7 +14,7 @@ def main() -> None:
     )
 
     # https://stackoverflow.com/a/45435707
-    with open(config, 'r', encoding='utf-8') as file:
+    with open(config, encoding='utf-8') as file:
         json_data = json.load(file)
         if 'FSAA' in json_data:
             json_data['FSAA'] = 0
