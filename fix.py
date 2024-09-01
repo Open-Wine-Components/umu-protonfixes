@@ -1,5 +1,4 @@
-""" Gets the game id and applies a fix if found
-"""
+"""Gets the game id and applies a fix if found"""
 
 import io
 import os
@@ -29,8 +28,7 @@ except ImportError:
 
 @lru_cache
 def get_game_id() -> str:
-    """ Trys to return the game id from environment variables
-    """
+    """Trys to return the game id from environment variables"""
     if 'UMU_ID' in os.environ:
         return os.environ['UMU_ID']
     if 'SteamAppId' in os.environ:
@@ -45,9 +43,8 @@ def get_game_id() -> str:
 
 
 @lru_cache
-def get_game_name() -> str:  #pylint: disable=R0914
-    """ Trys to return the game name from environment variables
-    """
+def get_game_name() -> str:  # pylint: disable=R0914
+    """Trys to return the game name from environment variables"""
     pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
 
     if os.environ.get('UMU_ID'):
@@ -56,7 +53,7 @@ def get_game_name() -> str:  #pylint: disable=R0914
                 return file.readline()
 
         if not check_internet():
-            log.warn('No internet connection, can\'t fetch name')
+            log.warn("No internet connection, can't fetch name")
             return 'UNKNOWN'
 
         try:
@@ -69,7 +66,9 @@ def get_game_name() -> str:  #pylint: disable=R0914
                 data = response.read()
                 json_data = json.loads(data)
                 title = json_data[0]['title']
-            with open(os.environ['WINEPREFIX'] + '/game_title', 'w', encoding='utf-8') as file:
+            with open(
+                os.environ['WINEPREFIX'] + '/game_title', 'w', encoding='utf-8'
+            ) as file:
                 file.write(title)
             return title
         except TimeoutError as ex:
@@ -99,8 +98,7 @@ def get_game_name() -> str:  #pylint: disable=R0914
 
 
 def get_store_name(store: str) -> str:
-    """ Mapping for store identifier to store name
-    """
+    """Mapping for store identifier to store name"""
     return {
         'amazon': 'Amazon',
         'battlenet': 'Battle.net',
@@ -111,13 +109,12 @@ def get_store_name(store: str) -> str:
         'itchio': 'Itch.io',
         'steam': 'Steam',
         'ubisoft': 'Ubisoft',
-        'zoomplatform': 'ZOOM Platform'
+        'zoomplatform': 'ZOOM Platform',
     }.get(store, None)
 
 
 def get_module_name(game_id: str, default: bool = False, local: bool = False) -> str:
-    """ Creates the name of a gamefix module, which can be imported
-    """
+    """Creates the name of a gamefix module, which can be imported"""
     store = 'umu'
     if game_id.isnumeric():
         store = 'steam'
@@ -134,15 +131,15 @@ def get_module_name(game_id: str, default: bool = False, local: bool = False) ->
             log.info('No store specified, using UMU database')
             store = 'umu'
 
-    return (f'protonfixes.gamefixes-{store}.' if not local else 'localfixes.') +\
-           (game_id if not default else 'default')
+    return (f'protonfixes.gamefixes-{store}.' if not local else 'localfixes.') + (
+        game_id if not default else 'default'
+    )
 
 
 def _run_fix_local(game_id: str, default: bool = False) -> bool:
-    """ Check if a local gamefix is available first and run it
-    """
+    """Check if a local gamefix is available first and run it"""
     localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
-    module_name =  game_id if not default else 'default'
+    module_name = game_id if not default else 'default'
 
     # Check if local gamefix exists
     if not os.path.isfile(os.path.join(localpath, module_name + '.py')):
@@ -157,10 +154,9 @@ def _run_fix_local(game_id: str, default: bool = False) -> bool:
 
 
 def _run_fix(game_id: str, default: bool = False, local: bool = False) -> bool:
-    """ Private function, which actually executes gamefixes
-    """
+    """Private function, which actually executes gamefixes"""
     fix_type = 'protonfix' if not default else 'defaults'
-    scope    = 'global' if not local else 'local'
+    scope = 'global' if not local else 'local'
 
     try:
         module_name = get_module_name(game_id, default, local)
@@ -175,8 +171,8 @@ def _run_fix(game_id: str, default: bool = False, local: bool = False) -> bool:
 
 
 def run_fix(game_id: str) -> None:
-    """ Loads a gamefix module by it's gameid
-        local fixes prevent global fixes from being executed
+    """Loads a gamefix module by it's gameid
+    local fixes prevent global fixes from being executed
     """
     if game_id is None:
         return
@@ -186,16 +182,15 @@ def run_fix(game_id: str) -> None:
 
     # execute default.py (local)
     if not _run_fix_local(game_id, True) and config.enable_global_fixes:
-        _run_fix(game_id, True) # global
+        _run_fix(game_id, True)  # global
 
     # execute <game_id>.py (local)
     if not _run_fix_local(game_id, False) and config.enable_global_fixes:
-        _run_fix(game_id, False) # global
+        _run_fix(game_id, False)  # global
 
 
 def main() -> None:
-    """ Runs the gamefix
-    """
+    """Runs the gamefix"""
     check_args = [
         'iscriptevaluator.exe' in sys.argv[2],
         'getcompatpath' in sys.argv[1],

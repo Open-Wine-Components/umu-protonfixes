@@ -1,5 +1,4 @@
-""" Starts the protonfix module
-"""
+"""Starts the protonfix module"""
 
 import os
 import sys
@@ -16,10 +15,11 @@ RUN_CONDITIONS = [
 if all(RUN_CONDITIONS):
     import traceback
     from . import fix
+
     try:
         fix.main()
 
-    #pylint: disable=W0702
+    # pylint: disable=W0702
     # Catch any exceptions and print a traceback
     except:
         sys.stderr.write('ProtonFixes ' + traceback.format_exc())
