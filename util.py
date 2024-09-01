@@ -15,11 +15,9 @@ from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Union, Literal, Mapping
 
 try:
-    from . import config
     from .logger import log
     from .steamhelper import install_app
 except ImportError:
-    import config
     from logger import log
     from steamhelper import install_app
 
@@ -727,7 +725,8 @@ def install_battleye_runtime() -> None:
 
 def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
     """Install all files from a downloaded tar.gz"""
-    cache_dir = config.cache_dir
+    cache_dir = os.path.expanduser('~/.cache/protonfixes')
+    os.makedirs(cache_dir, exist_ok=True)
     tgz_file_name = os.path.basename(url)
     tgz_file_path = os.path.join(cache_dir, tgz_file_name)
 
@@ -747,7 +746,8 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
         log.info(f'File {filename} found in {path}')
         return
 
-    cache_dir = config.cache_dir
+    cache_dir = os.path.expanduser('~/.cache/protonfixes')
+    os.makedirs(cache_dir, exist_ok=True)
     zip_file_name = os.path.basename(url)
     zip_file_path = os.path.join(cache_dir, zip_file_name)
 
