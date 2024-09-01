@@ -141,7 +141,7 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
         raise ValueError(err)
 
 
-def _batch_generator(gamefix: Path, size=50) -> Generator[set[str], Any, Any]:
+def _batch_generator(gamefix: Path, size: int = 50) -> Generator[set[str], Any, Any]:
     appids = set()
     # Keep track of the count because some APIs enforce limits
     count = 0
