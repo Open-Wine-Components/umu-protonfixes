@@ -27,7 +27,7 @@ def install_app(appid: str, delay: int = 1) -> None:
 
 def _install_steam_appid(appid: str) -> None:
     """Call steam URL"""
-    install_url = 'steam://install/' + str(appid)
+    install_url = f'steam://install/{appid}'
     if shutil.which('xdg-open'):
         subprocess.call(['xdg-open', install_url])
     elif shutil.which('gvfs-open'):
