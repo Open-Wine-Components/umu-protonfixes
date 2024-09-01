@@ -28,6 +28,7 @@ jobs:
     - name: Lint with Shellcheck
       run: |
         shellcheck tools/check-links.sh
+        shellcheck winetricks
     - name: Check symbolic links
       run: |
         bash tools/check-links.sh
