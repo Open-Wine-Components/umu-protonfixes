@@ -2,8 +2,6 @@
 
 import os
 import sys
-import shutil
-
 
 from __main__ import CURRENT_PREFIX_VERSION, g_proton
 from .logger import log
@@ -29,12 +27,6 @@ def show_debug_info() -> None:
     log.debug('Proton Python Version:')
     log.debug(sys.executable)
     log.debug(sys.version)
-    log.debug(line)
-    log.debug('System Python Version:')
-    try:
-        log.debug(shutil.which(os.readlink(shutil.which('python'))))
-    except:
-        log.debug(shutil.which('python'))
     log.debug(line)
 
     log.debug('Proton Version:')
