@@ -50,7 +50,7 @@ def show_debug_info() -> None:
     log.debug(line)
 
     log.debug('Command Line:')
-    log.debug(sys.argv)
+    log.debug(f'{sys.argv}')
     log.debug('----- end protontricks debug info -----')
 
 
