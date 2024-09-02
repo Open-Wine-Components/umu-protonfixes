@@ -53,8 +53,9 @@ select = [
     "FLY",
     # Simplify and update syntax to our target Python version
     "UP",
+    "D"
 ]
-ignore = ["ANN101"]
+ignore = ["ANN101", "D404", "D401", "D400", "D415"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
