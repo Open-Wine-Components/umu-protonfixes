@@ -4,6 +4,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    """installs openal as redistributable install script is borked."""
-
+    """Installs openal as redistributable install script is borked."""
     util.protontricks('openal')

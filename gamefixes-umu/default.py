@@ -5,4 +5,4 @@ even if no game fix is present. It is run before game fixes are applied.
 
 
 def main() -> None:
-    """global defaults"""
+    """Global defaults"""

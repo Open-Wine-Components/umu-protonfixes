@@ -1,6 +1,4 @@
-"""
-Silent Hill 4: The Room
-"""
+"""Silent Hill 4: The Room"""
 
 from protonfixes import util
 

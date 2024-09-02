@@ -7,6 +7,5 @@ from protonfixes import util
 
 def main() -> None:
     """Changes the proton argument from the launcher to the game"""
-
     # Game expects this to be set
     util.append_argument('-changedir')

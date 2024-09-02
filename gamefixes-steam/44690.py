@@ -4,6 +4,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    """installs mfc42"""
-
+    """Installs mfc42"""
     util.protontricks('mfc42')

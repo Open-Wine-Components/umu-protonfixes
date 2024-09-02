@@ -5,7 +5,6 @@ from protonfixes import util
 
 def main() -> None:
     """Install directsound libraries"""
-
     util.protontricks('dmime')
     util.protontricks('dmloader')
     util.protontricks('dmsynth')

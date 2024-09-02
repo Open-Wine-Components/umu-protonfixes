@@ -4,5 +4,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    """installs d3dx9_41"""
+    """Installs d3dx9_41"""
     util.protontricks('d3dx9_41')

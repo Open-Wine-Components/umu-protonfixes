@@ -6,7 +6,6 @@ from protonfixes import util
 
 def main() -> None:
     """Modify ge3.ini"""
-
     game_opts = """
     [Engine.Setup]
     Timer.ThreadSafe=false

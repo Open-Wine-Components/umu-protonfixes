@@ -5,7 +5,6 @@ from protonfixes import util
 
 def main() -> None:
     """EAC Workaround"""
-
     # eac workaround
     util.set_environment('EOS_USE_ANTICHEATCLIENTNULL', '1')
 

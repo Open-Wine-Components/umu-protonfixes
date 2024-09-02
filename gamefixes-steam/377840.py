@@ -5,7 +5,6 @@ from protonfixes import util
 
 def main() -> None:
     """Changes the proton argument from the launcher to the game"""
-
     # Fix crackling audio
     util.set_environment('PULSE_LATENCY_MSEC', '60')
 

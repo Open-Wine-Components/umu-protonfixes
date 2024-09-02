@@ -1,6 +1,4 @@
-"""
-The Last Blade
-"""
+"""The Last Blade"""
 
 from protonfixes import util
 

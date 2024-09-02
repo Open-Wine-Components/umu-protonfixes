@@ -7,7 +7,6 @@ from protonfixes import util
 
 def main() -> None:
     """Installs crypt32 and and bypasses launcher"""
-
     # Install crypt32 (not required for Proton 3.16-3 and up)
     util.protontricks('crypt32')
 

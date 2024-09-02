@@ -10,7 +10,6 @@ from protonfixes import util
 
 def main() -> None:
     """Enable preload options"""
-
     # Enable preload options
     util.append_argument('+r_renderAPI 1')
 

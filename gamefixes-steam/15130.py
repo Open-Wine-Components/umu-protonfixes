@@ -4,8 +4,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    """installs dsound d3dx9 arial d3dcompiler_47"""
-
+    """Installs dsound d3dx9 arial d3dcompiler_47"""
     util.protontricks('dsound')
     util.protontricks('d3dx9')
     util.protontricks('arial')

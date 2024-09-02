@@ -9,7 +9,6 @@ def main() -> None:
     This also has the side effect of breaking voip in DungeonCrawler.exe, so we add registry entries
     to only use native wininet and urlmon for Blacksmith.exe, and not DungeonCrawler.exe.
     """
-
     util.protontricks('wininet')
     util.protontricks('urlmon')
 

@@ -4,8 +4,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    """installs quartz, wmp9"""
-
+    """Installs quartz, wmp9"""
     # The whole game is only videos and require wmp9 & quartz
     util.protontricks('quartz')
     util.protontricks('wmp9')

@@ -14,7 +14,6 @@ def main() -> None:
 
     The game will just show a black screen without cnc-ddraw or the patch in place.
     """
-
     # Opt out of CnCNet with 'NO_CNCNET=1 %command%'
     no_cncnet = os.getenv('NO_CNCNET', '')
     if str.lower(no_cncnet) in ['y', 'yes', 'true', 'on', '1']:
@@ -36,7 +35,6 @@ def main() -> None:
 
 def use_cnc_ddraw() -> None:
     """Install cnc-ddraw, the current replacement from EA isn't working."""
-
     log('Using cnc-ddraw.')
 
     # Return early, if cnc-ddraw is installed

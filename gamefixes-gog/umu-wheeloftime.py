@@ -1,6 +1,4 @@
-"""
-The Wheel of Time
-"""
+"""The Wheel of Time"""
 
 from protonfixes import util
 

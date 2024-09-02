@@ -5,7 +5,6 @@ from protonfixes import util
 
 def main() -> None:
     """Installs directmusic and directplay"""
-
     util.protontricks('dmband')
     util.protontricks('dmime')
     util.protontricks('dmloader')

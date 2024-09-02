@@ -5,7 +5,7 @@ import subprocess
 
 
 def main() -> None:
-    """needs player.ini to prevent black screen on load"""
+    """Needs player.ini to prevent black screen on load"""
     if not os.path.isfile('player.ini'):
         subprocess.call(['touch', 'player.ini'])
         with open('player.ini', 'w+', encoding='utf-8') as f:

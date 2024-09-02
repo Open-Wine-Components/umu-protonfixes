@@ -4,8 +4,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    """installs corefonts, l3codecx, mfc42, winxp"""
-
+    """Installs corefonts, l3codecx, mfc42, winxp"""
     # https://github.com/ValveSoftware/Proton/issues/17#issuecomment-415977510
     util.protontricks('mfc42')
     util.protontricks('l3codecx')

@@ -4,7 +4,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    """klite to fix videos
+    """Klite to fix videos
     prev version of this used devenum, quartz, wmp9 but that caused laggy intros
     """
     util.protontricks('klite')

@@ -9,6 +9,5 @@ from protonfixes import util
 
 def main() -> None:
     """Set virtual desktop"""
-
     # https://github.com/ValveSoftware/Proton/issues/872
     util.protontricks('vd=1280x720')

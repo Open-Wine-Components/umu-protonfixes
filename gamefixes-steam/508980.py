@@ -6,7 +6,6 @@ from protonfixes import util
 
 def main() -> None:
     """Change setting FSAA to 0 in graphics.config"""
-
     config = (
         util.protonprefix()
         + 'drive_c/users/steamuser/Local Settings/'

@@ -8,7 +8,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    """global defaults"""
+    """Global defaults"""
 
     # Steam commandline
     def use_steam_commands() -> None:

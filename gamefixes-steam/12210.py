@@ -4,6 +4,6 @@ from protonfixes import util
 
 
 def main() -> None:
-    """installs wmp11"""
+    """Installs wmp11"""
     # Fixes Independence FM user radio station
     util.protontricks('wmp11')
