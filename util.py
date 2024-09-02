@@ -84,6 +84,7 @@ def once(
     func: Union[Callable, None] = None, retry: bool = False
 ) -> Union[None, Callable[..., Any]]:
     """Decorator to use on functions which should only run once in a prefix.
+
     Error handling:
     By default, when an exception occurs in the decorated function, the
     function is not run again. To change that behavior, set retry to True.
@@ -181,9 +182,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
 
 
 def checkinstalled(verb: str) -> bool:
-    """Returns True if the winetricks verb is found in the winetricks log
-    or in the 'winetricks.log.forced' file
-    """
+    """Returns True if the winetricks verb is found in the winetricks log or in the 'winetricks.log.forced' file"""
     if verb == 'gui':
         return False
 
@@ -357,6 +356,7 @@ def replace_command(
     orig: str, repl: str, match_flags: re.RegexFlag = re.IGNORECASE
 ) -> bool:
     """Make a commandline replacement in sys.argv
+
     Returns if there was any match.
 
     By default the search is case insensitive,
@@ -454,6 +454,7 @@ def disable_protonmediaconverter() -> None:
 @once
 def disable_uplay_overlay() -> bool:
     """Disables the UPlay in-game overlay.
+
     Creates or appends the UPlay settings.yml file
     with the correct setting to disable the overlay.
     UPlay will overwrite settings.yml on launch, but keep
@@ -506,6 +507,7 @@ def create_dosbox_conf(
 
 def _get_case_insensitive_name(path: str) -> str:
     """Find potentially differently-cased location
+
     e.g /path/to/game/system/gothic.ini -> /path/to/game/System/GOTHIC.INI
     """
     if os.path.exists(path):
@@ -666,6 +668,7 @@ def set_dxvk_option(
     opt: str, val: str, cfile: str = '/tmp/protonfixes_dxvk.conf'
 ) -> None:
     """Create custom DXVK config file
+
     See https://github.com/doitsujin/dxvk/wiki/Configuration for details
     """
     conf = configparser.ConfigParser()
@@ -747,6 +750,7 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
 
 def try_show_gui_error(text: str) -> None:
     """Trys to show a message box with an error
+
     1. Try importing tkinter and show messagebox
     2. Try executing process 'notify-send'
     3. Failed, output info to log
@@ -764,6 +768,7 @@ def try_show_gui_error(text: str) -> None:
 
 def is_smt_enabled() -> bool:
     """Returns whether SMT is enabled.
+
     If the check has failed, False is returned.
     """
     try:
@@ -778,6 +783,7 @@ def is_smt_enabled() -> bool:
 
 def get_cpu_count() -> int:
     """Returns the cpu core count, provided by the OS.
+
     If the request failed, 0 is returned.
     """
     cpu_cores = os.cpu_count()
@@ -789,6 +795,7 @@ def get_cpu_count() -> int:
 
 def set_cpu_topology(core_count: int, ignore_user_setting: bool = False) -> bool:
     """This sets the cpu topology to a fixed core count.
+
     By default, a user provided topology is prioritized.
     You can override this behavior by setting `ignore_user_setting`.
     """
@@ -814,6 +821,7 @@ def set_cpu_topology_nosmt(
     core_limit: int = 0, ignore_user_setting: bool = False, threads_per_core: int = 2
 ) -> bool:
     """This sets the cpu topology to the count of physical cores.
+
     If SMT is enabled, eg. a 4c8t cpu is limited to 4 logical cores.
     You can limit the core count to the `core_limit` argument.
     """
@@ -830,6 +838,7 @@ def set_cpu_topology_nosmt(
 
 def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -> bool:
     """This sets the cpu topology to a limited number of logical cores.
+
     A limit that exceeds the available cores, will be ignored.
     """
     cpu_cores = get_cpu_count()

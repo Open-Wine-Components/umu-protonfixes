@@ -8,6 +8,7 @@ except ImportError:
 
 def esync_file_limits() -> bool:
     """Check esync file limits using /proc/sys/fs/file-max
+
     https://www.reddit.com/r/SteamPlay/comments/9kqisk/tip_for_those_using_proton_no_esync1/
     """
     warning = """File descriptor limit is low

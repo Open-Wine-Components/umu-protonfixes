@@ -78,9 +78,7 @@ def _get_manifest_path(appid: str, librarypath: str) -> str:
 
 
 def _find_regex_groups(path: str, regex: re.Pattern, groupname: str) -> list:
-    """Given a file and a regex with a named group groupname, return an
-    array of all the matches
-    """
+    """Given a file and a regex with a named group groupname, return an array of all the matches"""
     matches = []
     with open(path, encoding='ascii') as re_file:
         for line in re_file:

@@ -8,7 +8,7 @@ from .logger import log
 class Engine:
     """Game engines"""
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # noqa: D107
         self.engine_name = None
         self.supported = {
             'Dunia 2': 'https://pcgamingwiki.com/wiki/Engine:Dunia_2',

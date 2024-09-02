@@ -7,7 +7,7 @@ import sys
 class Log:
     """Log to stderr for steam dumps"""
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # noqa: D107
         self.pfx = 'ProtonFixes[' + str(os.getpid()) + '] '
         self.colors = {
             'RESET': '\u001b[0m',

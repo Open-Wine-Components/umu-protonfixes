@@ -171,6 +171,7 @@ def _run_fix(game_id: str, default: bool = False, local: bool = False) -> bool:
 
 def run_fix(game_id: str) -> None:
     """Loads a gamefix module by it's gameid
+
     local fixes prevent global fixes from being executed
     """
     if game_id is None:
