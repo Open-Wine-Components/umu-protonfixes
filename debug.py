@@ -11,7 +11,6 @@ os.environ['DEBUG'] = '1'
 
 def show_debug_info() -> None:
     """Show various debug info"""
-
     check_args = [
         'iscriptevaluator.exe' in sys.argv[2],
         'getcompatpath' in sys.argv[1],

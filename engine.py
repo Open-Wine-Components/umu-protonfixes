@@ -39,12 +39,10 @@ class Engine:
 
     def _add_argument(self, args: str = '') -> None:
         """Set command line arguments"""
-
         sys.argv += args.split(' ')
 
     def _is_unity(self) -> bool:
         """Detect Unity engine"""
-
         dir_list = os.listdir(os.environ['PWD'])
         data_list = list(filter(lambda item: 'Data' in item, dir_list))
 
@@ -57,7 +55,6 @@ class Engine:
 
     def _is_dunia2(self) -> bool:
         """Detect Dunia 2 engine (Far Cry >= 3)"""
-
         dir_list = os.listdir(os.environ['PWD'])
         data_list = list(filter(lambda item: 'data_win' in item, dir_list))
 
@@ -72,7 +69,6 @@ class Engine:
 
     def _is_rage(self) -> bool:
         """Detect RAGE engine (GTA IV/V)"""
-
         #        dir_list = os.listdir(os.environ['PWD'])
 
         #        # Check .../*/pc/data/cdimages dir
@@ -86,17 +82,14 @@ class Engine:
 
     def _is_ue3(self) -> bool:
         """Detect Unreal Engine 3"""
-
         return False
 
     def _is_ue4(self) -> bool:
         """Detect Unreal Engine 4"""
-
         return False
 
     def _log(self, ctx: str, msg: str, warn: bool = False) -> None:
         """Log wrapper"""
-
         if self.engine_name is None:
             log.warn(ctx + ': Engine not defined')
             return
@@ -110,7 +103,6 @@ class Engine:
 
     def set(self, _engine: str = None) -> bool:
         """Force engine"""
-
         if _engine in self.supported:
             self.engine_name = _engine
             self._log('set', 'forced')
@@ -121,7 +113,6 @@ class Engine:
 
     def nosplash(self) -> bool:
         """Disable splash screen"""
-
         if self.engine_name == 'UE3':
             self._add_argument('-nosplash')
             self._log('nosplash', 'splash screen disabled')
@@ -132,7 +123,6 @@ class Engine:
 
     def info(self) -> bool:
         """Show some information about engine"""
-
         if self.engine_name == 'RAGE':
             self._add_argument('-help')
             self._log('info', 'command line arguments')
@@ -143,7 +133,6 @@ class Engine:
 
     def nointro(self) -> bool:
         """Skip intro videos"""
-
         if self.engine_name == 'UE3':
             self._add_argument('-nostartupmovies')
             self._log('nointro', 'intro videos disabled')
@@ -157,7 +146,6 @@ class Engine:
 
     def launcher(self) -> bool:
         """Force launcher"""
-
         if self.engine_name == 'Unity':
             self._add_argument('-show-screen-selector')
             self._log('launcher', 'forced')
@@ -168,7 +156,6 @@ class Engine:
 
     def windowed(self) -> bool:
         """Force windowed mode"""
-
         if self.engine_name == 'Unity':
             self._add_argument('-popupwindow -screen-fullscreen 0')
             self._log('windowed', 'borderless window')
@@ -182,7 +169,6 @@ class Engine:
 
     def resolution(self, res: str = None) -> bool:
         """Force screen resolution"""
-
         if not isinstance(res, str):
             self._log('resolution', 'not provided')
             return False

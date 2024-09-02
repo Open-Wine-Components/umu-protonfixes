@@ -19,12 +19,10 @@ class Log:
 
     def __call__(self, msg: str) -> None:
         """Allows the Log instance to be called directly"""
-
         self.log(msg)
 
     def log(self, msg: str = '', level: str = 'INFO') -> None:
         """Prints the log message to stdout the same way as Proton"""
-
         pfx = self.pfx + level + ': '
         color = self.colors[level]
         reset = self.colors['RESET']
@@ -37,22 +35,18 @@ class Log:
 
     def info(self, msg: str) -> None:
         """Wrapper for printing info messages"""
-
         self.log(msg, 'INFO')
 
     def warn(self, msg: str) -> None:
         """Wrapper for printing warning messages"""
-
         self.log(msg, 'WARN')
 
     def crit(self, msg: str) -> None:
         """Wrapper for printing critical messages"""
-
         self.log(msg, 'CRIT')
 
     def debug(self, msg: str) -> None:
         """Wrapper for printing debug messages"""
-
         if 'DEBUG' in os.environ:
             self.log(msg, 'DEBUG')
 

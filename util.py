@@ -31,7 +31,6 @@ except ImportError:
 
 def which(appname: str) -> Union[str, None]:
     """Returns the full path of an executable in $PATH"""
-
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
         if os.path.exists(fullpath) and os.access(fullpath, os.X_OK):
@@ -42,20 +41,17 @@ def which(appname: str) -> Union[str, None]:
 
 def protondir() -> str:
     """Returns the path to proton"""
-
     proton_dir = os.path.dirname(sys.argv[0])
     return proton_dir
 
 
 def protonprefix() -> str:
     """Returns the wineprefix used by proton"""
-
     return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
 
 
 def protonnameversion() -> Union[str, None]:
     """Returns the version of proton from sys.argv[0]"""
-
     version = re.search('Proton ([0-9]*\\.[0-9]*)', sys.argv[0])
     if version:
         return version.group(1)
@@ -65,7 +61,6 @@ def protonnameversion() -> Union[str, None]:
 
 def protontimeversion() -> int:
     """Returns the version timestamp of proton from the `version` file"""
-
     fullpath = os.path.join(protondir(), 'version')
     try:
         with open(fullpath, encoding='ascii') as version:
@@ -133,7 +128,6 @@ def once(
 
 def _killhanging() -> None:
     """Kills processes that hang when installing winetricks"""
-
     # avoiding an external library as proc should be available on linux
     log.debug('Killing hanging wine processes')
     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -158,7 +152,6 @@ def _forceinstalled(verb: str) -> None:
 
 def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
     """Returns True if the winetricks verb is found in the winetricks log"""
-
     if not isinstance(verb, str):
         return False
 
@@ -306,7 +299,6 @@ def regedit_add(
     arch: bool = False,
 ) -> None:
     """Add regedit keys"""
-
     env = dict(protonmain.g_session.env)
     env['WINEPREFIX'] = protonprefix()
     env['WINE'] = protonmain.g_proton.wine_bin
@@ -387,7 +379,6 @@ def replace_command(
 
 def append_argument(argument: str) -> None:
     """Append an argument to sys.argv"""
-
     log.info('Adding argument ' + argument)
     sys.argv.append(argument)
     log.debug('New commandline: ' + str(sys.argv))
@@ -395,7 +386,6 @@ def append_argument(argument: str) -> None:
 
 def set_environment(envvar: str, value: str) -> None:
     """Add or override an environment value"""
-
     log.info(f'Adding env: {envvar}={value}')
     os.environ[envvar] = value
     protonmain.g_session.env[envvar] = value
@@ -403,7 +393,6 @@ def set_environment(envvar: str, value: str) -> None:
 
 def del_environment(envvar: str) -> None:
     """Remove an environment variable"""
-
     log.info('Removing env: ' + envvar)
     if envvar in os.environ:
         del os.environ[envvar]
@@ -423,7 +412,6 @@ def get_game_install_path() -> str:
 
 def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
     """Add WINE dll override"""
-
     log.info(f'Overriding {dll}.dll = {dtype}')
     setting = f'{dll}={dtype}'
     protonmain.append_to_env_str(
@@ -433,7 +421,6 @@ def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> No
 
 def disable_nvapi() -> None:
     """Disable WINE nv* dlls"""
-
     log.info('Disabling NvAPI')
     winedll_override('nvapi', '')
     winedll_override('nvapi64', '')
@@ -445,21 +432,18 @@ def disable_nvapi() -> None:
 
 def disable_esync() -> None:
     """Disabling Esync"""
-
     log.info('Disabling Esync')
     set_environment('WINEESYNC', '')
 
 
 def disable_fsync() -> None:
     """Disabling FSync"""
-
     log.info('Disabling FSync')
     set_environment('WINEFSYNC', '')
 
 
 def disable_protonmediaconverter() -> None:
     """Disabling Proton Media Converter"""
-
     log.info('Disabling Proton Media Converter')
     set_environment('PROTON_AUDIO_CONVERT', '0')
     set_environment('PROTON_AUDIO_CONVERT_BIN', '0')
@@ -563,7 +547,6 @@ def _get_case_insensitive_name(path: str) -> str:
 
 def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
     """Find game's config file"""
-
     # Start from 'user'/'game' directories or absolute path
     if base_path == 'user':
         cfg_path = os.path.join(
@@ -586,7 +569,6 @@ def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
 
 def create_backup_config(cfg_path: str) -> None:
     """Create backup config file"""
-
     # Backup
     if not os.path.exists(cfg_path + '.protonfixes.bak'):
         log.info('Creating backup for config file')
@@ -745,7 +727,6 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
 
 def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     """Install a file from a downloaded zip"""
-
     if filename in os.listdir(path):
         log.info(f'File {filename} found in {path}')
         return
@@ -811,7 +792,6 @@ def set_cpu_topology(core_count: int, ignore_user_setting: bool = False) -> bool
     By default, a user provided topology is prioritized.
     You can override this behavior by setting `ignore_user_setting`.
     """
-
     # Don't override the user's settings (except, if we override it)
     user_topo = os.getenv('WINE_CPU_TOPOLOGY')
     if user_topo and not ignore_user_setting:
@@ -837,7 +817,6 @@ def set_cpu_topology_nosmt(
     If SMT is enabled, eg. a 4c8t cpu is limited to 4 logical cores.
     You can limit the core count to the `core_limit` argument.
     """
-
     # Check first, if SMT is enabled
     if is_smt_enabled() is False:
         log.info('SMT is not active, skipping fix')
@@ -853,7 +832,6 @@ def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -
     """This sets the cpu topology to a limited number of logical cores.
     A limit that exceeds the available cores, will be ignored.
     """
-
     cpu_cores = get_cpu_count()
     if core_limit >= cpu_cores:
         log.info(

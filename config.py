@@ -33,7 +33,6 @@ except Exception:
 
 def opt_bool(opt: str) -> bool:
     """Convert bool ini strings to actual boolean values"""
-
     return opt.lower() in ['yes', 'y', 'true', '1']
 
 
