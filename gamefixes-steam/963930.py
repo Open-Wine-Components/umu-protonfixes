@@ -1,8 +1,7 @@
-""" Contractors VR
-"""
-#pylint: disable=C0103
+"""Contractors VR"""
 
 from protonfixes import util
 
-def main():
-    util.protontricks('vcrun2022') # Game crashes without it
+
+def main() -> None:
+    util.protontricks('vcrun2022')  # Game crashes without it

@@ -1,11 +1,9 @@
-""" Game fix for Dusty Revenge: Co-Op Edition
-"""
-#pylint: disable=C0103
+"""Game fix for Dusty Revenge: Co-Op Edition"""
 
 from protonfixes import util
 
-def main():
-    """ Install vcrun2010
-    """
+
+def main() -> None:
+    """Install vcrun2010"""
     util.protontricks('vcrun2010')
     util.protontricks('dsound')

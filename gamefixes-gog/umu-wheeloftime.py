@@ -1,9 +1,7 @@
-""" 
-The Wheel of Time
-"""
-#pylint: disable=C0103
+"""The Wheel of Time"""
 
 from protonfixes import util
 
-def main():
-    util.winedll_override('ddraw', 'n,b') # GOG's dxcfg
+
+def main() -> None:
+    util.winedll_override('ddraw', 'n,b')  # GOG's dxcfg

@@ -1,9 +1,8 @@
-""" Cease to Breathe
+"""Cease to Breathe
 Replace included nwjs(0.71) wich doesn't work with 0.86
 Fix cursor hitbox (set frame=false in package.json)
 Updated from 0.85 that didn't display custom cursors.
 """
-#pylint: disable=C0103
 
 import os
 import glob
@@ -15,7 +14,8 @@ import hashlib
 from protonfixes import util
 from protonfixes.logger import log
 
-def main():
+
+def main() -> None:
     util.replace_command('CTB.exe', 'nw.exe')
     install_dir = glob.escape(util.get_game_install_path())
     if not os.path.isfile(os.path.join(install_dir, 'nw.exe')):
@@ -23,7 +23,7 @@ def main():
         hashsum = 'ed2681847162e0fa457dd55e293b6f331ccd58acedd934a98e7fe1406c26dd4f'
         nwjs = os.path.basename(url)
         urllib.request.urlretrieve(url, nwjs)
-        with open(nwjs, "rb") as f:
+        with open(nwjs, 'rb') as f:
             nwjs_sum = hashlib.sha256(f.read()).hexdigest()
         if hashsum == nwjs_sum:
             with zipfile.ZipFile(nwjs, 'r') as zip_ref:
@@ -33,4 +33,7 @@ def main():
             shutil.rmtree(nwjs)
         else:
             log(f"{nwjs} checksum doesn't match, fix not applied.")
-    subprocess.call([f"sed -i 's/\"frame\": true/\"frame\": false/' \"{install_dir}/package.json\""], shell=True)
+    subprocess.call(
+        [f'sed -i \'s/"frame": true/"frame": false/\' "{install_dir}/package.json"'],
+        shell=True,
+    )

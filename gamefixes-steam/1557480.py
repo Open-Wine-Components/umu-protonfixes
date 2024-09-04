@@ -1,10 +1,8 @@
-""" Project MIKHAIL: A Muv-Luv War Story
-"""
-#pylint: disable=C0103
+"""Project MIKHAIL: A Muv-Luv War Story"""
 
 from protonfixes import util
 
-def main():
-    """ needs native d3dcompiler_47
-    """
+
+def main() -> None:
+    """Needs native d3dcompiler_47"""
     util.protontricks('d3dcompiler_47')

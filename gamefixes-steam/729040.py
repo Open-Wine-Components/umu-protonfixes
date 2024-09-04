@@ -1,8 +1,7 @@
-""" Borderlands GOTY 
-"""
-#pylint: disable=C0103
+"""Borderlands GOTY"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.replace_command('Launcher.exe', 'BorderlandsGOTY.exe')

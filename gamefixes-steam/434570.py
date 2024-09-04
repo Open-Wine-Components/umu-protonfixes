@@ -1,9 +1,7 @@
-""" Game fix for Blood and Bacon
-"""
-
-#pylint: disable=C0103
+"""Game fix for Blood and Bacon"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('dotnet40')

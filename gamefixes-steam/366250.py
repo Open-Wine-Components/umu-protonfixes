@@ -1,8 +1,7 @@
-""" Metal Slug
-"""
-#pylint: disable=C0103
+"""Metal Slug"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('d3dcompiler_46')

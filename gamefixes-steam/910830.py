@@ -1,12 +1,9 @@
-""" Game fix for Rebel Galaxy Outlaw
-"""
-#pylint: disable=C0103
+"""Game fix for Rebel Galaxy Outlaw"""
 
 from protonfixes import util
 
-def main():
-    """ installs mfc42
-    """
 
+def main() -> None:
+    """Installs mfc42"""
     # https://github.com/ValveSoftware/Proton/issues/4216
     util.protontricks('mfc42')

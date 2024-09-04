@@ -1,11 +1,8 @@
-""" Game fix for Cryostasis
-"""
-#pylint: disable=C0103
+"""Game fix for Cryostasis"""
 
 from protonfixes import util
 
-def main():
-    """ Uses physx
-    """
 
+def main() -> None:
+    """Uses physx"""
     util.protontricks('physx')

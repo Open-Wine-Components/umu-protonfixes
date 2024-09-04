@@ -1,9 +1,7 @@
-""" Game fix for AirMech Strike
-"""
-
-#pylint: disable=C0103
+"""Game fix for AirMech Strike"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.append_argument('/dx11')

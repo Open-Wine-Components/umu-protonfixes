@@ -1,8 +1,7 @@
-""" Oddworld: Stranger's Wrath HD
-"""
-#pylint: disable=C0103
+"""Oddworld: Stranger's Wrath HD"""
 
 from protonfixes import util
 
-def main():
-    util.protontricks('mfc90') # The game crashes on launch without mfc90
+
+def main() -> None:
+    util.protontricks('mfc90')  # The game crashes on launch without mfc90

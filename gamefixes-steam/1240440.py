@@ -1,8 +1,7 @@
-""" Halo Infinite needs vcrun2019
-"""
-#pylint: disable=C0103
+"""Halo Infinite needs vcrun2019"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('vcrun2019')

@@ -1,9 +1,8 @@
-""" Game fix for Agarest: Generations of War 2
-"""
-#pylint: disable=C0103
+"""Game fix for Agarest: Generations of War 2"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('wmp9')
     util.disable_protonmediaconverter()

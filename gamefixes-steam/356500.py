@@ -1,10 +1,8 @@
-""" Game fix for STAR WARS Galactic Battlegrounds Saga
-"""
-
-#pylint: disable=C0103
+"""Game fix for STAR WARS Galactic Battlegrounds Saga"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('icodecs')
     util.protontricks('directplay')

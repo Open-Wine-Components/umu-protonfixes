@@ -1,13 +1,10 @@
-""" Game fix for Chantelise - A Tale of Two Sisters
-"""
-#pylint: disable=C0103
+"""Game fix for Chantelise - A Tale of Two Sisters"""
 
 from protonfixes import util
 
-def main():
-    """ Install directsound libraries
-    """
 
+def main() -> None:
+    """Install directsound libraries"""
     util.protontricks('dmime')
     util.protontricks('dmloader')
     util.protontricks('dmsynth')

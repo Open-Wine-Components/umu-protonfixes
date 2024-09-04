@@ -1,8 +1,7 @@
-""" Alien Breed 3: Descent 
-"""
-#pylint: disable=C0103
+"""Alien Breed 3: Descent"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('physx')

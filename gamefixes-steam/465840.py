@@ -1,9 +1,7 @@
-""" 
-The Last Blade
-"""
-#pylint: disable=C0103
+"""The Last Blade"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('d3dcompiler_46')

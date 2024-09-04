@@ -1,11 +1,8 @@
-""" Ship Graveyard Simulator Prologue
-"""
-#pylint: disable=C0103
+"""Ship Graveyard Simulator Prologue"""
 
 from protonfixes import util
 
-def main():
-    """ needs builtin vulkan-1
-    """
 
+def main() -> None:
+    """Needs builtin vulkan-1"""
     util.winedll_override('vulkan-1', 'b')

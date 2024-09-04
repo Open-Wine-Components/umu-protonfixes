@@ -1,9 +1,8 @@
-""" Ougon Musoukyoku
-"""
-#pylint: disable=C0103
+"""Ougon Musoukyoku"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     # Codecs required for opening playback
     util.protontricks('lavfilters')

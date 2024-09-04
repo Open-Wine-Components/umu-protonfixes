@@ -1,12 +1,10 @@
-""" The Great Ace Attorney Chronicles
+"""The Great Ace Attorney Chronicles
 Missing sound in bonus content videos
 Requires disabling the gstreamer protonaudioconverterbin to get full audio
 """
 
-# pylint: disable=C0103
-
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     util.disable_protonmediaconverter()

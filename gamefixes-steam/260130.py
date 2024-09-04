@@ -1,9 +1,8 @@
-""" Game fix for Agarest Zero
-"""
-#pylint: disable=C0103
+"""Game fix for Agarest Zero"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('wmp9')
     util.disable_protonmediaconverter()

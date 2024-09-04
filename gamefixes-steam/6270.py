@@ -1,8 +1,7 @@
-""" Ducati World Championship
-"""
-#pylint: disable=C0103
+"""Ducati World Championship"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('icodecs')

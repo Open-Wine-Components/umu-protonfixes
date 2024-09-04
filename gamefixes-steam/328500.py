@@ -1,13 +1,11 @@
-""" Game fix for Potatoman Seeks the Troof
-"""
-#pylint: disable=C0103
+"""Game fix for Potatoman Seeks the Troof"""
 
 import os
 from protonfixes import util
 
-def main():
-    """ The file mms.cfg must have the string OverrideGPUValidation=1 written
-    """
+
+def main() -> None:
+    """The file mms.cfg must have the string OverrideGPUValidation=1 written"""
     fix_installed = False
     prefix = util.protonprefix()
     macro_path = 'drive_c/windows/syswow64/Macromed/Flash'
@@ -22,4 +20,4 @@ def main():
     if not fix_installed:
         with open(mms_path, 'a', encoding='utf-8') as f:
             f.write('\n')
-            f.write("OverrideGPUValidation=1")
+            f.write('OverrideGPUValidation=1')

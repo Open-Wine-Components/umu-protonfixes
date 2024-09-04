@@ -1,10 +1,9 @@
-""" Crysis Remastered
-"""
-#pylint: disable=C0103
+"""Crysis Remastered"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     # Replace launcher with game exe in proton arguments
     util.protontricks('vcrun2019')
     util.protontricks('d3dcompiler_43')

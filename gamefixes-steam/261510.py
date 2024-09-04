@@ -1,12 +1,9 @@
-""" Game fix for Tesla Effect
-"""
-#pylint: disable=C0103
+"""Game fix for Tesla Effect"""
 
 from protonfixes import util
 
-def main():
-    """ Install corefonts
-    """
 
+def main() -> None:
+    """Install corefonts"""
     # https://github.com/ValveSoftware/Proton/issues/1317
     util.protontricks('corefonts')

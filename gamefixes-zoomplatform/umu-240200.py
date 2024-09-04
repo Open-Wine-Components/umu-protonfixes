@@ -1,9 +1,8 @@
-""" Duke Nukem: Manhattan Project - Enhanced Edition
-"""
-#pylint: disable=C0103
+"""Duke Nukem: Manhattan Project - Enhanced Edition"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.winedll_override('d3d8', 'n,b')
     util.protontricks('vcrun2019')

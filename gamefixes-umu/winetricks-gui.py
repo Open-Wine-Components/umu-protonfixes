@@ -1,11 +1,8 @@
-""" Call Winetricks GUI
-"""
-#pylint: disable=C0103
+"""Call Winetricks GUI"""
 
 from protonfixes import util
 
-def main():
-    """ Requires seccomp
-    """
 
+def main() -> None:
+    """Requires seccomp"""
     util.protontricks('gui')

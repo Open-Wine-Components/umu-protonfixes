@@ -1,9 +1,7 @@
-""" Game fix for Age of Wonders
-"""
-
-#pylint: disable=C0103
+"""Game fix for Age of Wonders"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('icodecs')

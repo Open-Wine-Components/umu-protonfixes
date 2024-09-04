@@ -1,8 +1,7 @@
-""" Alien Breed: Impact
-"""
-#pylint: disable=C0103
+"""Alien Breed: Impact"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('physx')

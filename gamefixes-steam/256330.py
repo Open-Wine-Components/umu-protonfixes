@@ -1,16 +1,15 @@
-""" WRC 4
-"""
-#pylint: disable=C0103
+"""WRC 4"""
 
 from protonfixes import util
 
-def main():
-    #Black screen without it
+
+def main() -> None:
+    # Black screen without it
     util.protontricks('d3dx9_42')
     util.protontricks('d3dx9_43')
 
-    #Fixes background videos
+    # Fixes background videos
     util.protontricks('wmp11')
 
-    #Fixes audio sliders in options
+    # Fixes audio sliders in options
     util.protontricks('xact')

@@ -1,12 +1,10 @@
-""" Game fix for Tomb Raider I
-"""
-# pylint: disable=C0103
+"""Game fix for Tomb Raider I"""
 
 from protonfixes import util
 
-def main():
-    """ Enable Glide emulation in dosbox config """
 
+def main() -> None:
+    """Enable Glide emulation in dosbox config"""
     conf_dict = {'glide': {'glide': 'emu'}}
     util.create_dosbox_conf('glide_fix.conf', conf_dict)
     util.append_argument('-conf')

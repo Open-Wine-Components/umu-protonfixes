@@ -1,12 +1,8 @@
-""" FarCry 3
-"""
-#pylint: disable=C0103
+"""FarCry 3"""
 
 from protonfixes import util
 
 
-def main():
-    """ FarCry 3 chokes on more than 24 cores
-    """
-
+def main() -> None:
+    """FarCry 3 chokes on more than 24 cores"""
     util.set_cpu_topology_limit(24)

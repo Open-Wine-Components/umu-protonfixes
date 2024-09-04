@@ -1,14 +1,10 @@
-""" Game fix for Serious Sam: The Random Encounter
-"""
-#pylint: disable=C0103
+"""Game fix for Serious Sam: The Random Encounter"""
 
 from protonfixes import util
 
 
-def main():
-    """ Installs directmusic and directplay
-    """
-
+def main() -> None:
+    """Installs directmusic and directplay"""
     util.protontricks('dmband')
     util.protontricks('dmime')
     util.protontricks('dmloader')

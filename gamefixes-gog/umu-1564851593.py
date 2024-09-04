@@ -14,19 +14,19 @@ from protonfixes import util
 from protonfixes.logger import log
 
 # Archive containing the text injecting framework
-arc = "https://github.com/user-attachments/files/16136393/d3d9-2206220222.zip"
+arc = 'https://github.com/user-attachments/files/16136393/d3d9-2206220222.zip'
 
 # Digest of the archive, d3d9.dll proxy and JSON
-hashsum_arc = "caed98ec44d4270290f0652502344a40c1d45216caa8935b41e7d9f461ae2d24"
-hashsum_d3d9 = "17e1c6706c684b19d05e89b588ba5101bf3ee40429cecf803c6e98af9b342129"
-hashsum_config = "aecb441fdc9c9e2ba78df63dfbe14f48c31dfd5ad571adba988ba362fc814377"
+hashsum_arc = 'caed98ec44d4270290f0652502344a40c1d45216caa8935b41e7d9f461ae2d24'
+hashsum_d3d9 = '17e1c6706c684b19d05e89b588ba5101bf3ee40429cecf803c6e98af9b342129'
+hashsum_config = 'aecb441fdc9c9e2ba78df63dfbe14f48c31dfd5ad571adba988ba362fc814377'
 
 
-def main():  # pylint: disable=R0914
-    tmp = f"{mkdtemp()}/d3d9-2206220222.zip"
+def main() -> None:
+    tmp = f'{mkdtemp()}/d3d9-2206220222.zip'
     install_dir = util.get_game_install_path()
-    path_config = f"{install_dir}/config.json"
-    path_dll = f"{install_dir}/d3d9.dll"
+    path_config = f'{install_dir}/config.json'
+    path_dll = f'{install_dir}/d3d9.dll'
     hashsum = sha256()
 
     # Ensure that the text injection files do not already exist before opening
@@ -36,8 +36,8 @@ def main():  # pylint: disable=R0914
         )
         return
 
-    config = open(path_config, mode="rb")  # pylint: disable=R1732
-    dll = open(path_dll, mode="rb")  # pylint: disable=R1732
+    config = open(path_config, mode='rb')
+    dll = open(path_dll, mode='rb')
 
     # Check if the text injection framework files have already been replaced
     if (
@@ -57,10 +57,10 @@ def main():  # pylint: disable=R0914
     # Download the archive
     with urlopen(arc, timeout=30) as resp:
         if resp.status != 200:
-            log.warn(f"github returned the status code: {resp.status}")
+            log.warn(f'github returned the status code: {resp.status}')
             return
 
-        with open(tmp, mode="wb", buffering=0) as file:
+        with open(tmp, mode='wb', buffering=0) as file:
             chunk_size = 64 * 1024  # 64 KB
             buffer = bytearray(chunk_size)
             view = memoryview(buffer)
@@ -70,7 +70,7 @@ def main():  # pylint: disable=R0914
                 hashsum.update(view[:size])
 
     if hashsum_arc != hashsum.hexdigest():
-        log.warn(f"Digest mismatch: {arc}")
+        log.warn(f'Digest mismatch: {arc}')
         log.warn(f"Expected '{hashsum_arc}', skipping...")
         return
 
@@ -82,10 +82,10 @@ def main():  # pylint: disable=R0914
     randstr = os.urandom(16).hex()
     log.info(f"Renaming 'config.json' -> '.{randstr}.config.json.bak'")
     log.info(f"Renaming 'd3d9.dll' -> '.{randstr}.d3d9.dll.bak'")
-    os.rename(path_config, f"{install_dir}/.{randstr}.config.json.bak")
-    os.rename(path_dll, f"{install_dir}/.{randstr}.d3d9.dll.bak")
+    os.rename(path_config, f'{install_dir}/.{randstr}.config.json.bak')
+    os.rename(path_dll, f'{install_dir}/.{randstr}.d3d9.dll.bak')
 
-    with ZipFile(tmp, mode="r") as zipfile:
+    with ZipFile(tmp, mode='r') as zipfile:
         log.info("Fixing in-game font for 'Flowers - Le Volume Sur Hiver'...")
         zipfile.extractall(install_dir)
 

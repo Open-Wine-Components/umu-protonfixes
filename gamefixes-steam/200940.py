@@ -1,12 +1,10 @@
-""" Game fix for Sonic CD
-"""
-#pylint: disable=C0103
+"""Game fix for Sonic CD"""
 
 from protonfixes import util
 
-def main():
-    """ Installs d3dcompiler_43, d3dx9_43, mdx. Locks fps to 60.
-    """
+
+def main() -> None:
+    """Installs d3dcompiler_43, d3dx9_43, mdx. Locks fps to 60."""
     util.protontricks('d3dcompiler_43')
     util.protontricks('d3dx9_43')
     util.protontricks('mdx')

@@ -1,10 +1,8 @@
-""" Bionic Commander Rearmed
-"""
-#pylint: disable=C0103
+"""Bionic Commander Rearmed"""
 
 from protonfixes import util
 
-def main():
-    """ Installs physx
-    """
+
+def main() -> None:
+    """Installs physx"""
     util.protontricks('physx')

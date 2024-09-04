@@ -1,9 +1,8 @@
-""" Game fix for Agarest: Generations of War
-"""
-#pylint: disable=C0103
+"""Game fix for Agarest: Generations of War"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('wmp9')
     util.winedll_override('winegstreamer', '')

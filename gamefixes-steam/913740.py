@@ -1,12 +1,9 @@
-""" Game fix for WORLD OF HORROR
-"""
-#pylint: disable=C0103
+"""Game fix for WORLD OF HORROR"""
 
 from protonfixes import util
 
-def main():
-    """ Disable esync
-    """
 
+def main() -> None:
+    """Disable esync"""
     # esync causes occasional crashing
     util.disable_esync()

@@ -1,9 +1,8 @@
-""" Game fix Age of Empires II: DE 
-"""
-#pylint: disable=C0103
+"""Game fix Age of Empires II: DE"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     # Requires vcrun2019 to launch
     util.protontricks('vcrun2019')

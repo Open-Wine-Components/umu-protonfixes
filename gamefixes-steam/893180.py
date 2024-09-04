@@ -1,10 +1,9 @@
-""" Game fix Catherine Classic
-"""
-#pylint: disable=C0103
+"""Game fix Catherine Classic"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     util.protontricks('directshow')
     util.protontricks('cinepak')
     util.protontricks('lavfilters')

@@ -1,18 +1,17 @@
-""" Game fix for Gothic 1 Classic
-    Game fix for Gothic II: Gold Classic
+"""Game fix for Gothic 1 Classic
+Game fix for Gothic II: Gold Classic
 """
-#pylint: disable=C0103
 
 from protonfixes import util
 
 
-def main():
+def main() -> None:
     # Fix resolution, not necessary with 'GD3D11' - but doesn't hurt
     set_resolution()
 
     # Fix background music / Gothic 2 startup
     util.protontricks('directmusic')
-    util.winedll_override('*dsound', 'b') # Override registry entry
+    util.winedll_override('*dsound', 'b')  # Override registry entry
 
     # Fix crackling audio
     util.set_environment('PULSE_LATENCY_MSEC', '90')
@@ -33,18 +32,24 @@ def main():
 
 def set_resolution() -> None:
     # Patch the config to match the system resolution
-    screen_width,screen_height = util.get_resolution()
+    screen_width, screen_height = util.get_resolution()
 
     zVidResFullscreenX = str(screen_width)
     zVidResFullscreenY = str(screen_height)
 
-    game_opts = """
+    game_opts = (
+        """
     [GAME]
     scaleVideos=1
     [VIDEO]
-    zVidResFullscreenX=""" + zVidResFullscreenX + """
-    zVidResFullscreenY=""" + zVidResFullscreenY + """
+    zVidResFullscreenX="""
+        + zVidResFullscreenX
+        + """
+    zVidResFullscreenY="""
+        + zVidResFullscreenY
+        + """
     zVidResFullscreenBPP=32
     """
+    )
 
     util.set_ini_options(game_opts, 'system/Gothic.ini', 'cp1251', 'game')

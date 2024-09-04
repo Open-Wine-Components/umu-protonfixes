@@ -1,10 +1,8 @@
-""" The Hunter: Call of the Wild
-"""
-#pylint: disable=C0103
+"""The Hunter: Call of the Wild"""
 
 from protonfixes import util
 
-def main():
-    """ Requires nvapi disabled.
-    """
+
+def main() -> None:
+    """Requires nvapi disabled."""
     util.disable_nvapi()

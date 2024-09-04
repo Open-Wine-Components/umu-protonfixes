@@ -1,12 +1,8 @@
-""" Game fix for Arkania
-"""
-
-# pylint: disable=C0103
+"""Game fix for Arkania"""
 
 from protonfixes import util
 
 
-def main():
-
+def main() -> None:
     # This requires Proton 5.0 installed
     util.protontricks('wmp11')

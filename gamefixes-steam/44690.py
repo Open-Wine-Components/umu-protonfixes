@@ -1,11 +1,8 @@
-""" Game fix for GT Legends
-"""
-#pylint: disable=C0103
+"""Game fix for GT Legends"""
 
 from protonfixes import util
 
-def main():
-    """ installs mfc42
-    """
 
+def main() -> None:
+    """Installs mfc42"""
     util.protontricks('mfc42')

@@ -1,13 +1,11 @@
-""" Game fix for IMSCARED
-"""
-
-#pylint: disable=C0103
+"""Game fix for IMSCARED"""
 
 import os
 import getpass
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     # IMSCARED relies on a folder on the user's Desktop being accessible
     # The problem is that all of the folders in Proton are sandboxed
     # So this protonfix works around that

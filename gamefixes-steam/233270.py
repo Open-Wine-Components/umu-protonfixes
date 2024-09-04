@@ -1,12 +1,8 @@
-""" Far Cry Blood Dragon
-"""
-#pylint: disable=C0103
+"""Far Cry Blood Dragon"""
 
 from protonfixes import util
 
 
-def main():
-    """ dx11 version is broken
-    """
-
+def main() -> None:
+    """dx11 version is broken"""
     util.set_cpu_topology_limit(24)

@@ -1,11 +1,8 @@
-""" Project Wingman
-"""
-#pylint: disable=C0103
+"""Project Wingman"""
 
 from protonfixes import util
 
-def main():
-    """ Requires d3dcompiler_47
-    """
 
+def main() -> None:
+    """Requires d3dcompiler_47"""
     util.protontricks('d3dcompiler_47')

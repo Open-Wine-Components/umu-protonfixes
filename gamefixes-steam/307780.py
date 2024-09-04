@@ -1,9 +1,8 @@
-""" Game fix for Mortal Kombat X
-"""
-#pylint: disable=C0103
+"""Game fix for Mortal Kombat X"""
 
 from protonfixes import util
 
-def main():
+
+def main() -> None:
     # Fix pre-rendered cutscene playback
     util.protontricks('xact_x64')

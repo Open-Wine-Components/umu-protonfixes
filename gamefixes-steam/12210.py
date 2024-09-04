@@ -1,11 +1,9 @@
-""" Game fix for GTA IV
-"""
-#pylint: disable=C0103
+"""Game fix for GTA IV"""
 
 from protonfixes import util
 
-def main():
-    """ installs wmp11
-    """
+
+def main() -> None:
+    """Installs wmp11"""
     # Fixes Independence FM user radio station
     util.protontricks('wmp11')

@@ -1,8 +1,7 @@
-""" Overlord II
-"""
-#pylint: disable=C0103
+"""Overlord II"""
 
 from protonfixes import util
 
-def main():
-    util.protontricks('physx') # Game crashes without it
+
+def main() -> None:
+    util.protontricks('physx')  # Game crashes without it

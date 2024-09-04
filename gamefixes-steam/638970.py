@@ -1,12 +1,9 @@
-""" Game fix for Yakuza 0
-"""
-#pylint: disable=C0103
+"""Game fix for Yakuza 0"""
 
 from protonfixes import util
 
-def main():
-    """ Disable FSYNC
-    """
 
+def main() -> None:
+    """Disable FSYNC"""
     # Disable fsync to fix saving issues
     util.disable_fsync()

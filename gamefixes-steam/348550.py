@@ -1,11 +1,8 @@
-""" Game fix for Guilty Gear Accent Core Plus R
-"""
-#pylint: disable=C0103
+"""Game fix for Guilty Gear Accent Core Plus R"""
 
 from protonfixes import util
 
-def main():
-    """ Uses physx
-    """
 
+def main() -> None:
+    """Uses physx"""
     util.protontricks('quartz')
