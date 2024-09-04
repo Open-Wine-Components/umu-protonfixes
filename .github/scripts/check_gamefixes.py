@@ -163,10 +163,47 @@ def _batch_generator(gamefix: Path, size: int = 50) -> Generator[set[str], Any, 
     yield appids
 
 
+def check_links(root: Path) -> None:
+    """Check for broken symbolic links"""
+    gamefixes = [
+        file
+        for file in root.glob('gamefixes-*/*.py')
+        if not file.name.startswith(('__init__.py', 'default.py', 'winetricks-gui.py'))
+    ]
+
+    print('Checking for broken symbolic links...', file=sys.stderr)
+    for module in gamefixes:
+        print(f'{module.parent.name}/{module.name}', file=sys.stderr)
+        if module.is_symlink() and not module.exists():
+            err = f'The following file is not a valid symbolic link: {module}'
+            raise FileNotFoundError(err)
+
+
+def check_filenames(root: Path) -> None:
+    """Check for expected file names.
+
+    All files in non-steam gamefixes are expected to start with 'umu-'
+    """
+    gamefixes = [
+        file
+        for file in root.glob('gamefixes-*/*.py')
+        if not file.name.startswith(('__init__.py', 'default.py', 'winetricks-gui.py'))
+        and not file.parent.name.startswith('gamefixes-steam')
+    ]
+
+    print('Checking for expected file names...', file=sys.stderr)
+    for module in gamefixes:
+        print(f'{module.parent.name}/{module.name}', file=sys.stderr)
+        if module.exists() and not module.name.startswith('umu-'):
+            err = f'The following file does not start with "umu-": {module}'
+            raise FileNotFoundError(err)
+
+
 def main() -> None:
     """Validate gamefixes modules."""
     # Top-level project directory that is expected to contain gamefix directories
-    project = Path(__file__).parent.parent
+    project = Path(__file__).parent.parent.parent
+    print(project)
 
     # Steam API to acquire a single id. Used as fallback in case some IDs could
     # not be validated. Unforutnately, this endpoint does not accept a comma
@@ -192,6 +229,8 @@ def main() -> None:
     # See https://gogapidocs.readthedocs.io/en/latest/galaxy.html#get--products
     gogapi = 'https://api.gog.com/products?ids='
 
+    check_links(project)
+    check_filenames(project)
     check_steamfixes(project, steampowered, steamapi)
     check_gogfixes(project, gogapi, umudb_gog)
 
