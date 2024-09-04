@@ -171,14 +171,16 @@ def check_links(root: Path) -> None:
         if not file.name.startswith(('__init__.py', 'default.py', 'winetricks-gui.py'))
     ]
 
+    print('Checking for broken symbolic links...', file=sys.stderr)
     for module in gamefixes:
+        print(f'{module.parent.name}/{module.name}', file=sys.stderr)
         if module.is_symlink() and not module.exists():
             err = f'The following file is not a valid symbolic link: {module}'
             raise FileNotFoundError(err)
 
 
 def check_filenames(root: Path) -> None:
-    """Check for expected filenames.
+    """Check for expected file names.
 
     All files in non-steam gamefixes are expected to start with 'umu-'
     """
@@ -189,7 +191,9 @@ def check_filenames(root: Path) -> None:
         and not file.parent.name.startswith('gamefixes-steam')
     ]
 
+    print('Checking for expected file names...', file=sys.stderr)
     for module in gamefixes:
+        print(f'{module.parent.name}/{module.name}', file=sys.stderr)
         if module.exists() and not module.name.startswith('umu-'):
             err = f'The following file does not start with "umu-": {module}'
             raise FileNotFoundError(err)
