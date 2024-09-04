@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # The Steam Runtime platform (sniper) uses Python 3.9
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          sudo apt-get install shellcheck
+          python3 -m pip install --upgrade pip
+          pip install ruff
+          pip install ijson
+      - name: Lint with Shellcheck
+        run: |
+          shellcheck tools/check-links.sh
+          shellcheck winetricks
+      - name: Lint with Ruff
+        run: |
+          ruff check .
+      - name: Validate gamefix modules
+        run: |
+          python3 .github/scripts/check_gamefixes.py
+      - name: Test with unittest
+        run: |
+          python3 protonfixes_test.py
