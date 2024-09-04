@@ -168,7 +168,7 @@ def check_links(root: Path) -> None:
     gamefixes = [
         file
         for file in root.glob('gamefixes-*/*.py')
-        if not file.name.startswith('gamefixes-steam')
+        if not file.name.startswith(('__init__.py', 'default.py', 'winetricks-gui.py'))
     ]
 
     for module in gamefixes:
