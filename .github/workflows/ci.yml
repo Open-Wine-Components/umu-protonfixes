@@ -27,7 +27,6 @@ jobs:
           pip install ijson
       - name: Lint with Shellcheck
         run: |
-          shellcheck tools/check-links.sh
           shellcheck winetricks
       - name: Lint with Ruff
         run: |
