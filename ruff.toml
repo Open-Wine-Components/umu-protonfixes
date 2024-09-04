@@ -66,8 +66,6 @@ ignore = [
     "D400",
     # Ignore punctuation
     "D415",
-    # Ignore 'No blank lines allowed before class docstring'
-    "D211",
     # Ignore '1 blank line required before class docstring'
     "D203",
     # Ignore 'Multi-line docstring summary should start at the second line'
