@@ -10,4 +10,4 @@ def main() -> None:
     util.protontricks('d3dx9_42')
     util.protontricks('d3dx9')
     util.protontricks('xact')
-    util.protontricks('xact_64')
+    util.protontricks('xact_x64')
