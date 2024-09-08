@@ -52,7 +52,7 @@ def find_valid_verbs(root: Path) -> set[str]:
     env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
 
     # Execute winetricks, suppress output
-    print('Executing winetricks, using tmp path "{tmp_dir}" - this may take a moment.')
+    print(f'Executing winetricks, using tmp path "{tmp_dir}" - this may take a moment.')
     subprocess.run([wt_path, '--no-clean', 'list-all'], env=env, stdout=subprocess.DEVNULL)
 
     # Get all verbs
