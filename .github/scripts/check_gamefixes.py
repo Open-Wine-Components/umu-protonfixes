@@ -194,13 +194,14 @@ def check_filenames(root: Path) -> None:
     print('Checking for expected file names...', file=sys.stderr)
     for module in gamefixes:
         print(f'{module.parent.name}/{module.name}', file=sys.stderr)
+        is_steam = module.parent.name.startswith('gamefixes-steam')
         if not module.exists():
             err = f'The following file does not exist: {module.parent.name}/{module}'
             raise FileNotFoundError(err)
-        elif module.parent.name.startswith('gamefixes-steam') and not module.stem.isnumeric():
+        elif is_steam and not module.stem.isnumeric():
             err = f'The following Steam fix filename is invalid: {module}'
             raise ValueError(err)
-        elif not module.name.startswith('umu-'):
+        elif not is_steam and not module.name.startswith('umu-'):
             err = f'The following file does not start with "umu-": {module}'
             raise ValueError(err)
 
