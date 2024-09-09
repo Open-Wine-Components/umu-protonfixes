@@ -80,15 +80,14 @@ def main() -> None:
     print(f'Unique verbs used: {len(verbs)}')
 
     # Check for unused local verbs
-    unused_local_verbs = valid_verbs_local.difference(verbs)
-    if len(unused_local_verbs) > 0:
+    unused_local_verbs = valid_verbs_local - verbs
+    if unused_local_verbs:
         print(f'WARNING: The following local verbs are unused: {unused_local_verbs}')
 
     # Compare the results
     #FIXME: Implement a more robust mechanism for "setting" type verbs (eg. "vd")
     invalid_verbs = verbs - (valid_verbs | valid_verbs_local | whitelist_verbs)
-
-    if len(invalid_verbs) > 0:
+    if invalid_verbs:
         raise ValueError(f'The following verbs are invalid: {invalid_verbs}')
 
     print('All verbs are valid!')
