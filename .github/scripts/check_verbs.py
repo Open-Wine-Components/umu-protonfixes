@@ -85,14 +85,13 @@ def main() -> None:
         print(f'WARNING: The following local verbs are unused: {unused_local_verbs}')
 
     # Compare the results
-    #FIXME: Implement a more robust mechanism for setting verbs
-    valid_verbs_all = valid_verbs.union(valid_verbs_local).union(whitelist_verbs)
-    invalid_verbs = verbs.difference(valid_verbs_all)
+    #FIXME: Implement a more robust mechanism for "setting" type verbs (eg. "vd")
+    invalid_verbs = verbs - (valid_verbs | valid_verbs_local | whitelist_verbs)
 
     if len(invalid_verbs) > 0:
         raise ValueError(f'The following verbs are invalid: {invalid_verbs}')
-    else:
-        print('All verbs are valid!')
+
+    print('All verbs are valid!')
 
 
 if __name__ == '__main__':
