@@ -183,6 +183,7 @@ def check_filenames(root: Path) -> None:
     """Check for expected file names.
 
     All files in non-steam gamefixes are expected to start with 'umu-'
+    All files in steam gamefixes are expected to have a numeric name
     """
     gamefixes = [
         file
@@ -196,9 +197,7 @@ def check_filenames(root: Path) -> None:
         if not module.exists():
             err = f'The following file does not exist: {module.parent.name}/{module}'
             raise FileNotFoundError(err)
-        elif module.parent.name.startswith('gamefixes-steam'):
-            if module.stem.isnumeric():
-                continue
+        elif module.parent.name.startswith('gamefixes-steam') and not module.stem.isnumeric():
             err = f'The following Steam fix filename is invalid: {module}'
             raise ValueError(err)
         elif not module.name.startswith('umu-'):
