@@ -1,4 +1,6 @@
-import sys  # noqa: D100
+"""This provides a check, if all filenames are correct and if all IDs used by GOG and Steam fixes are valid."""
+
+import sys
 from pathlib import Path
 from urllib.request import urlopen, Request
 from http.client import HTTPSConnection
