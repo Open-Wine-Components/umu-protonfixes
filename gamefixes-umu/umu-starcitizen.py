@@ -8,11 +8,5 @@ def main() -> None:
     # eac workaround
     util.set_environment('EOS_USE_ANTICHEATCLIENTNULL', '1')
 
-    # needed for nvidia vulkan
-    util.set_environment('WINE_HIDE_NVIDIA_GPU', '1')
-
-    # needed for amd vulkan
-    util.set_environment('dual_color_blend_by_location', 'true')
-
-    # allow the RSI Launcher to auto-update itself
+    # RSI Launcher depends on powershell
     util.protontricks('powershell')
