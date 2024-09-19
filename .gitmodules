@@ -7,3 +7,6 @@
 [submodule "subprojects/xutils-dev"]
 	path = subprojects/xutils-dev
 	url = https://salsa.debian.org/xorg-team/app/xutils-dev.git
+[submodule "subprojects/winetricks"]
+	path = subprojects/winetricks
+	url = https://github.com/Winetricks/winetricks.git
