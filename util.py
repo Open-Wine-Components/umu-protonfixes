@@ -437,19 +437,39 @@ def patch_libcuda() -> bool:
             log.warn('libcuda.so not found on the system.')
             return False
 
-        library_paths = ['/lib64', '/usr/lib64', '/usr/local/lib64']
+        library_paths = [
+            '/lib64', '/usr/lib64', '/usr/local/lib64',
+            '/lib', '/usr/lib', '/usr/local/lib'
+        ]
 
         libcuda_path = None
         for lib_dir in library_paths:
             full_path = os.path.join(lib_dir, library_base)
             if os.path.exists(full_path):
-                libcuda_path = os.path.abspath(full_path)
-                break
+                # Check if it's a 64-bit ELF file
+                try:
+                    with open(full_path, 'rb') as f:
+                        e_ident = f.read(5)
+                        if e_ident[:4] != b'\x7fELF':
+                            log.info(f'{full_path} is not an ELF file.')
+                            continue  # Not an ELF file
+                        ei_class = e_ident[4]
+                        if ei_class == 2:
+                            # 64-bit ELF
+                            libcuda_path = os.path.abspath(full_path)
+                            break
+                        else:
+                            log.info(f'{full_path} is not a 64-bit ELF file.')
+                            continue  # Not 64-bit ELF
+                except Exception as e:
+                    log.error(f'Error reading {full_path}: {e}')
+                    continue
 
         if not libcuda_path:
-            log.error(f'libcuda.so found as {library_base}, but not found in standard library directories.')
+            log.error(f'libcuda.so found as {library_base}, but not found as a 64-bit library in standard library directories.')
             return False
-        log.info(f'Found libcuda.so at: {libcuda_path}')
+
+        log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
 
         patched_library = os.path.join(cache_dir, 'libcuda.patched.so')
         try:
@@ -469,8 +489,8 @@ def patch_libcuda() -> bool:
 
             # Set permissions to rwxr-xr-x (755)
             os.chmod(patched_library, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |  # Owner: rwx
-                            stat.S_IRGRP | stat.S_IXGRP |                   # Group: r-x
-                            stat.S_IROTH | stat.S_IXOTH)                    # Others: r-x
+                     stat.S_IRGRP | stat.S_IXGRP |                   # Group: r-x
+                     stat.S_IROTH | stat.S_IXOTH)                    # Others: r-x
             log.info(f'Permissions set to rwxr-xr-x for {patched_library}')
         except OSError as e:
             log.error(f'Unable to write patched libcuda.so to {patched_library}: {e}')
@@ -485,6 +505,7 @@ def patch_libcuda() -> bool:
     except Exception as e:
         log.error(f'Unexpected error occurred: {e}')
         return False
+
 
 
 def disable_nvapi() -> None:
