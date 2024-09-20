@@ -1,6 +1,7 @@
 """Utilities to make gamefixes easier"""
 
 import configparser
+import ctypes.util
 from io import TextIOWrapper
 import os
 import sys
@@ -417,6 +418,66 @@ def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> No
     protonmain.append_to_env_str(
         protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';'
     )
+
+
+def patch_libcuda() -> bool:
+    """Patches libcuda to work around games that crash with DLSS due to wonky memory allocation.
+
+    The patched library is overwritten at every launch and is placed in .cache
+
+    Returns true if the library was patched correctly. Otherwise returns false
+    """
+    cache_dir = os.path.expanduser('~/.cache/protonfixes')
+    os.makedirs(cache_dir, exist_ok=True)
+
+    try:
+        library_base = ctypes.util.find_library('cuda')
+        if not library_base:
+            log.warn('libcuda.so not found on the system.')
+            return False
+
+        library_paths = ['/lib64', '/usr/lib64', '/usr/local/lib64']
+
+        libcuda_path = None
+        for lib_dir in library_paths:
+            full_path = os.path.join(lib_dir, library_base)
+            if os.path.exists(full_path):
+                libcuda_path = os.path.abspath(full_path)
+                break
+
+        if not libcuda_path:
+            log.error(f'libcuda.so found as {library_base}, but not found in standard library directories.')
+            return False
+        log.info(f'Found libcuda.so at: {libcuda_path}')
+
+        patched_library = os.path.join(cache_dir, 'libcuda.patched.so')
+        try:
+            with open(libcuda_path, 'rb') as f:
+                binary_data = f.read()
+        except IOError as e:
+            log.error(f'Unable to read libcuda.so: {e}')
+            return False
+
+        hex_data = binary_data.hex()
+        hex_data = hex_data.replace('000000f8ff000000', '000000f8ffff0000')
+        patched_binary_data = bytes.fromhex(hex_data)
+
+        try:
+            with open(patched_library, 'wb') as f:
+                f.write(patched_binary_data)
+        except IOError as e:
+            log.error(f'Unable to write patched libcuda.so to {patched_library}: {e}')
+            return False
+
+        log.info(f'Patched libcuda.so saved to: {patched_library}')
+        
+        log.info(f'Setting LD_PRELOAD to: {patched_library}')
+        set_environment('LD_PRELOAD', patched_library)
+        return True
+
+    except Exception as e:
+        log.error(f'Unexpected error occurred: {e}')
+        return False
 
 
 def disable_nvapi() -> None:
