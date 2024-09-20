@@ -1,9 +1,13 @@
 """Game fix for GTAV"""
 
+import os
 from protonfixes import util
 
 
 def main() -> None:
     """Game fix for GTAV"""
-    # Set SteamGameId so that non-steam versions can pick up steam-specific fixes in proton's wine code
-    util.set_environment('SteamGameId', '271590')
+    # Rockstar reads SteamAppId and tries to init Steam API
+    # We want to avoid this when running from Epic for example
+    game_id = os.environ.get("UMU_ID")
+    if game_id and not game_id.isnumeric():
+        util.del_environment("SteamAppId")
