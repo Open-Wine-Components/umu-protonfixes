@@ -454,7 +454,7 @@ def patch_libcuda() -> bool:
         try:
             with open(libcuda_path, 'rb') as f:
                 binary_data = f.read()
-        except IOError as e:
+        except OSError as e:
             log.error(f'Unable to read libcuda.so: {e}')
             return False
 
@@ -465,12 +465,12 @@ def patch_libcuda() -> bool:
         try:
             with open(patched_library, 'wb') as f:
                 f.write(patched_binary_data)
-        except IOError as e:
+        except OSError as e:
             log.error(f'Unable to write patched libcuda.so to {patched_library}: {e}')
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        
+
         log.info(f'Setting LD_PRELOAD to: {patched_library}')
         set_environment('LD_PRELOAD', patched_library)
         return True
