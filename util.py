@@ -8,6 +8,7 @@ import sys
 import re
 import shutil
 import signal
+import stat
 import tarfile
 import zipfile
 import subprocess
@@ -465,6 +466,12 @@ def patch_libcuda() -> bool:
         try:
             with open(patched_library, 'wb') as f:
                 f.write(patched_binary_data)
+
+            # Set permissions to rwxr-xr-x (755)
+            os.chmod(patched_library, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |  # Owner: rwx
+                            stat.S_IRGRP | stat.S_IXGRP |                   # Group: r-x
+                            stat.S_IROTH | stat.S_IXOTH)                    # Others: r-x
+            log.info(f'Permissions set to rwxr-xr-x for {patched_library}')
         except OSError as e:
             log.error(f'Unable to write patched libcuda.so to {patched_library}: {e}')
             return False
