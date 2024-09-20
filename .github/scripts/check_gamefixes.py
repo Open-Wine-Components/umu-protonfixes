@@ -22,8 +22,8 @@ headers = {
     'Accept-Language': 'en-US,en;q=0.5',
 }
 
-# Steam games that are no longer on sale, but are valid IDs
-whitelist_steam = {231990, 4730, 105400, 321040, 12840, 7850}
+# Steam games that are no longer on sale or only in certain regions, but are valid IDs
+whitelist_steam = {231990, 4730, 105400, 321040, 12840, 7850, 1175730}
 
 
 def check_steamfixes(project: Path, url: str, api: ApiEndpoint) -> None:
