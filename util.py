@@ -465,6 +465,17 @@ def patch_libcuda() -> bool:
             log.crit(f'Unable to read libcuda.so: {e}')
             return False
 
+        # Replace specific bytes in the original libcuda.so binary to increase the allowed memory allocation area.
+        # Context (see original comment here: https://github.com/jp7677/dxvk-nvapi/issues/174#issuecomment-2227462795):
+        # There is an issue with memory allocation in libcuda.so when creating a Vulkan device with the
+        # VK_NVX_binary_import and/or VK_NVX_image_view_handle extensions. libcuda tries to allocate memory in a
+        # specific area that is already used by the game, leading to allocation failures.
+        # DXVK and VKD3D work around this by recreating the device without these extensions, but doing so disables
+        # DLSS (Deep Learning Super Sampling) functionality.
+        # By modifying libcuda.so to increase the allowed memory allocation area, we can prevent these allocation
+        # failures without disabling the extensions, thus enabling DLSS to work properly.
+        # The hex replacement changes the memory allocation constraints within libcuda.so.
+
         hex_data = binary_data.hex()
         hex_data = hex_data.replace('000000f8ff000000', '000000f8ffff0000')
         patched_binary_data = bytes.fromhex(hex_data)
