@@ -1,4 +1,4 @@
-""" Game fix for Worms: Blast """
+"""Game fix for Worms: Blast"""
 
 from protonfixes import util
 
