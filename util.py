@@ -438,12 +438,11 @@ def patch_libcuda() -> bool:
             log.warn('ldconfig not found in PATH.')
             return False
 
-        # Use subprocess.run with explicit encoding handling
+        # Use subprocess.run with capture_output and explicit encoding handling
         try:
             result = subprocess.run(
                 [ldconfig_path, '-p'],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 check=True
             )
             # Decode the output using utf-8 with fallback to locale preferred encoding
