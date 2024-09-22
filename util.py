@@ -1,7 +1,6 @@
 """Utilities to make gamefixes easier"""
 
 import configparser
-import ctypes.util
 from io import TextIOWrapper
 import os
 import sys
@@ -422,7 +421,9 @@ def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> No
 
 
 def patch_libcuda() -> bool:
-    """Patches libcuda to work around games that crash with DLSS due to wonky memory allocation.
+    """Patches libcuda to work around games that crash when initializing libcuda and are using DLSS.
+
+    We will replace specific bytes in the original libcuda.so binary to increase the allowed memory allocation area.
 
     The patched library is overwritten at every launch and is placed in .cache
 
@@ -432,41 +433,26 @@ def patch_libcuda() -> bool:
     os.makedirs(cache_dir, exist_ok=True)
 
     try:
-        library_base = ctypes.util.find_library('cuda')
-        if not library_base:
-            log.warn('libcuda.so not found on the system.')
+        # Use ldconfig -p to search library paths
+        try:
+            output = subprocess.check_output(['ldconfig', '-p'], stderr=subprocess.STDOUT, text=True)
+        except subprocess.CalledProcessError as e:
+            log.warn(f'Error running ldconfig: {e}')
             return False
 
-        library_paths = [
-            '/lib64', '/usr/lib64', '/usr/local/lib64',
-            '/lib', '/usr/lib', '/usr/local/lib'
-        ]
-
         libcuda_path = None
-        for lib_dir in library_paths:
-            full_path = os.path.join(lib_dir, library_base)
-            if os.path.exists(full_path):
-                # Check if it's a 64-bit ELF file
-                try:
-                    with open(full_path, 'rb') as f:
-                        e_ident = f.read(5)
-                        if e_ident[:4] != b'\x7fELF':
-                            log.info(f'{full_path} is not an ELF file.')
-                            continue  # Not an ELF file
-                        ei_class = e_ident[4]
-                        if ei_class == 2:
-                            # 64-bit ELF
-                            libcuda_path = os.path.abspath(full_path)
-                            break
-                        else:
-                            log.info(f'{full_path} is not a 64-bit ELF file.')
-                            continue  # Not 64-bit ELF
-                except Exception as e:
-                    log.error(f'Error reading {full_path}: {e}')
-                    continue
+        for line in output.splitlines():
+            if 'libcuda.so' in line and 'x86-64' in line:
+                # Parse the line to extract the path
+                parts = line.strip().split(' => ')
+                if len(parts) == 2:
+                    path = parts[1].strip()
+                    if os.path.exists(path):
+                        libcuda_path = os.path.abspath(path)
+                        break
 
         if not libcuda_path:
-            log.error(f'libcuda.so found as {library_base}, but not found as a 64-bit library in standard library directories.')
+            log.warn('libcuda.so not found as a 64-bit library in ldconfig output.')
             return False
 
         log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
@@ -476,7 +462,7 @@ def patch_libcuda() -> bool:
             with open(libcuda_path, 'rb') as f:
                 binary_data = f.read()
         except OSError as e:
-            log.error(f'Unable to read libcuda.so: {e}')
+            log.crit(f'Unable to read libcuda.so: {e}')
             return False
 
         hex_data = binary_data.hex()
@@ -491,21 +477,18 @@ def patch_libcuda() -> bool:
             os.chmod(patched_library, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |  # Owner: rwx
                      stat.S_IRGRP | stat.S_IXGRP |                   # Group: r-x
                      stat.S_IROTH | stat.S_IXOTH)                    # Others: r-x
-            log.info(f'Permissions set to rwxr-xr-x for {patched_library}')
+            log.debug(f'Permissions set to rwxr-xr-x for {patched_library}')
         except OSError as e:
-            log.error(f'Unable to write patched libcuda.so to {patched_library}: {e}')
+            log.crit(f'Unable to write patched libcuda.so to {patched_library}: {e}')
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-
-        log.info(f'Setting LD_PRELOAD to: {patched_library}')
         set_environment('LD_PRELOAD', patched_library)
         return True
 
     except Exception as e:
-        log.error(f'Unexpected error occurred: {e}')
+        log.crit(f'Unexpected error occurred: {e}')
         return False
-
 
 
 def disable_nvapi() -> None:
