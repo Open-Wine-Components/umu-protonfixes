@@ -432,9 +432,27 @@ def patch_libcuda() -> bool:
     os.makedirs(cache_dir, exist_ok=True)
 
     try:
-        # Use ldconfig -p to search library paths
+        # Use shutil.which to find ldconfig binary
+        ldconfig_path = shutil.which('ldconfig')
+        if not ldconfig_path:
+            log.warn('ldconfig not found in PATH.')
+            return False
+
+        # Use subprocess.run with explicit encoding handling
         try:
-            output = subprocess.check_output(['ldconfig', '-p'], stderr=subprocess.STDOUT, text=True)
+            result = subprocess.run(
+                [ldconfig_path, '-p'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True
+            )
+            # Decode the output using utf-8 with fallback to locale preferred encoding
+            try:
+                output = result.stdout.decode('utf-8')
+            except UnicodeDecodeError:
+                import locale
+                encoding = locale.getpreferredencoding(False)
+                output = result.stdout.decode(encoding, errors='replace')
         except subprocess.CalledProcessError as e:
             log.warn(f'Error running ldconfig: {e}')
             return False
