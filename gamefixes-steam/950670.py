@@ -15,14 +15,14 @@ def modify_settings() -> None:
     # Assure that the settings folder exists
     path = Path('GothicRemake/Saved/Config/WindowsNoEditor/')
     if not path.is_dir():
-        log(f'Creating settings folder "{path}".')
+        log.info(f'Creating settings folder "{path}".')
         path.mkdir(parents=True, exist_ok=True)
 
     # Assure, that the settings file exists
     # Necessary defaults will still be created by the game
     path = path / 'Engine.ini'
     if not path.is_file():
-        log(f'Creating empty settings file "{path}".')
+        log.info(f'Creating empty settings file "{path}".')
         path.touch(exist_ok=True)
 
     # Disable excessive (as in gigabytes) logging
@@ -49,5 +49,5 @@ def clear_logs() -> None:
         file_size = file.stat().st_size         # Bytes
         file_size = file_size // 1000 // 1000   # Megabytes
         if file.is_file() and file_size > 10:
-            log(f'Removing log file "{file}" with a size of {file_size} MB.')
+            log.info(f'Removing log file "{file}" with a size of {file_size} MB.')
             file.unlink()
