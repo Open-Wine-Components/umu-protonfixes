@@ -419,6 +419,103 @@ def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> No
     )
 
 
+def patch_libcuda() -> bool:
+    """Patches libcuda to work around games that crash when initializing libcuda and are using DLSS.
+
+    We will replace specific bytes in the original libcuda.so binary to increase the allowed memory allocation area.
+
+    The patched library is overwritten at every launch and is placed in .cache
+
+    Returns true if the library was patched correctly. Otherwise returns false
+    """
+    cache_dir = os.path.expanduser('~/.cache/protonfixes')
+    os.makedirs(cache_dir, exist_ok=True)
+
+    try:
+        # Use shutil.which to find ldconfig binary
+        ldconfig_path = shutil.which('ldconfig')
+        if not ldconfig_path:
+            log.warn('ldconfig not found in PATH.')
+            return False
+
+        # Use subprocess.run with capture_output and explicit encoding handling
+        try:
+            result = subprocess.run(
+                [ldconfig_path, '-p'],
+                capture_output=True,
+                check=True
+            )
+            # Decode the output using utf-8 with fallback to locale preferred encoding
+            try:
+                output = result.stdout.decode('utf-8')
+            except UnicodeDecodeError:
+                import locale
+                encoding = locale.getpreferredencoding(False)
+                output = result.stdout.decode(encoding, errors='replace')
+        except subprocess.CalledProcessError as e:
+            log.warn(f'Error running ldconfig: {e}')
+            return False
+
+        libcuda_path = None
+        for line in output.splitlines():
+            if 'libcuda.so' in line and 'x86-64' in line:
+                # Parse the line to extract the path
+                parts = line.strip().split(' => ')
+                if len(parts) == 2:
+                    path = parts[1].strip()
+                    if os.path.exists(path):
+                        libcuda_path = os.path.abspath(path)
+                        break
+
+        if not libcuda_path:
+            log.warn('libcuda.so not found as a 64-bit library in ldconfig output.')
+            return False
+
+        log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
+
+        patched_library = os.path.join(cache_dir, 'libcuda.patched.so')
+        try:
+            with open(libcuda_path, 'rb') as f:
+                binary_data = f.read()
+        except OSError as e:
+            log.crit(f'Unable to read libcuda.so: {e}')
+            return False
+
+        # Replace specific bytes in the original libcuda.so binary to increase the allowed memory allocation area.
+        # Context (see original comment here: https://github.com/jp7677/dxvk-nvapi/issues/174#issuecomment-2227462795):
+        # There is an issue with memory allocation in libcuda.so when creating a Vulkan device with the
+        # VK_NVX_binary_import and/or VK_NVX_image_view_handle extensions. libcuda tries to allocate memory in a
+        # specific area that is already used by the game, leading to allocation failures.
+        # DXVK and VKD3D work around this by recreating the device without these extensions, but doing so disables
+        # DLSS (Deep Learning Super Sampling) functionality.
+        # By modifying libcuda.so to increase the allowed memory allocation area, we can prevent these allocation
+        # failures without disabling the extensions, thus enabling DLSS to work properly.
+        # The hex replacement changes the memory allocation constraints within libcuda.so.
+
+        hex_data = binary_data.hex()
+        hex_data = hex_data.replace('000000f8ff000000', '000000f8ffff0000')
+        patched_binary_data = bytes.fromhex(hex_data)
+
+        try:
+            with open(patched_library, 'wb') as f:
+                f.write(patched_binary_data)
+
+            # Set permissions to rwxr-xr-x (755)
+            os.chmod(patched_library, 0o755)
+            log.debug(f'Permissions set to rwxr-xr-x for {patched_library}')
+        except OSError as e:
+            log.crit(f'Unable to write patched libcuda.so to {patched_library}: {e}')
+            return False
+
+        log.info(f'Patched libcuda.so saved to: {patched_library}')
+        set_environment('LD_PRELOAD', patched_library)
+        return True
+
+    except Exception as e:
+        log.crit(f'Unexpected error occurred: {e}')
+        return False
+
+
 def disable_nvapi() -> None:
     """Disable WINE nv* dlls"""
     log.info('Disabling NvAPI')
