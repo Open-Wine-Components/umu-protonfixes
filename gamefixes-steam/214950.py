@@ -4,10 +4,9 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Installs d3dx11_42, d3dcompiler_42, directplay
+    """Installs d3dcompiler_42, directplay
     Disable esync and fsync
     """
-    util.protontricks('d3dx11_42')
     util.protontricks('d3dcompiler_42')
     util.protontricks('directplay')
     util.disable_esync()
