@@ -441,15 +441,14 @@ def patch_libcuda() -> bool:
         # Use subprocess.run with capture_output and explicit encoding handling
         try:
             result = subprocess.run(
-                [ldconfig_path, '-p'],
-                capture_output=True,
-                check=True
+                [ldconfig_path, '-p'], capture_output=True, check=True
             )
             # Decode the output using utf-8 with fallback to locale preferred encoding
             try:
                 output = result.stdout.decode('utf-8')
             except UnicodeDecodeError:
                 import locale
+
                 encoding = locale.getpreferredencoding(False)
                 output = result.stdout.decode(encoding, errors='replace')
         except subprocess.CalledProcessError as e:

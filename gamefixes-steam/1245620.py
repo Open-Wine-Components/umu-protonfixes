@@ -3,6 +3,7 @@
 from pathlib import Path
 from protonfixes import util
 
+
 def main() -> None:
     game_dir = Path(util.get_game_install_path()) / 'Game'
     # Create the DLC.bdt file if it doesn't already exist, which is known to fix Easy AntiCheat not working for players that don't own the DLC

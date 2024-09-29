@@ -10,14 +10,12 @@ from tempfile import mkdtemp
 
 # 'gui' is a virtual verb for opening the Winetricks GUI
 # 'vd=1280x720' is a setting for the virtual desktop and valid
-whitelist_verbs = { 'gui', 'vd=1280x720' }
+whitelist_verbs = {'gui', 'vd=1280x720'}
+
 
 def extract_verbs_from_glob(path_glob: iglob) -> set[str]:
     """Simply strip the extension from all found files."""
-    return {
-        file.stem
-        for file in path_glob
-    }
+    return {file.stem for file in path_glob}
 
 
 def find_verbs(root: Path) -> set[str]:
@@ -27,7 +25,9 @@ def find_verbs(root: Path) -> set[str]:
 
     for fix in game_fixes:
         f = fix.read_text()
-        r = re.finditer(r"util\.protontricks\s*\(\s*('|\")(?P<verb>.*)\1\s*\)", f, re.MULTILINE)
+        r = re.finditer(
+            r"util\.protontricks\s*\(\s*('|\")(?P<verb>.*)\1\s*\)", f, re.MULTILINE
+        )
         for match in r:
             verbs.add(match.group('verb'))
 
@@ -53,7 +53,9 @@ def find_valid_verbs(root: Path) -> set[str]:
 
     # Execute winetricks, suppress output
     print(f'Executing winetricks, using tmp path "{tmp_dir}" - this may take a moment.')
-    subprocess.run([wt_path, '--no-clean', 'list-all'], env=env, stdout=subprocess.DEVNULL)
+    subprocess.run(
+        [wt_path, '--no-clean', 'list-all'], env=env, stdout=subprocess.DEVNULL
+    )
 
     # Get all verbs
     vars_glob = tmp_dir.glob('**/*.vars')
@@ -85,7 +87,7 @@ def main() -> None:
         print(f'WARNING: The following local verbs are unused: {unused_local_verbs}')
 
     # Compare the results
-    #FIXME: Implement a more robust mechanism for "setting" type verbs (eg. "vd")
+    # FIXME: Implement a more robust mechanism for "setting" type verbs (eg. "vd")
     invalid_verbs = verbs - (valid_verbs | valid_verbs_local | whitelist_verbs)
     if invalid_verbs:
         raise ValueError(f'The following verbs are invalid: {invalid_verbs}')
