@@ -4,9 +4,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    """EAC Workaround"""
-    # eac workaround
-    util.set_environment('EOS_USE_ANTICHEATCLIENTNULL', '1')
+    """Patches libcuda & installs required dependencies"""
 
     # patch libcuda to workaround crashes related to DLSS
     # See: https://github.com/jp7677/dxvk-nvapi/issues/174#issuecomment-2227462795
