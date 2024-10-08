@@ -162,7 +162,10 @@ def _run_fix(game_id: str, default: bool = False, local: bool = False) -> bool:
         game_module = import_module(module_name)
 
         log.info(f'Using {scope} {fix_type} for {get_game_name()} ({game_id})')
-        game_module.main()
+        if hasattr(game_module, 'main_with_id'):
+            game_module.main_with_id(game_id)
+        else:
+            game_module.main()
     except ImportError:
         log.info(f'No {scope} {fix_type} found for {get_game_name()} ({game_id})')
         return False
