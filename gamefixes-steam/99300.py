@@ -1,6 +1,6 @@
 """Game fix Renegade Ops"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
