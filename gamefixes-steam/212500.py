@@ -169,10 +169,11 @@ def main() -> None:
     """Disable libglesv2"""
     ## gpu acceleration on wined3d https://bugs.winehq.org/show_bug.cgi?id=44985
     # Make the store work.
-    util.winedll_override('libglesv2', '')
+    util.winedll_override('libglesv2', util.OverrideOrder.DISABLED)
+
     # Fix visible mouse in middle of screen while rotating camera
     # This needs to run as a subprocess while the game is running,
-    # the proces will close itself when the game window isn't detected for 30 seconds
+    # the process will close itself when the game window isn't detected for 30 seconds
     util.log.info('Applying mouse fix')
     _, tmp = mkstemp(suffix='.py', text=True)
     with open(tmp, mode='w', encoding='utf-8') as f:
