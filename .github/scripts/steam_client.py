@@ -77,6 +77,6 @@ class Steam:
             err = 'Error retrieving appinfo from Steam'
             raise ValueError(err)
 
-        apps: dict[str, Any] = proto_to_dict(resp).get('apps') or dict()
+        apps: list[dict[str, Any]] = proto_to_dict(resp).get('apps') or []
 
         return {app['appid'] for app in apps}
