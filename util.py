@@ -31,8 +31,10 @@ except ImportError:
     log.crit('Unable to hook into Proton main script environment')
     exit()
 
+
 # TypeAliases
 BasePathType = Literal['user', 'game']
+OverrideTypes = Literal['n', 'b', 'n,b', 'b,n', '']
 
 # Enums
 class DosDevice(Enum):
@@ -444,7 +446,7 @@ def get_game_install_path() -> str:
 
 
 def _winepe_override(
-    target: str, filetype: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']
+    target: str, filetype: str, dtype: OverrideTypes
 ) -> None:
     """Add WINE file override"""
     log.info(f'Overriding {target}.{filetype} = {dtype}')
@@ -455,14 +457,16 @@ def _winepe_override(
     )
 
 
-def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+def winedll_override(dll: str, dtype: OverrideTypes) -> None:
     """Add WINE dll override"""
     _winepe_override(target=dll, filetype='dll', dtype=dtype)
 
 
-def wineexe_override(exe: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+
+def wineexe_override(exe: str, dtype: OverrideTypes) -> None:
     """Add WINE executable override"""
     _winepe_override(target=exe, filetype='exe', dtype=dtype)
+
 
 
 def patch_libcuda() -> bool:
