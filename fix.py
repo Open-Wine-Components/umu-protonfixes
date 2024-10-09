@@ -15,7 +15,8 @@ from .logger import log
 try:
     import __main__ as protonmain  # noqa F401
 except ImportError:
-    log.warn('Unable to hook into Proton main script environment')
+    log.crit('Unable to hook into Proton main script environment')
+    exit()
 
 
 @lru_cache
