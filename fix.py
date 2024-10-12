@@ -66,7 +66,7 @@ def get_game_name() -> str:
                 json_data = json.loads(data)
                 title = json_data[0]['title']
             with open(
-                os.environ['WINEPREFIX'] + '/game_title', 'w', encoding='utf-8'
+                pfx + '/game_title', 'w', encoding='utf-8'
             ) as file:
                 file.write(title)
             return title
