@@ -41,7 +41,7 @@ class Steam: # noqa: D101
 
         client.anonymous_login()
 
-    def get_valid_appids(self, appids: set[int]) -> list[int]:
+    def get_valid_appids(self, appids: set[int]) -> set[int]:
         """Queries Steam for the specified appids.
 
         If an appid doesn't exist, it won't be in the response.
@@ -63,6 +63,6 @@ class Steam: # noqa: D101
             raise ValueError(err)
 
         data = proto_to_dict(resp)
-        appids = [app['appid'] for app in data['apps']]
+        appids = {app['appid'] for app in data['apps']}
 
         return appids
