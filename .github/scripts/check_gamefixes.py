@@ -37,10 +37,9 @@ def check_steamfixes(project: Path) -> None:
         appids = {int(x) for x in appids}
 
         steam_appids = steam.get_valid_appids(appids)
-    
-        for appid in steam_appids:
-            if appid not in appids:
-                invalid_appids.add(appid)
+
+        # If an ID doesn't exist in the Steam result then it's invalid
+        invalid_appids.update(appids - steam_appids)
 
     if invalid_appids:
         err = f'The following Steam app ids are invalid: {invalid_appids}'
