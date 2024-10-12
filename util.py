@@ -947,3 +947,8 @@ def set_cpu_topology_limit(core_limit: int, ignore_user_setting: bool = False) -
 
     # Apply the limit
     return set_cpu_topology(core_limit, ignore_user_setting)
+
+def set_game_drive(enabled: bool) -> None:
+    if enabled:
+        protonmain.g_session.compat_config.add("gamedrive")
+        protonmain.setup_game_dir_drive()
