@@ -15,4 +15,7 @@ class Config(ConfigBase):
     class PathSection:
         cache_dir: Path = Path.home() / '.cache/protonfixes'
 
+    main: MainSection
+    path: PathSection
+
 config = Config(Path.home() / '.config/protonfixes/config.ini')
