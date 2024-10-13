@@ -6,6 +6,9 @@ from configparser import ConfigParser
 from dataclasses import dataclass, is_dataclass
 from pathlib import Path
 
+from typing import Any
+from collections.abc import Callable
+
 from logger import log, LogLevelType
 
 class ConfigBase:
@@ -50,7 +53,7 @@ class ConfigBase:
                 continue
 
             # Initialize section class as a member
-            setattr(self, section_name, member())
+            setattr(self, section_name, member()) # pyright: ignore [reportCallIssue]
 
 
     def parse_config_file(self, file: Path) -> bool:
@@ -72,25 +75,29 @@ class ConfigBase:
 
                 parser_items = parser[section_name]
 
+                # FIXME: match is not supported in Python 3.9
+                def _get_parse_function(type_name: str) -> Callable[[str], Any]:
+                    # Mapping of type_name to according value get function
+                    value = {
+                        'int': parser_items.getint,
+                        'float': parser_items.getfloat,
+                        'bool': parser_items.getboolean,
+                        'Path': lambda option: Path(parser_items.get(option, '')),
+                        'PosixPath': lambda option: Path(parser_items.get(option, '')),
+                        'str': parser_items.get
+                    }.get(type_name, None)
+                    if not value:
+                        value = parser_items.get
+                        self.__log(f'Unknown type "{type_name}", falling back to "str".')
+                    return value
+
                 # Iterate over the option objects in this section
                 for (option_name, option_item) in section.__dict__.items():
-                    # Match type of local object
-                    match type(option_item).__name__:
-                        case 'int':
-                            setattr(section, option_name, parser_items.getint(option_name))
-                        case 'float':
-                            setattr(section, option_name, parser_items.getfloat(option_name))
-                        case 'bool':
-                            setattr(section, option_name, parser_items.getboolean(option_name))
-                        case 'Path':
-                            setattr(section, option_name, Path(parser_items.get(option_name)))
-                        case 'PosixPath':
-                            setattr(section, option_name, Path(parser_items.get(option_name)))
-                        case 'str':
-                            setattr(section, option_name, parser_items.get(option_name))
-                        case _:
-                            setattr(section, option_name, parser_items.get(option_name))
-                            self.__log(f'[CONFIG]: Type mismatch')
+                    # Get values from config and set it on object
+                    type_name = type(option_item).__name__
+                    func = _get_parse_function(type_name)
+                    value = func(option_name)
+                    setattr(section, option_name, value)
         except Exception as ex:
             self.__log(f'Failed to parse config file "{file}". Exception: "{ex}"', 'CRIT')
             return False
