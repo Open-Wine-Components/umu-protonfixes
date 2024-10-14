@@ -4,9 +4,9 @@ import os
 import re
 import subprocess
 
-from typing import Generator
 from pathlib import Path
 from tempfile import mkdtemp
+from collections.abc import Generator
 
 # 'gui' is a virtual verb for opening the Winetricks GUI
 # 'vd=1280x720' is a setting for the virtual desktop and valid

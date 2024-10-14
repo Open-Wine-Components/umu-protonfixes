@@ -3,7 +3,7 @@
 import re
 
 from configparser import ConfigParser
-from dataclasses import dataclass, is_dataclass
+from dataclasses import is_dataclass
 from pathlib import Path
 
 from typing import Any
@@ -12,11 +12,25 @@ from collections.abc import Callable
 from logger import log, LogLevelType
 
 class ConfigBase:
+    """Base class for configuration objects.
+
+    This reflects a given config file and populates the object with it's values.
+    It also injects attributes from the sub classes, this isn't compatible with static type checking though.
+    You can define the attributes accordingly to satisfy type checkers.
+    """
+
     __CAMEL_CASE_PATTERN: re.Pattern = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
 
     @classmethod
     def snake_case(cls, input: str) -> str:
-        # Convert CamelCase to snake_case
+        """Converts CamelCase to snake_case.
+
+        Args:
+            input (str): The string to convert.
+
+        Returns:
+            str: The converted string.
+        """
         return cls.__CAMEL_CASE_PATTERN.sub(r'_\1', input).lower()
 
 
@@ -26,6 +40,17 @@ class ConfigBase:
 
 
     def __init__(self, path: Path) -> None:
+        """Initialize the instance from a given config file.
+        
+        Defaults will be used if the file doesn't exist.
+        The file will also be created in this case.
+
+        Args:
+            path (Path): The reflected config file's path.
+
+        Raises:
+            IsADirectoryError: If the path exists, but isn't a file.
+        """
         assert path
         if path.is_file():
             self.parse_config_file(path)
@@ -37,6 +62,14 @@ class ConfigBase:
 
 
     def init_sections(self, force: bool = False) -> None:
+        """Find sub-classes and initialize them as attributes.
+
+        Sub-classes are initialized and injected as attributes.
+        Example: `MainSection` will be injected as `main` to the config (this) object.
+
+        Args:
+            force (bool, optional): Force initialization? This results in a reset. Defaults to False.
+        """
         for (member_name, member) in self.__class__.__dict__.items():
             # Find non private section definitions
             if not member_name.endswith('Section') or member_name.startswith('_'):
@@ -57,6 +90,16 @@ class ConfigBase:
 
 
     def parse_config_file(self, file: Path) -> bool:
+        """Parse a config file.
+        
+        This resets the data in the sections, regardless if the file exists or is loaded.
+
+        Args:
+            file (Path): The reflected config file's path.
+
+        Returns:
+            bool: True, if the config file was successfully loaded.
+        """
         # Initialize / reset sections to defaults
         self.init_sections(True)
 
@@ -88,7 +131,7 @@ class ConfigBase:
                     }.get(type_name, None)
                     if not value:
                         value = parser_items.get
-                        self.__log(f'Unknown type "{type_name}", falling back to "str".')
+                        self.__log(f'Unknown type "{type_name}", falling back to "str".', 'WARN')
                     return value
 
                 # Iterate over the option objects in this section
@@ -105,6 +148,14 @@ class ConfigBase:
 
 
     def write_config_file(self, file: Path) -> bool:
+        """Write the current config to a file.
+
+        Args:
+            file (Path): The file path to write to.
+
+        Returns:
+            bool: True, if the file was successfully written.
+        """
         # Only precede if the parent directory exists
         if not file.parent.is_dir():
             self.__log(f'Parent directory "{file.parent}" does not exist. Abort.', 'WARN')
