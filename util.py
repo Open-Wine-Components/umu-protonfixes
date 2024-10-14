@@ -14,8 +14,8 @@ import functools
 from io import TextIOWrapper
 from pathlib import Path
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Any, Callable, Union, Optional
-from collections.abc import Mapping, Generator
+from typing import Literal, Any, Union, Optional
+from collections.abc import Mapping, Generator, Callable
 
 try:
     from .logger import log
