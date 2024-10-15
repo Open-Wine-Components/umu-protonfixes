@@ -13,13 +13,11 @@ class Config(ConfigBase):
         
         Attributes:
             enable_checks (bool): Run checks (`checks.py`) before the fix is executed.
-            enable_splash (bool): Enables splash screen, that is shown while a fix is executed.
             enable_global_fixes (bool): Enables included fixes. If deactivated, only local fixes (`~/.config/protonfixes/localfixes`) are executed.
 
         """
 
         enable_checks: bool = True
-        enable_splash: bool = False
         enable_global_fixes: bool = True
 
     @dataclass
