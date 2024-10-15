@@ -295,20 +295,18 @@ class TestProtonfixes(unittest.TestCase):
     def testGetGameNameDB(self):
         """Set UMU_ID and access umu database
 
-        Makes a request to the umu database for a title name to be displayed
-        if a UMU_ID is supplied. This function should be fail safe in case of
-        a TimeoutError, OSError, IndexError or UnicodeDecodeError
+        Reads from a local CSV file for a title name to be displayed
+        if a UMU_ID is supplied.
         """
         os.environ['UMU_ID'] = 'umu-35140'
-        os.environ['WINEPREFIX'] = self.pfx.as_posix()
-        # Mock a valid umu db response
-        data = '[{"title":"Batman: Arkham Asylum Game of the Year Edition","umu_id":"umu-35140","acronym":null,"codename":"1482504285","store":"gog","notes":null},{"title":"Batman: Arkham Asylum Game of the Year Edition","umu_id":"umu-35140","acronym":null,"codename":"godwit","store":"egs","notes":null}]'
-        data = io.StringIO(data)
-        with (
-            patch.object(fix, 'check_internet', return_value=True),
-            patch.object(urllib.request, 'urlopen', return_value=data),
-        ):
-            func = fix.get_game_name.__wrapped__  # Do not reference the cache
+        os.environ['STORE'] = 'gog'
+        os.environ['WINEPREFIX'] = self.pfx
+
+        # Mock CSV content
+        csv_content = """Batman: Arkham Asylum Game of the Year Edition,gog,1482504285,umu-35140,,"""
+
+        with patch('builtins.open', mock_open(read_data=csv_content)):
+            func = fix.get_game_name  # Reference the function directly
             result = func()
             self.assertEqual(result, 'Batman: Arkham Asylum Game of the Year Edition')
 
