@@ -10,3 +10,6 @@
 [submodule "subprojects/winetricks"]
 	path = subprojects/winetricks
 	url = https://github.com/Winetricks/winetricks.git
+[submodule "subprojects/umu-database"]
+        path = subprojects/umu-database
+        url = https://github.com/Open-Wine-Components/umu-database

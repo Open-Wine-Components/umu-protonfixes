@@ -25,6 +25,7 @@ protonfixes-install: protonfixes
 	cp      -r verbs        $(INSTALL_DIR)
 	cp         *.py         $(INSTALL_DIR)
 	cp         winetricks   $(INSTALL_DIR)
+	cp         umu-database.csv   $(INSTALL_DIR)
 	rm $(INSTALL_DIR)/protonfixes_test.py
 
 #
