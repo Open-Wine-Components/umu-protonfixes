@@ -2,7 +2,7 @@ import unittest
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, mock_open
 import io
 import urllib.request
 import fix
@@ -289,118 +289,90 @@ class TestProtonfixes(unittest.TestCase):
         os.environ['UMU_ID'] = self.game_id
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
         self.pfx.joinpath('game_title').touch()
-        result = fix.get_game_name()
+        func = fix.get_game_name.__wrapped__  # Do not reference the cache
+        result = func()
         self.assertFalse(result, 'Expected an empty string')
 
     def testGetGameNameDB(self):
-        """Set UMU_ID and access umu database
-
-        Reads from a local CSV file for a title name to be displayed
-        if a UMU_ID is supplied.
-        """
+        """Set UMU_ID and access umu database"""
         os.environ['UMU_ID'] = 'umu-35140'
         os.environ['STORE'] = 'gog'
-        os.environ['WINEPREFIX'] = self.pfx
+        os.environ['WINEPREFIX'] = self.pfx.as_posix()
 
         # Mock CSV content
         csv_content = """Batman: Arkham Asylum Game of the Year Edition,gog,1482504285,umu-35140,,"""
 
         with patch('builtins.open', mock_open(read_data=csv_content)):
-            func = fix.get_game_name  # Reference the function directly
+            func = fix.get_game_name.__wrapped__  # Do not reference the cache
             result = func()
             self.assertEqual(result, 'Batman: Arkham Asylum Game of the Year Edition')
 
-    def testGetGameNameDBTimeout(self):
-        """Set UMU_ID and access umu database
-
-        Mock the TimeoutError
-        """
+    def testGetGameNameDBFileNotFound(self):
+        """Set UMU_ID and simulate FileNotFoundError for the CSV file"""
         os.environ['UMU_ID'] = 'umu-35140'
+        os.environ['STORE'] = 'gog'
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
-        # Mock a valid umu db response
-        with (
-            patch.object(fix, 'check_internet', return_value=True),
-            patch.object(urllib.request, 'urlopen') as mock_function,
-        ):
-            mock_function.side_effect = TimeoutError
-            func = fix.get_game_name.__wrapped__  # Do not reference the cache
-            result = func()
-            self.assertEqual(result, 'UNKNOWN')
+
+        with patch('builtins.open', mock_open()) as mocked_open:
+            mocked_open.side_effect = FileNotFoundError
+            with patch('fix.log') as mocked_log:  # Mock the logger separately
+                func = fix.get_game_name.__wrapped__  # Do not reference the cache
+                result = func()
+                self.assertEqual(result, 'UNKNOWN')
+                mocked_log.warn.assert_called_with(f"Game title not found in CSV")
 
     def testGetGameNameDbOS(self):
-        """Set UMU_ID and access umu database
-
-        Mock the OSError, which only shown if debugging is enabled
-        """
+        """Set UMU_ID and simulate OSError when accessing the CSV file"""
         os.environ['UMU_ID'] = 'umu-35140'
+        os.environ['STORE'] = 'gog'
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
-        os.environ['DEBUG'] = '1'
-        # Mock a valid umu db response
-        with (
-            patch.object(fix, 'check_internet', return_value=True),
-            patch.object(urllib.request, 'urlopen') as mock_function,
-        ):
-            mock_function.side_effect = OSError
-            func = fix.get_game_name.__wrapped__  # Do not reference the cache
-            result = func()
-            self.assertEqual(result, 'UNKNOWN')
+
+        with patch('builtins.open', mock_open()) as mocked_open:
+            mocked_open.side_effect = OSError
+            with patch('fix.log') as mocked_log:  # Mock the logger separately
+                func = fix.get_game_name.__wrapped__  # Do not reference the cache
+                result = func()
+                self.assertEqual(result, 'UNKNOWN')
+                mocked_log.warn.assert_called_with("Game title not found in CSV")
 
     def testGetGameNameDbIndex(self):
-        """Set UMU_ID and access umu database
-
-        Mock the IndexError
-        """
+        """Set UMU_ID and simulate IndexError with malformed CSV data"""
         os.environ['UMU_ID'] = 'umu-35140'
+        os.environ['STORE'] = 'gog'
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
-        os.environ['DEBUG'] = '1'
-        # Mock a valid umu db response
-        with (
-            patch.object(fix, 'check_internet', return_value=True),
-            patch.object(urllib.request, 'urlopen') as mock_function,
-        ):
-            mock_function.side_effect = IndexError
+
+        # Mock CSV content with missing columns
+        csv_content = """Batman: Arkham Asylum Game of the Year Edition,gog"""
+
+        with patch('builtins.open', mock_open(read_data=csv_content)):
             func = fix.get_game_name.__wrapped__  # Do not reference the cache
             result = func()
             self.assertEqual(result, 'UNKNOWN')
 
     def testGetGameNameDbUnicode(self):
-        """Set UMU_ID and access umu database
-
-        Mock the UnicodeError
-        """
+        """Set UMU_ID and simulate UnicodeDecodeError when reading the CSV file"""
         os.environ['UMU_ID'] = 'umu-35140'
+        os.environ['STORE'] = 'gog'
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
-        os.environ['DEBUG'] = '1'
 
-        def mock_urlopen_raise_error(*args, **kwargs):
-            raise UnicodeDecodeError('utf-8', b'', 0, 1, '')
-
-        # Mock a valid umu db response
-        with (
-            patch.object(fix, 'check_internet', return_value=True),
-            patch.object(urllib.request, 'urlopen') as mock_function,
-        ):
-            mock_function.side_effect = mock_urlopen_raise_error
-            func = fix.get_game_name.__wrapped__  # Do not reference the cache
-            result = func()
-            self.assertEqual(result, 'UNKNOWN')
+        with patch('builtins.open', mock_open()) as mocked_open:
+            mocked_open.side_effect = UnicodeDecodeError('utf-8', b'', 0, 1, '')
+            with patch('fix.log') as mocked_log:  # Mock the logger separately
+                func = fix.get_game_name.__wrapped__  # Do not reference the cache
+                result = func()
+                self.assertEqual(result, 'UNKNOWN')
+                mocked_log.warn.assert_called_with("Game title not found in CSV")
 
     def testGetGameNameNoManifest(self):
-        """Do not set UMU_ID and try to get the title from the steam app
-        library
-
-        UNKNOWN should be returned because no manifest file will exist in the
-        test directory
-        """
+        """Do not set UMU_ID and try to get the title from the steam app library"""
         os.environ['SteamAppId'] = '1628350'
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
         os.environ['PWD'] = os.environ['WINEPREFIX']
         steamapps = self.pfx.joinpath('steamapps')
-        steamapps.mkdir()
+        os.makedirs(steamapps, exist_ok=True)
         func = fix.get_game_name.__wrapped__  # Do not reference the cache
         result = func()
         self.assertEqual(result, 'UNKNOWN')
-
 
 if __name__ == '__main__':
     unittest.main()
