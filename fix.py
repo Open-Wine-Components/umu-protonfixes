@@ -8,6 +8,7 @@ import csv
 from functools import lru_cache
 from importlib import import_module
 
+from .util import proton_version
 from .config import config
 from .checks import run_checks
 from .logger import log
@@ -189,5 +190,6 @@ def main() -> None:
         log.debug('Not running protonfixes for setup runs')
         return
 
-    log.info('Running protonfixes')
+    version = proton_version()
+    log.info(f'Running protonfixes on "{version.version_name}", build at {version.build_date}.')
     run_fix(get_game_id())
