@@ -1,4 +1,4 @@
-"Game fix for Disgaea 4 Complete+"
+"""Game fix for Disgaea 4 Complete+"""
 
 from protonfixes import util
 
