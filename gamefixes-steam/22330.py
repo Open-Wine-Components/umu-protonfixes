@@ -22,7 +22,7 @@ def main_with_id(game_id: str) -> None:
 
     # Run script extender if it exists.
     mapping = get_redirect_name(game_id)
-    if os.path.isfile(mapping.from_name):
+    if os.path.isfile(mapping.to_name):
         util.replace_command(mapping.from_name, mapping.to_name)
 
 
