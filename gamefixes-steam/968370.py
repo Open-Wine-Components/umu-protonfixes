@@ -2,9 +2,9 @@
 garbled fonts & No cursive font (Segoe Script)
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
-    util.winedll_override('d3d9', 'd')
+    util.winedll_override('d3d9', '')
     util.protontricks('segoe_script')

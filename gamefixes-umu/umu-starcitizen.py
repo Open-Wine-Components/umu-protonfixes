@@ -1,6 +1,6 @@
 """Game fix for Star Citizen"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
@@ -12,4 +12,4 @@ def main() -> None:
     util.protontricks('powershell')
 
     # RSI Launcher animation
-    util.winedll_override("libglesv2", "builtin")
+    util.winedll_override('libglesv2', 'b')
