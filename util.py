@@ -68,7 +68,7 @@ def protondir() -> Path:
 @functools.lru_cache
 def protonprefix() -> Path:
     """Returns wineprefix's path used by proton"""
-    return Path(os.environ['STEAM_COMPAT_DATA_PATH']) / 'pfx'
+    return Path(os.environ.get('STEAM_COMPAT_DATA_PATH', '')) / 'pfx'
 
 
 @functools.lru_cache
