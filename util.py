@@ -11,11 +11,13 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
+
+from enum import Enum
 from pathlib import Path
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Any, Union, Optional
+from typing import Any, Union, Optional
 from collections.abc import Mapping, Callable
 
 try:
@@ -33,17 +35,76 @@ except ImportError:
     log.crit('Unable to hook into Proton main script environment')
     exit()
 
+
 # TypeAliases
 StrPath = Union[str, Path]
-BasePathType = Literal['user', 'game']
-OverrideTypes = Literal['n', 'b', 'n,b', 'b,n', '']
-DosDeviceTypes = Literal['hd', 'network', 'floppy', 'cdrom']
+
+
+# Enums
+class BasePath(Enum):
+    """Enum for base paths
+    
+    Attributes:
+        USER: User's "My Documents" folder in the current prefix
+        GAME: Game's install folder
+    """
+    USER = 'user'
+    GAME = 'game'
+
+
+class DosDevice(Enum):
+    """Enum for dos device types (mounted at 'prefix/dosdevices/')
+    
+    Attributes:
+        NETWORK: A network device (UNC)
+        FLOPPY: A floppy drive
+        CD_ROM: A CD ROM drive
+        HD: A hard disk drive
+    """
+    NETWORK = 'network'
+    FLOPPY = 'floppy'
+    CD_ROM = 'cdrom'
+    HD = 'hd'
+
+
+class DllOverride(Enum):
+    """Enum for Wine dll override order
+
+    Builtin means dlls that are provided by Wine.
+    Native means dlls that are provided by the user or application.
+
+    https://gitlab.winehq.org/wine/wine/-/wikis/Wine-User%27s-Guide#dll-overrides
+
+    DLLs usually get resolved in the following order:
+
+    1. The directory the program was started from.
+    2. The current directory.
+    3. The Windows system directory.
+    4. The Windows directory.
+    5. The PATH variable directories.
+    
+    Attributes:
+        DISABLED: Disable dll
+        NATIVE: Load native dll
+        BUILTIN: Load builtin dll
+        NATIVE_BUILTIN: Load native dll first, builtin second
+        BUILTIN_NATIVE: Load builtin dll first, native second
+    """
+    DISABLED = ''
+    NATIVE = 'n'
+    BUILTIN = 'b'
+    NATIVE_BUILTIN = 'n,b'
+    BUILTIN_NATIVE = 'b,n'
+
+
+# Helper classes
 @dataclass
 class ReplaceType:
     """Used for replacements"""
 
     from_value: str
     to_value: str
+
 
 class ProtonVersion:
     """Parses the proton version and build timestamp"""
@@ -59,6 +120,7 @@ class ProtonVersion:
         self.version_name: str = parts[1]
 
 
+# Functions
 @functools.lru_cache
 def protondir() -> Path:
     """Returns the path to proton"""
@@ -406,10 +468,10 @@ def get_game_install_path() -> Path:
     return install_path
 
 
-def winedll_override(dll: str, dtype: OverrideTypes) -> None:
+def winedll_override(dll: str, dtype: DllOverride) -> None:
     """Add WINE dll override"""
-    log.info(f'Overriding {dll}.dll = {dtype}')
-    setting = f'{dll}={dtype}'
+    log.info(f'Overriding {dll}.dll = {dtype.value}')
+    setting = f'{dll}={dtype.value}'
     protonmain.append_to_env_str(
         protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';'
     )
@@ -511,12 +573,12 @@ def patch_libcuda() -> bool:
 def disable_nvapi() -> None:
     """Disable WINE nv* dlls"""
     log.info('Disabling NvAPI')
-    winedll_override('nvapi', '')
-    winedll_override('nvapi64', '')
-    winedll_override('nvcuda', '')
-    winedll_override('nvcuvid', '')
-    winedll_override('nvencodeapi', '')
-    winedll_override('nvencodeapi64', '')
+    winedll_override('nvapi', DllOverride.DISABLED)
+    winedll_override('nvapi64', DllOverride.DISABLED)
+    winedll_override('nvcuda', DllOverride.DISABLED)
+    winedll_override('nvcuvid', DllOverride.DISABLED)
+    winedll_override('nvencodeapi', DllOverride.DISABLED)
+    winedll_override('nvencodeapi64', DllOverride.DISABLED)
 
 
 def disable_esync() -> None:
@@ -627,12 +689,12 @@ def _get_case_insensitive_name(path: Path) -> Path:
     return resolved
 
 
-def _get_config_full_path(cfile: StrPath, base_path: BasePathType) -> Optional[Path]:
+def _get_config_full_path(cfile: StrPath, base_path: BasePath) -> Optional[Path]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
-    if base_path == 'user':
+    if base_path == BasePath.USER:
         cfg_path = protonprefix() / 'drive_c/users/steamuser/My Documents' / cfile
-    elif base_path == 'game':
+    elif base_path == BasePath.GAME:
         cfg_path = get_game_install_path() / cfile
     else:
         cfg_path = Path(cfile)
@@ -657,7 +719,7 @@ def create_backup_config(cfg_path: Path) -> bool:
 
 
 def set_ini_options(
-    ini_opts: str, cfile: StrPath, encoding: str, base_path: BasePathType = 'user'
+    ini_opts: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -684,7 +746,7 @@ def set_ini_options(
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: StrPath, base_path: BasePathType = 'user'
+    base_attibutte: str, xml_line: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
@@ -697,7 +759,7 @@ def set_xml_options(
 
     # set options
     i = 0
-    contents = xml_path.read_text(encoding='utf-8').splitlines()
+    contents = xml_path.read_text(encoding).splitlines()
     for line in contents:
         i += 1
         if base_attibutte not in line:
@@ -706,7 +768,7 @@ def set_xml_options(
         contents.insert(i, xml_line + '\n')
 
     data = str.join('\n', contents)
-    xml_path.write_text(data, encoding='utf-8')
+    xml_path.write_text(data, encoding)
     log.info('XML config patch applied')
     return True
 
@@ -936,12 +998,12 @@ def set_game_drive(enabled: bool) -> None:
         protonmain.g_session.compat_config.discard("gamedrive")
 
 
-def create_dos_device(letter: str = 'r', dev_type: DosDeviceTypes = 'cdrom') -> bool:
+def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
     """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
 
     Args:
         letter (str, optional): Letter that the device gets assigned to, must be len = 1
-        dev_type (DosDeviceTypes, optional): The device's type which will be registered to wine
+        dev_type (DosDevice, optional): The device's type which will be registered to wine
 
     Returns:
         bool: True, if device was created
@@ -956,7 +1018,7 @@ def create_dos_device(letter: str = 'r', dev_type: DosDeviceTypes = 'cdrom') -> 
     dosdevice.symlink_to('/tmp', True)
 
     # designate device as CD-ROM, requires 64-bit access
-    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type, True)
+    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type.value, True)
     return True
 
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 def main() -> None:
     util.protontricks('dotnet35sp1')
-    util.winedll_override('libvkd3d-1', 'n')
+    util.winedll_override('libvkd3d-1', util.DllOverride.NATIVE)
 
     # Videos play and audio works but screen is black.
     # util.protontricks('quartz')

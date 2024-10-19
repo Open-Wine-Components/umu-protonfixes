@@ -7,5 +7,5 @@ from .. import util
 
 
 def main() -> None:
-    util.winedll_override('libvkd3d-1', 'n')
+    util.winedll_override('libvkd3d-1', util.DllOverride.NATIVE)
     util.protontricks('wmp11')

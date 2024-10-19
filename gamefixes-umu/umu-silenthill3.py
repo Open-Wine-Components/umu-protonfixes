@@ -7,4 +7,4 @@ def main() -> None:
 
     # Needs directmusic for some cutscenes
     util.protontricks('directmusic')
-    util.winedll_override("dsound", "builtin")
+    util.winedll_override('dsound', util.DllOverride.NATIVE_BUILTIN)

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from collections.abc import Callable
 
-from logger import log, LogLevelType
+from logger import log, LogLevel
 
 class ConfigBase:
     """Base class for configuration objects.
@@ -35,7 +35,7 @@ class ConfigBase:
 
 
     @staticmethod
-    def __log(message: str, level: LogLevelType = 'INFO') -> None:
+    def __log(message: str, level: LogLevel = LogLevel.INFO) -> None:
         log.log(f'[CONFIG]: {message}', level)
 
 
@@ -131,7 +131,7 @@ class ConfigBase:
                     }.get(type_name, None)
                     if not value:
                         value = parser_items.get
-                        self.__log(f'Unknown type "{type_name}", falling back to "str".', 'WARN')
+                        self.__log(f'Unknown type "{type_name}", falling back to "str".', LogLevel.WARN)
                     return value
 
                 # Iterate over the option objects in this section
@@ -142,7 +142,7 @@ class ConfigBase:
                     value = func(option_name)
                     setattr(section, option_name, value)
         except Exception as ex:
-            self.__log(f'Failed to parse config file "{file}". Exception: "{ex}"', 'CRIT')
+            self.__log(f'Failed to parse config file "{file}". Exception: "{ex}"', LogLevel.CRIT)
             return False
         return True
 
@@ -158,7 +158,7 @@ class ConfigBase:
         """
         # Only precede if the parent directory exists
         if not file.parent.is_dir():
-            self.__log(f'Parent directory "{file.parent}" does not exist. Abort.', 'WARN')
+            self.__log(f'Parent directory "{file.parent}" does not exist. Abort.', LogLevel.WARN)
             return False
 
         # Create and populate ConfigParser
@@ -176,6 +176,6 @@ class ConfigBase:
             with file.open(mode='w') as stream:
                 parser.write(stream)
         except Exception as ex:
-            self.__log(f'Failed to create config file "{file}". Exception: "{ex}"', 'CRIT')
+            self.__log(f'Failed to create config file "{file}". Exception: "{ex}"', LogLevel.CRIT)
             return False
         return True
