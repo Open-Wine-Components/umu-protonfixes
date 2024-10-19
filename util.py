@@ -12,6 +12,7 @@ import subprocess
 import urllib.request
 import functools
 
+from enum import Enum
 from pathlib import Path
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -31,9 +32,27 @@ except ImportError:
 
 # TypeAliases
 StrPath = Union[str, Path]
-DosDeviceTypes = Literal['hd', 'network', 'floppy', 'cdrom']
 
 
+# Enums
+class DosDevice(Enum):
+    """Enum for dos device types (mounted at 'prefix/dosdevices/')
+    
+    Attributes:
+        NETWORK: A network device (UNC)
+        FLOPPY: A floppy drive
+        CD_ROM: A CD ROM drive
+        HD: A hard disk drive
+
+    """
+
+    NETWORK = 'network'
+    FLOPPY = 'floppy'
+    CD_ROM = 'cdrom'
+    HD = 'hd'
+
+
+# Helper classes
 @dataclass
 class ReplaceType:
     """Used for replacements"""
@@ -56,6 +75,7 @@ class ProtonVersion:
         self.version_name: str = parts[1]
 
 
+# Functions
 @functools.lru_cache
 def protondir() -> Path:
     """Returns the path to proton"""
@@ -1064,12 +1084,12 @@ def get_steam_account_id() -> str:
                 return lastFoundId
 
 
-def create_dos_device(letter: str = 'r', dev_type: DosDeviceTypes = 'cdrom') -> bool:
+def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
     """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
 
     Args:
         letter (str, optional): Letter that the device gets assigned to, must be len = 1
-        dev_type (DosDeviceTypes, optional): The device's type which will be registered to wine
+        dev_type (DosDevice, optional): The device's type which will be registered to wine
 
     Returns:
         bool: True, if device was created
@@ -1085,7 +1105,7 @@ def create_dos_device(letter: str = 'r', dev_type: DosDeviceTypes = 'cdrom') -> 
     dosdevice.symlink_to('/tmp', True)
 
     # designate device as CD-ROM, requires 64-bit access
-    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type, True)
+    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type.value, True)
     return True
 
 
