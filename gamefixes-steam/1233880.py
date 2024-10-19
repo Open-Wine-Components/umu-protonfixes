@@ -1,6 +1,6 @@
 """Game fix for Disgaea 4 Complete+"""
 
-from protonfixes import util
+from .. import util
 
 def main() -> None:
 	"""Usually won't reach menu unless Esync and Fsync are disabled"""

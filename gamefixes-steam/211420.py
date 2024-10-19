@@ -1,6 +1,6 @@
 """Game fix Dark Souls Prepare To Die Edition"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
@@ -12,6 +12,6 @@ def main() -> None:
 
     # In case if someone wishes to use DSfix
     util.protontricks('dinput8')
-    util.winedll_override('dinput8', 'n')
+    util.winedll_override('dinput8', util.DllOverride.NATIVE)
 
     util.protontricks('win7')

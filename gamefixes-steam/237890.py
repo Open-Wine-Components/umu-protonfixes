@@ -1,8 +1,8 @@
 """Game fix for Agarest: Generations of War"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
     util.protontricks('wmp9')
-    util.winedll_override('winegstreamer', '')
+    util.winedll_override('winegstreamer', util.DllOverride.DISABLED)

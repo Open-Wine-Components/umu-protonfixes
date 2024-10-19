@@ -1,10 +1,11 @@
 """Street Racing Syndicate"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
-    util.protontricks('lavfilters')  # fix videos
-    util.winedll_override(
-        'd3d9', 'n,b'
-    )  # in case user uses the ThirteenAG widescreen fix
+    # fix videos
+    util.protontricks('lavfilters')
+
+    # in case user uses the ThirteenAG widescreen fix
+    util.winedll_override('d3d9', util.DllOverride.NATIVE_BUILTIN)
