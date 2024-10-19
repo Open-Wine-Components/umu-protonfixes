@@ -13,9 +13,10 @@ import urllib.request
 import functools
 
 from io import TextIOWrapper
+from enum import Enum
 from pathlib import Path
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Any, Union, Optional
+from typing import Any, Union, Optional
 from collections.abc import Mapping, Generator, Callable
 
 from .logger import log
@@ -29,16 +30,58 @@ except ImportError:
     exit()
 
 
+
 # TypeAliases
 StrPath = Union[str, Path]
-BasePathType = Literal['user', 'game']
-OverrideTypes = Literal['n', 'b', 'n,b', 'b,n', '']
 
 
+# Enums
+class BasePath(Enum):
+    """Enum for base paths
+
+    Attributes:
+        USER: User's "My Documents" folder in the current prefix
+        GAME: Game's install folder
+    """
+    USER = 'user'
+    GAME = 'game'
+
+
+class OverrideOrder(Enum):
+    """Enum for Wine dll/file override order
+
+    Builtin means dlls/files that are provided by Wine.
+    Native means dlls/files that are provided by the user or application.
+
+    https://gitlab.winehq.org/wine/wine/-/wikis/Wine-User%27s-Guide#dll-overrides
+
+    Files are usually resolved in the following order:
+
+    1. The directory the program was started from.
+    2. The current directory.
+    3. The Windows system directory.
+    4. The Windows directory.
+    5. The PATH variable directories.
+
+    Attributes:
+        DISABLED: Disable file
+        NATIVE: Load native file
+        BUILTIN: Load builtin file
+        NATIVE_BUILTIN: Load native file first, builtin second
+        BUILTIN_NATIVE: Load builtin file first, native second
+    """
+    DISABLED = ''
+    NATIVE = 'n'
+    BUILTIN = 'b'
+    NATIVE_BUILTIN = 'n,b'
+    BUILTIN_NATIVE = 'b,n'
+
+
+# Functions
+@functools.lru_cache
 def protondir() -> str:
     """Returns the path to proton"""
-    proton_dir = os.path.dirname(sys.argv[0])
-    return proton_dir
+    return os.path.dirname(sys.argv[0])
 
 
 def protonprefix() -> str:
@@ -404,24 +447,24 @@ def get_game_install_path() -> str:
 
 
 def _winepe_override(
-    target: str, filetype: str, dtype: OverrideTypes
+    target: str, filetype: str, dtype: OverrideOrder
 ) -> None:
     """Add WINE file override"""
-    log.info(f'Overriding {target}.{filetype} = {dtype}')
+    log.info(f'Overriding {target}.{filetype} = {dtype.value}')
     target_file = target if filetype == 'dll' else f'{target}.{filetype}'
-    setting = f'{target_file}={dtype}'
+    setting = f'{target_file}={dtype.value}'
     protonmain.append_to_env_str(
         protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';'
     )
 
 
-def winedll_override(dll: str, dtype: OverrideTypes) -> None:
+def winedll_override(dll: str, dtype: OverrideOrder) -> None:
     """Add WINE dll override"""
     _winepe_override(target=dll, filetype='dll', dtype=dtype)
 
 
 
-def wineexe_override(exe: str, dtype: OverrideTypes) -> None:
+def wineexe_override(exe: str, dtype: OverrideOrder) -> None:
     """Add WINE executable override"""
     _winepe_override(target=exe, filetype='exe', dtype=dtype)
 
@@ -523,12 +566,12 @@ def patch_libcuda() -> bool:
 def disable_nvapi() -> None:
     """Disable WINE nv* dlls"""
     log.info('Disabling NvAPI')
-    winedll_override('nvapi', '')
-    winedll_override('nvapi64', '')
-    winedll_override('nvcuda', '')
-    winedll_override('nvcuvid', '')
-    winedll_override('nvencodeapi', '')
-    winedll_override('nvencodeapi64', '')
+    winedll_override('nvapi', OverrideOrder.DISABLED)
+    winedll_override('nvapi64', OverrideOrder.DISABLED)
+    winedll_override('nvcuda', OverrideOrder.DISABLED)
+    winedll_override('nvcuvid', OverrideOrder.DISABLED)
+    winedll_override('nvencodeapi', OverrideOrder.DISABLED)
+    winedll_override('nvencodeapi64', OverrideOrder.DISABLED)
 
 
 def disable_esync() -> None:
@@ -648,18 +691,17 @@ def _get_case_insensitive_name(path: str) -> str:
     return root
 
 
-def _get_config_full_path(cfile: StrPath, base_path: BasePathType) -> Optional[str]:
+def _get_config_full_path(cfile: StrPath, base_path: BasePath) -> Optional[str]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
-    if base_path == 'user':
+    if base_path == BasePath.USER:
         cfg_path = os.path.join(
             protonprefix(), 'drive_c/users/steamuser/My Documents', cfile
         )
+    elif base_path == BasePath.GAME:
+        cfg_path = os.path.join(get_game_install_path(), cfile)
     else:
-        if base_path == 'game':
-            cfg_path = os.path.join(get_game_install_path(), cfile)
-        else:
-            cfg_path = cfile
+        cfg_path = cfile
     cfg_path = _get_case_insensitive_name(str(cfg_path))
 
     if os.path.exists(cfg_path) and os.access(cfg_path, os.F_OK):
@@ -679,7 +721,7 @@ def create_backup_config(cfg_path: str) -> None:
 
 
 def set_ini_options(
-    ini_opts: str, cfile: StrPath, encoding: str, base_path: BasePathType = 'user'
+    ini_opts: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -706,7 +748,7 @@ def set_ini_options(
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: StrPath, base_path: BasePathType = 'user'
+    base_attibutte: str, xml_line: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
@@ -714,28 +756,20 @@ def set_xml_options(
         return False
 
     create_backup_config(xml_path)
+    xml_path_obj = Path(xml_path)
 
     # set options
+    i = 0
+    contents = xml_path_obj.read_text(encoding).splitlines()
+    for line in contents:
+        i += 1
+        if base_attibutte not in line:
+            continue
+        log.info(f'Adding XML options into "{cfile}", line {i}:\n{xml_line}')
+        contents.insert(i, xml_line + '\n')
 
-    base_size = os.path.getsize(xml_path)
-    backup_size = os.path.getsize(xml_path + '.protonfixes.bak')
-
-    if base_size != backup_size:
-        return False
-
-    with open(xml_path, encoding='utf-8') as file:
-        contents = file.readlines()
-        i = 0
-        for line in contents:
-            i += 1
-            if base_attibutte in line:
-                log.info(f'Adding XML options into {cfile}, line {i}:\n{xml_line}')
-                contents.insert(i, xml_line + '\n')
-
-    with open(xml_path, 'w', encoding='utf-8') as file:
-        for eachitem in contents:
-            file.write(eachitem)
-
+    data = str.join('\n', contents)
+    xml_path_obj.write_text(data, encoding)
     log.info('XML config patch applied')
     return True
 
