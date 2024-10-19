@@ -22,4 +22,4 @@ def main() -> None:
     util.protontricks('powershell')
 
     # RSI Launcher animation
-    util.winedll_override('libglesv2', 'b')
+    util.winedll_override('libglesv2', util.OverrideOrder.BUILTIN)
