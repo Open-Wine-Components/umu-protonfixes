@@ -21,9 +21,9 @@ def main_with_id(game_id: str) -> None:
 
     # Demo
     if game_id == '2505910':
-        util.set_ini_options(cfg_str, 'acsetup.cfg', 'utf-8', 'game')#
+        util.set_ini_options(cfg_str, 'acsetup.cfg')
         return
 
     # Full
     for i in range(1, 5):
-        util.set_ini_options(cfg_str, f'Gobliiins5-Part{i}/acsetup.cfg', 'utf-8', 'game')
+        util.set_ini_options(cfg_str, f'Gobliiins5-Part{i}/acsetup.cfg')
