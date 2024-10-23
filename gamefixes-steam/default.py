@@ -13,16 +13,23 @@ def main() -> None:
     # Steam commandline
     def use_steam_commands() -> None:
         """Parse aliases from Steam launch options"""
-        pf_alias_list = list(filter(lambda item: '-pf_' in item, sys.argv))
+        pf_alias_list = list(filter(lambda item: item.startswith('-pf_'), sys.argv))
 
         for pf_alias in pf_alias_list:
+            alias, sep, param = pf_alias.partition('=')
+            if sep != '=':
+                continue
             sys.argv.remove(pf_alias)
-            if pf_alias.split('=')[0] == '-pf_tricks':
-                param = str(pf_alias.replace('-pf_tricks=', ''))
+
+            if alias == '-pf_tricks':
                 util.protontricks(param)
-            elif pf_alias.split('=')[0] == '-pf_dxvk_set':
-                param = str(pf_alias.replace('-pf_dxvk_set=', ''))
-                dxvk_opt = param.split('=')
-                util.set_dxvk_option(str(dxvk_opt[0]), str(dxvk_opt[1]))
+            elif alias == '-pf_dxvk_set':
+                dxvk_opt, dxvk_sep, dxvk_val = param.partition('=')
+                if dxvk_sep == '=':
+                    util.set_dxvk_option(dxvk_opt, dxvk_val)
+            elif alias == '-pf_replace_cmd':
+                repl_opt, repl_sep, repl_val = param.partition('=')
+                if repl_sep == '=':
+                    util.replace_command(repl_opt, repl_val)
 
     use_steam_commands()
