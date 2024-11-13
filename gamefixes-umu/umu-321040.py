@@ -5,5 +5,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Installs OpenAL library, without it the game simply wont launch on newer proton version"""
+    """Installs OpenAL library, without it the game simply wont launch on proton 8 or above"""
     util.protontricks('Openal')
