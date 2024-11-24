@@ -1,1 +1,0 @@
-/home/pollux/umu-protonfixes-dirt3/gamefixes-steam/321040.py
