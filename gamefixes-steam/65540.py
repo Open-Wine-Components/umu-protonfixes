@@ -27,7 +27,6 @@ def main() -> None:
     # Gothic 1: https://steamcommunity.com/sharedfiles/filedetails/?id=3054112346
     # Gothic 2: https://steamcommunity.com/sharedfiles/filedetails/?id=3054078559
     util.winedll_override('dinput', 'n,b')
-    util.winedll_override('dinput8', 'n,b')
 
 
 def set_resolution() -> None:
