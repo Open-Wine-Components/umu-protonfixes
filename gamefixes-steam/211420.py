@@ -12,6 +12,5 @@ def main() -> None:
 
     # In case if someone wishes to use DSfix
     util.protontricks('dinput8')
-    util.winedll_override('dinput8', 'n')
 
     util.protontricks('win7')
