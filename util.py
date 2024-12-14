@@ -548,42 +548,6 @@ def disable_protonmediaconverter() -> None:
 
 
 @once
-def disable_uplay_overlay() -> bool:
-    """Disables the UPlay in-game overlay.
-
-    Creates or appends the UPlay settings.yml file
-    with the correct setting to disable the overlay.
-    UPlay will overwrite settings.yml on launch, but keep
-    this setting.
-    """
-    config_dir = os.path.join(
-        protonprefix(),
-        'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/',
-    )
-    config_file = os.path.join(config_dir, 'settings.yml')
-
-    os.makedirs(config_dir, exist_ok=True)
-
-    try:
-        data = (
-            'overlay:\n'
-            '  enabled: false\n'
-            '  forceunhookgame: false\n'
-            '  fps_enabled: false\n'
-            '  warning_enabled: false\n'
-            'user:\n'
-            '  closebehavior: CloseBehavior_Close'
-        )
-        with open(config_file, 'a+', encoding='ascii') as file:
-            file.write(data)
-        log.info('Disabled UPlay overlay')
-        return True
-    except OSError as err:
-        log.warn('Could not disable UPlay overlay: ' + err.strerror)
-
-    return False
-
-
 def create_dosbox_conf(
     conf_file: str, conf_dict: Mapping[str, Mapping[str, Any]]
 ) -> None:
