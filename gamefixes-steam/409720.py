@@ -4,12 +4,8 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Disable ESYNC, disable intro's"""
-    # After loading the game, or a save file, a key needs to be pressed
-    # to continue. That screen does not respond to keyboard or mouse,
-    # so there is no way to continue. -nointro disables that screen
-    # (but also the intro's at the start of the game).
-    util.append_argument('-nointro')
+    """Disable ESYNC and FSYNC"""
 
-    # ESYNC causes texture problems and frequent hangs.
+    # ESYNC and FSYNC causes low quality texture problems and frequent hangs.
     util.disable_esync()
+    util.disable_fsync()
