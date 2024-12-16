@@ -5,7 +5,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    # disable new character intro cutscene to prevent black screen loop
+    # Game defaults to Japanese language, set this to English instead
     configpath = os.path.join(
         util.protonprefix(),
         'drive_c/users/steamuser/My Documents/SQUARE ENIX/FINAL FANTASY X&X-2 HD Remaster',
