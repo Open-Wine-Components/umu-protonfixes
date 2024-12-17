@@ -1,11 +1,13 @@
-import unittest
+import io
 import os
 import tempfile
+import unittest
+import urllib.request
+
 from pathlib import Path
 from unittest.mock import patch, mock_open
-import io
-import urllib.request
-import fix
+
+from . import fix
 
 
 class TestProtonfixes(unittest.TestCase):
@@ -308,7 +310,7 @@ class TestProtonfixes(unittest.TestCase):
 
         with patch('builtins.open', mock_open()) as mocked_open:
             mocked_open.side_effect = FileNotFoundError
-            with patch('fix.log') as mocked_log:  # Mock the logger separately
+            with patch('protonfixes.fix.log') as mocked_log:  # Mock the logger separately
                 func = fix.get_game_name.__wrapped__  # Do not reference the cache
                 result = func()
                 self.assertEqual(result, 'UNKNOWN')
@@ -322,7 +324,7 @@ class TestProtonfixes(unittest.TestCase):
 
         with patch('builtins.open', mock_open()) as mocked_open:
             mocked_open.side_effect = OSError
-            with patch('fix.log') as mocked_log:  # Mock the logger separately
+            with patch('protonfixes.fix.log') as mocked_log:  # Mock the logger separately
                 func = fix.get_game_name.__wrapped__  # Do not reference the cache
                 result = func()
                 self.assertEqual(result, 'UNKNOWN')
@@ -350,7 +352,7 @@ class TestProtonfixes(unittest.TestCase):
 
         with patch('builtins.open', mock_open()) as mocked_open:
             mocked_open.side_effect = UnicodeDecodeError('utf-8', b'', 0, 1, '')
-            with patch('fix.log') as mocked_log:  # Mock the logger separately
+            with patch('protonfixes.fix.log') as mocked_log:  # Mock the logger separately
                 func = fix.get_game_name.__wrapped__  # Do not reference the cache
                 result = func()
                 self.assertEqual(result, 'UNKNOWN')
