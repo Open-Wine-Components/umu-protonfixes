@@ -4,20 +4,15 @@ import os
 import re
 import sys
 import csv
+
 from functools import lru_cache
 from importlib import import_module
 from typing import Optional
 
-try:
-    from .config import config
-    from .util import proton_version
-    from .checks import run_checks
-    from .logger import log
-except ImportError:
-    from config import config
-    from util import proton_version
-    from checks import run_checks
-    from logger import log
+from .config import config
+from .util import proton_version
+from .checks import run_checks
+from .logger import log
 
 try:
     import __main__ as protonmain

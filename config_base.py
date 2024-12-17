@@ -5,11 +5,11 @@ import re
 from configparser import ConfigParser
 from dataclasses import is_dataclass
 from pathlib import Path
-
 from typing import Any
 from collections.abc import Callable
 
-from logger import log, LogLevel
+from .logger import log, LogLevel
+
 
 class ConfigBase:
     """Base class for configuration objects.

@@ -20,14 +20,9 @@ from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Any, Union, Optional
 from collections.abc import Mapping, Callable
 
-try:
-    from .logger import log
-    from .config import config
-    from .steamhelper import install_app
-except ImportError:
-    from logger import log
-    from config import config
-    from steamhelper import install_app
+from .logger import log
+from .config import config
+from .steamhelper import install_app
 
 try:
     import __main__ as protonmain
