@@ -1,1 +1,1 @@
-../gamefixes-steam/976590.py
+../gamefixes-egs/umu-976590.py
