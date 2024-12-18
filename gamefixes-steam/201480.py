@@ -1,6 +1,6 @@
 """Game fix for Serious Sam: The Random Encounter"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
@@ -14,4 +14,4 @@ def main() -> None:
     util.protontricks('dsound')
     util.protontricks('dswave')
     util.protontricks('directplay')
-    util.winedll_override('streamci', 'n')
+    util.winedll_override('streamci', util.DllOverride.NATIVE)
