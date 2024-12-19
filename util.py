@@ -197,20 +197,24 @@ def is_custom_verb(verb: str) -> Union[bool, str]:
     if verb == 'gui':
         return False
 
-    verb_name = verb + '.verb'
+    verb_name = f'{verb}.verb'
     verb_dir = 'verbs'
 
+    verbpath = Path('~/.config/protonfixes/localfixes/', verb_dir).expanduser()
+
     # check local custom verbs
-    verbpath = os.path.expanduser('~/.config/protonfixes/localfixes/' + verb_dir)
-    if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using local custom winetricks verb from: ' + verbpath)
-        return os.path.join(verbpath, verb_name)
+    verbfile = verbpath / verb_name
+    if verbfile.is_file():
+        log.debug(f'Using local custom winetricks verb from: {verbpath}')
+        return str(verbfile)
+
+    verbpath = Path(__file__).parent / verb_dir
 
     # check custom verbs
-    verbpath = os.path.join(os.path.dirname(__file__), verb_dir)
-    if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using custom winetricks verb from: ' + verbpath)
-        return os.path.join(verbpath, verb_name)
+    verbfile = verbpath / verb_name
+    if verbfile.is_file():
+        log.debug(f'Using custom winetricks verb from: {verbpath}')
+        return str(verbfile)
 
     return False
 
