@@ -697,7 +697,8 @@ def set_ini_options(
     log.info(f'Addinging INI options into {cfile}:\n{str(ini_opts)}')
     conf.read_string(ini_opts)
 
-    with open(cfg_path, 'w', encoding=encoding) as configfile:
+    # Using open is OK here
+    with open(cfg_path, 'w', encoding=encoding) as configfile:  # noqa: PTH123
         conf.write(configfile)
     return True
 
