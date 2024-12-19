@@ -156,7 +156,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
     if not isinstance(verb, str):
         return False
 
-    winetricks_log = os.path.join(protonprefix(), logfile)
+    winetricks_log = Path(protonprefix(), logfile)
 
     # Check for 'verb=param' verb types
     if len(verb.split('=')) > 1:
@@ -164,7 +164,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
         wt_verb_param = verb.split('=')[1]
         wt_is_set = False
         try:
-            with open(winetricks_log, encoding='ascii') as tricklog:
+            with winetricks_log.open(mode='r', encoding='ascii') as tricklog:
                 for xline in tricklog.readlines():
                     if re.findall(r'^' + wt_verb, xline.strip()):
                         wt_is_set = bool(xline.strip() == wt_verb + wt_verb_param)
@@ -173,7 +173,7 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
             return False
     # Check for regular verbs
     try:
-        with open(winetricks_log, encoding='ascii') as tricklog:
+        with winetricks_log.open(mode='r', encoding='ascii') as tricklog:
             if verb in reversed([x.strip() for x in tricklog.readlines()]):
                 return True
     except OSError:
