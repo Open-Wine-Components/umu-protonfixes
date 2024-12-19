@@ -61,15 +61,15 @@ def protonnameversion() -> Union[str, None]:
 
 def protontimeversion() -> int:
     """Returns the version timestamp of proton from the `version` file"""
-    fullpath = os.path.join(protondir(), 'version')
+    fullpath = Path(protondir(), 'version')
     try:
-        with open(fullpath, encoding='ascii') as version:
+        with fullpath.open(mode='r', encoding='ascii') as version:
             for timestamp in version.readlines():
                 return int(timestamp.strip())
     except OSError:
-        log.warn('Proton version file not found in: ' + fullpath)
+        log.warn(f'Proton version file not found in: {fullpath}')
         return 0
-    log.warn('Proton version not parsed from file: ' + fullpath)
+    log.warn(f'Proton version not parsed from file: {fullpath}')
     return 0
 
 
