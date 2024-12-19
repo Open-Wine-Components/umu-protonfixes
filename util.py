@@ -609,40 +609,41 @@ def _get_case_insensitive_name(path: str) -> str:
 
     e.g /path/to/game/system/gothic.ini -> /path/to/game/System/GOTHIC.INI
     """
-    if os.path.exists(path):
+    # TODO: Refactor this later to use pathlib
+    if os.path.exists(path):  # noqa: PTH110
         return path
     root = path
     # Find first existing directory in the tree
-    while not os.path.exists(root):
+    while not os.path.exists(root):  # noqa: PTH110
         root = os.path.split(root)[0]
 
     if root[len(root) - 1] not in ['/', '\\']:
         root = root + os.sep
     # Separate missing path from existing root
-    s_working_dir = path.replace(root, '').split(os.sep)
+    s_working_dir = path.replace(root, '').split(os.sep)  # noqa: PTH206
     paths_to_find = len(s_working_dir)
     # Keep track of paths we found so far
     paths_found = 0
     # Walk through missing paths
     for directory in s_working_dir:
-        if not os.path.exists(root):
+        if not os.path.exists(root):  # noqa: PTH110
             break
         dir_list = os.listdir(root)
         found = False
         for existing_dir in dir_list:
             # Find matching filename on drive
             if existing_dir.lower() == directory.lower():
-                root = os.path.join(root, existing_dir)
+                root = os.path.join(root, existing_dir)  # noqa: PTH118
                 paths_found += 1
                 found = True
         # If path was not found append case that we were looking for
         if not found:
-            root = os.path.join(root, directory)
+            root = os.path.join(root, directory)  # noqa: PTH118
             paths_found += 1
 
     # Append rest of the path if we were unable to find directory at any level
     if paths_to_find != paths_found:
-        root = os.path.join(root, os.sep.join(s_working_dir[paths_found:]))
+        root = os.path.join(root, os.sep.join(s_working_dir[paths_found:]))  # noqa: PTH118
     return root
 
 
