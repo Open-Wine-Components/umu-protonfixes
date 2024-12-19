@@ -838,16 +838,16 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:  # noqa: PT
         tgz_obj.extractall(path)
 
 
-def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
+def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:  # noqa: PTH109
     """Install a file from a downloaded zip"""
     if filename in os.listdir(path):
         log.info(f'File {filename} found in {path}')
         return
 
-    cache_dir = os.path.expanduser('~/.cache/protonfixes')
-    os.makedirs(cache_dir, exist_ok=True)
-    zip_file_name = os.path.basename(url)
-    zip_file_path = os.path.join(cache_dir, zip_file_name)
+    cache_dir = Path('~/.cache/protonfixes').expanduser()
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    zip_file_name = Path(url).expanduser().name
+    zip_file_path = cache_dir.joinpath(zip_file_name)
 
     if zip_file_name not in os.listdir(cache_dir):
         log.info(f'Downloading {filename} to {zip_file_path}')
