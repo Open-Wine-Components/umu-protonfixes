@@ -651,30 +651,29 @@ def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
     if base_path == 'user':
-        cfg_path = os.path.join(
-            protonprefix(), 'drive_c/users/steamuser/My Documents', cfile
-        )
+        cfg_path = Path(protonprefix(), 'drive_c/users/steamuser/My Documents', cfile)
     else:
         if base_path == 'game':
-            cfg_path = os.path.join(get_game_install_path(), cfile)
+            cfg_path = Path(get_game_install_path(), cfile)
         else:
-            cfg_path = cfile
-    cfg_path = _get_case_insensitive_name(cfg_path)
+            cfg_path = Path(cfile)
+    cfg_path = Path(_get_case_insensitive_name(str(cfg_path)))
 
-    if os.path.exists(cfg_path) and os.access(cfg_path, os.F_OK):
-        log.debug('Found config file: ' + cfg_path)
-        return cfg_path
+    if cfg_path.exists() and os.access(cfg_path, os.F_OK):
+        log.debug(f'Found config file: {cfg_path}')
+        return str(cfg_path)
 
-    log.warn('Config file not found: ' + cfg_path)
+    log.warn(f'Config file not found: {cfg_path}')
     return None
 
 
 def create_backup_config(cfg_path: str) -> None:
     """Create backup config file"""
     # Backup
-    if not os.path.exists(cfg_path + '.protonfixes.bak'):
+    bak = Path(f'{cfg_path}.protonfixes.bak').expanduser()
+    if not bak.is_file():
         log.info('Creating backup for config file')
-        shutil.copyfile(cfg_path, cfg_path + '.protonfixes.bak')
+        shutil.copyfile(cfg_path, f'{cfg_path}.protonfixes.bak')
 
 
 def set_ini_options(
