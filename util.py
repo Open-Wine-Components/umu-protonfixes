@@ -742,7 +742,12 @@ def set_xml_options(
 def get_resolution() -> tuple[int, int]:
     """Returns screen res width, height using xrandr"""
     # Execute xrandr command and capture its output
-    xrandr_bin = os.path.abspath(__file__).replace('util.py', 'xrandr')
+
+    # TODO: Should prefer to use a library instead of xrandr.
+    # Alternatively, xrandr has already been included in recent versions
+    # of sniper so we can do away with building it all together. This would
+    # decrease build times, latency, and the size of Proton delta patches
+    xrandr_bin = os.path.abspath(__file__).replace('util.py', 'xrandr')  # noqa: PTH100
     xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
 
     # Find the line that starts with 'Screen   0:' and extract the resolution
