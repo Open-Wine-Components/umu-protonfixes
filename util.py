@@ -558,13 +558,13 @@ def disable_uplay_overlay() -> bool:
     UPlay will overwrite settings.yml on launch, but keep
     this setting.
     """
-    config_dir = os.path.join(
+    config_dir = Path(
         protonprefix(),
         'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/',
     )
-    config_file = os.path.join(config_dir, 'settings.yml')
+    config_file = config_dir / 'settings.yml'
 
-    os.makedirs(config_dir, exist_ok=True)
+    config_dir.mkdir(exist_ok=True)
 
     try:
         data = (
@@ -576,12 +576,12 @@ def disable_uplay_overlay() -> bool:
             'user:\n'
             '  closebehavior: CloseBehavior_Close'
         )
-        with open(config_file, 'a+', encoding='ascii') as file:
+        with config_file.open(mode='a+', encoding='ascii') as file:
             file.write(data)
         log.info('Disabled UPlay overlay')
         return True
     except OSError as err:
-        log.warn('Could not disable UPlay overlay: ' + err.strerror)
+        log.warn(f'Could not disable UPlay overlay: {err.strerror}')
 
     return False
 
