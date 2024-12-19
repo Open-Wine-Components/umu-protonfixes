@@ -882,7 +882,8 @@ def is_smt_enabled() -> bool:
     If the check has failed, False is returned.
     """
     try:
-        with open('/sys/devices/system/cpu/smt/active', encoding='ascii') as smt_file:
+        # open is OK here
+        with open('/sys/devices/system/cpu/smt/active', encoding='ascii') as smt_file:  # noqa: PTH123
             return smt_file.read().strip() == '1'
     except PermissionError:
         log.warn('No permission to read SMT status')
