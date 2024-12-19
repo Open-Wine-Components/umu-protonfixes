@@ -146,9 +146,9 @@ def _killhanging() -> None:
 
 def _forceinstalled(verb: str) -> None:
     """Records verb into the winetricks.log.forced file"""
-    forced_log = os.path.join(protonprefix(), 'winetricks.log.forced')
-    with open(forced_log, 'a', encoding='ascii') as forcedlog:
-        forcedlog.write(verb + '\n')
+    forced_log = Path(protonprefix(), 'winetricks.log.forced')
+    with forced_log.open(mode='a', encoding='ascii') as forcedlog:
+        forcedlog.write(f'{verb}\n')
 
 
 def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
