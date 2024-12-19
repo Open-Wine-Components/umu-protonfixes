@@ -715,13 +715,14 @@ def set_xml_options(
 
     # set options
 
-    base_size = os.path.getsize(xml_path)
-    backup_size = os.path.getsize(xml_path + '.protonfixes.bak')
+    xml_path = Path(xml_path).expanduser()
+    base_size = xml_path.stat().st_size
+    backup_size = xml_path.joinpath('.protonfixes.bak').stat().st_size
 
     if base_size != backup_size:
         return False
 
-    with open(xml_path, encoding='utf-8') as file:
+    with xml_path.open(mode='r', encoding='utf-8') as file:
         contents = file.readlines()
         i = 0
         for line in contents:
@@ -730,7 +731,7 @@ def set_xml_options(
                 log.info(f'Adding XML options into {cfile}, line {i}:\n{xml_line}')
                 contents.insert(i, xml_line + '\n')
 
-    with open(xml_path, 'w', encoding='utf-8') as file:
+    with xml_path.open(mode='w', encoding='utf-8') as file:
         for eachitem in contents:
             file.write(eachitem)
 
