@@ -47,7 +47,7 @@ def protondir() -> str:
 
 def protonprefix() -> str:
     """Returns the wineprefix used by proton"""
-    return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
+    return f"{os.environ['STEAM_COMPAT_DATA_PATH']}/pfx/"
 
 
 def protonnameversion() -> Union[str, None]:
