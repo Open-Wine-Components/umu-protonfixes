@@ -433,8 +433,8 @@ def patch_libcuda() -> bool:
 
     Returns true if the library was patched correctly. Otherwise returns false
     """
-    cache_dir = os.path.expanduser('~/.cache/protonfixes')
-    os.makedirs(cache_dir, exist_ok=True)
+    cache_dir = Path('~/.cache/protonfixes').expanduser()
+    cache_dir.mkdir(exist_ok=True, parents=True)
 
     try:
         # Use shutil.which to find ldconfig binary
@@ -466,9 +466,9 @@ def patch_libcuda() -> bool:
                 # Parse the line to extract the path
                 parts = line.strip().split(' => ')
                 if len(parts) == 2:
-                    path = parts[1].strip()
-                    if os.path.exists(path):
-                        libcuda_path = os.path.abspath(path)
+                    path = Path(parts[1].strip())
+                    if path.exists():
+                        libcuda_path = path.resolve()
                         break
 
         if not libcuda_path:
@@ -477,10 +477,9 @@ def patch_libcuda() -> bool:
 
         log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
 
-        patched_library = os.path.join(cache_dir, 'libcuda.patched.so')
+        patched_library = cache_dir / 'libcuda.patched.so'
         try:
-            with open(libcuda_path, 'rb') as f:
-                binary_data = f.read()
+            binary_data = libcuda_path.read_bytes()
         except OSError as e:
             log.crit(f'Unable to read libcuda.so: {e}')
             return False
@@ -501,18 +500,16 @@ def patch_libcuda() -> bool:
         patched_binary_data = bytes.fromhex(hex_data)
 
         try:
-            with open(patched_library, 'wb') as f:
-                f.write(patched_binary_data)
-
+            patched_library.write_bytes(patched_binary_data)
             # Set permissions to rwxr-xr-x (755)
-            os.chmod(patched_library, 0o755)
+            patched_library.chmod(0o755)
             log.debug(f'Permissions set to rwxr-xr-x for {patched_library}')
         except OSError as e:
             log.crit(f'Unable to write patched libcuda.so to {patched_library}: {e}')
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        set_environment('LD_PRELOAD', patched_library)
+        set_environment('LD_PRELOAD', str(patched_library))
         return True
 
     except Exception as e:
