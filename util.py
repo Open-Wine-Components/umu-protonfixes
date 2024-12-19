@@ -599,7 +599,8 @@ def create_dosbox_conf(
         return
     conf = configparser.ConfigParser()
     conf.read_dict(conf_dict)
-    with open(conf_file, 'w', encoding='ascii') as file:
+    # Using open than Path.open is OK in this context
+    with open(conf_file, 'w', encoding='ascii') as file:  # noqa: PTH123
         conf.write(file)
 
 
