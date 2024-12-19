@@ -6,6 +6,7 @@ import sys
 import csv
 from functools import lru_cache
 from importlib import import_module
+from pathlib import Path
 
 try:
     from . import config
@@ -42,42 +43,43 @@ def get_game_id() -> str:
 def get_game_name() -> str:
     """Trys to return the game name from environment variables"""
     pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = Path(__file__).resolve().parent
 
     if os.environ.get('UMU_ID'):
+        game_title = Path(pfx, 'game_title')
 
-        if os.path.isfile(f'{pfx}/game_title'):
-            with open(f'{pfx}/game_title', encoding='utf-8') as file:
+        if game_title.is_file():
+            with game_title.open(mode='r', encoding='utf-8') as file:
                 return file.readline()
 
         umu_id = os.environ['UMU_ID']
         store = os.getenv('STORE', 'none')
-        csv_file_path = os.path.join(script_dir, 'umu-database.csv')
+        csv_file_path = script_dir / 'umu-database.csv'
 
         try:
-            with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
+            with csv_file_path.open(mode='r', encoding='utf-8') as csvfile:
                 csvreader = csv.reader(csvfile)
                 for row in csvreader:
                     # Check if the row has enough columns and matches both UMU_ID and STORE
                     if len(row) > 3 and row[3] == umu_id and row[1] == store:
                         title = row[0]  # Title is the first entry
-                        with open(os.path.join(script_dir, 'game_title'), 'w', encoding='utf-8') as file:
+                        with game_title.open(mode='w', encoding='utf-8') as file:
                             file.write(title)
                         return title
         except FileNotFoundError:
-            log.warn(f"CSV file not found: {csv_file_path}")
+            log.warn(f'CSV file not found: {csv_file_path}')
         except Exception as ex:
-            log.debug(f"Error reading CSV file: {ex}")
+            log.debug(f'Error reading CSV file: {ex}')
 
-        log.warn("Game title not found in CSV")
+        log.warn('Game title not found in CSV')
         return 'UNKNOWN'
 
     try:
         log.debug('UMU_ID is not in environment')
         game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
-        game_manifest = os.path.join(game_library, f'appmanifest_{get_game_id()}.acf')
+        game_manifest = Path(game_library, f'appmanifest_{get_game_id()}.acf')
 
-        with open(game_manifest, encoding='utf-8') as appmanifest:
+        with game_manifest.open(mode='r', encoding='utf-8') as appmanifest:
             for xline in appmanifest.readlines():
                 if 'name' in xline.strip():
                     name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]
@@ -129,16 +131,16 @@ def get_module_name(game_id: str, default: bool = False, local: bool = False) ->
 
 def _run_fix_local(game_id: str, default: bool = False) -> bool:
     """Check if a local gamefix is available first and run it"""
-    localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
+    localpath = Path('~/.config/protonfixes/localfixes').expanduser()
     module_name = game_id if not default else 'default'
 
     # Check if local gamefix exists
-    if not os.path.isfile(os.path.join(localpath, module_name + '.py')):
+    if not localpath.joinpath(f'{module_name}.py').is_file():
         return False
 
     # Ensure local gamefixes are importable as modules via PATH
-    with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):
-        sys.path.append(os.path.expanduser('~/.config/protonfixes'))
+    with Path(localpath, '__init__.py').open(mode='a', encoding='utf-8'):
+        sys.path.append(str(localpath.parent))
 
     # Run fix
     return _run_fix(game_id, default, True)
