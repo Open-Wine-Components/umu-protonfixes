@@ -249,7 +249,8 @@ def protontricks(verb: str) -> bool:
         env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
         env['LD_PRELOAD'] = ''
 
-        winetricks_bin = os.path.abspath(__file__).replace('util.py', 'winetricks')
+        # Using os.path.abspath suffices
+        winetricks_bin = os.path.abspath(__file__).replace('util.py', 'winetricks')  # noqa: PTH100
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
         if verb == 'gui':
             winetricks_cmd = [winetricks_bin, '--unattended']
