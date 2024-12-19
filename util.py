@@ -15,6 +15,7 @@ import functools
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Literal, Any, Callable, Union
 from collections.abc import Mapping, Generator
+from pathlib import Path
 
 try:
     from .logger import log
@@ -32,9 +33,9 @@ except ImportError:
 def which(appname: str) -> Union[str, None]:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
-        fullpath = os.path.join(path, appname)
-        if os.path.exists(fullpath) and os.access(fullpath, os.X_OK):
-            return fullpath
+        fullpath = Path(path, appname)
+        if fullpath.exists() and os.access(fullpath, os.X_OK):
+            return str(fullpath)
     log.warn(str(appname) + 'not found in $PATH')
     return None
 
