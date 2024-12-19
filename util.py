@@ -780,7 +780,7 @@ def set_dxvk_option(
     conf = configparser.ConfigParser()
     conf.optionxform = str
     section = conf.default_section
-    dxvk_conf = os.path.join(os.environ['PWD'], 'dxvk.conf')
+    dxvk_conf = Path(os.environ['PWD'], 'dxvk.conf')
 
     conf.read(cfile)
 
@@ -796,7 +796,7 @@ def set_dxvk_option(
         conf.set(section, 'session', str(os.getpid()))
 
         if os.access(dxvk_conf, os.F_OK):
-            with open(dxvk_conf, encoding='ascii') as dxvk:
+            with dxvk_conf.open(encoding='ascii') as dxvk:
                 conf.read_file(read_dxvk_conf(dxvk))
         log.debug(f'{conf.items(section)}')
 
@@ -804,7 +804,7 @@ def set_dxvk_option(
     log.info('Addinging DXVK option: ' + str(opt) + ' = ' + str(val))
     conf.set(section, opt, str(val))
 
-    with open(cfile, 'w', encoding='ascii') as configfile:
+    with Path(cfile).open(encoding='ascii') as configfile:
         conf.write(configfile)
 
 
