@@ -135,7 +135,7 @@ def _killhanging() -> None:
     badexes = ['mscorsvw.exe']
     for pid in pids:
         try:
-            with open(os.path.join('/proc', pid, 'cmdline'), 'rb') as proc_cmd:
+            with Path('/proc', pid, 'cmdline').open(mode='rb') as proc_cmd:
                 cmdline = proc_cmd.read()
                 for exe in badexes:
                     if exe in cmdline.decode():
