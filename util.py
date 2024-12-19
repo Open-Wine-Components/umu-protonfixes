@@ -42,8 +42,7 @@ def which(appname: str) -> Union[str, None]:
 
 def protondir() -> str:
     """Returns the path to proton"""
-    proton_dir = os.path.dirname(sys.argv[0])
-    return proton_dir
+    return str(Path(sys.argv[0]).parent)
 
 
 def protonprefix() -> str:
