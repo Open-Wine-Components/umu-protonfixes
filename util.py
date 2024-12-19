@@ -101,11 +101,11 @@ def once(
     def wrapper(*args, **kwargs) -> None:  # noqa: ANN002, ANN003
         func_id = f'{func.__module__}.{func.__name__}'
         prefix = protonprefix()
-        directory = os.path.join(prefix, 'drive_c/protonfixes/run/')
-        file = os.path.join(directory, func_id)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        if os.path.exists(file):
+        directory = Path(prefix, 'drive_c/protonfixes/run/')
+        file = directory / func_id
+        if not directory.exists():
+            directory.mkdir(parents=True)
+        if file.exists():
             return
 
         exception = None
@@ -116,7 +116,7 @@ def once(
                 raise exc
             exception = exc
 
-        with open(file, 'a', encoding='ascii') as tmp:
+        with file.open(mode='a', encoding='ascii') as tmp:
             tmp.close()
 
         if exception:
