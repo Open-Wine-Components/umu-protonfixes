@@ -4,22 +4,21 @@ import os
 import re
 import sys
 import csv
+
 from functools import lru_cache
 from importlib import import_module
+from typing import Optional
 
-try:
-    from . import config
-    from .checks import run_checks
-    from .logger import log
-except ImportError:
-    import config
-    from checks import run_checks
-    from logger import log
+from .config import config
+from .util import proton_version
+from .checks import run_checks
+from .logger import log
 
 try:
     import __main__ as protonmain
 except ImportError:
-    log.warn('Unable to hook into Proton main script environment')
+    log.crit('Unable to hook into Proton main script environment')
+    exit()
 
 
 @lru_cache
@@ -35,7 +34,7 @@ def get_game_id() -> str:
         return re.findall(r'\d+', os.environ['STEAM_COMPAT_DATA_PATH'])[-1]
 
     log.crit('Game ID not found in environment variables')
-    return None
+    exit()
 
 
 @lru_cache
@@ -88,7 +87,7 @@ def get_game_name() -> str:
     return 'UNKNOWN'
 
 
-def get_store_name(store: str) -> str:
+def get_store_name(store: str) -> Optional[str]:
     """Mapping for store identifier to store name"""
     return {
         'amazon': 'Amazon',
@@ -110,7 +109,7 @@ def get_module_name(game_id: str, default: bool = False, local: bool = False) ->
     if game_id.isnumeric():
         store = 'steam'
     elif os.environ.get('STORE'):
-        store = os.environ.get('STORE').lower()
+        store = os.environ.get('STORE', '').lower()
 
     if store != 'steam':
         log.info(f'Non-steam game {get_game_name()} ({game_id})')
@@ -172,15 +171,15 @@ def run_fix(game_id: str) -> None:
     if game_id is None:
         return
 
-    if config.enable_checks:
+    if config.main.enable_checks:
         run_checks()
 
     # execute default.py (local)
-    if not _run_fix_local(game_id, True) and config.enable_global_fixes:
+    if not _run_fix_local(game_id, True) and config.main.enable_global_fixes:
         _run_fix(game_id, True)  # global
 
     # execute <game_id>.py (local)
-    if not _run_fix_local(game_id, False) and config.enable_global_fixes:
+    if not _run_fix_local(game_id, False) and config.main.enable_global_fixes:
         _run_fix(game_id, False)  # global
 
 
@@ -197,5 +196,6 @@ def main() -> None:
         log.debug('Not running protonfixes for setup runs')
         return
 
-    log.info('Running protonfixes')
+    version = proton_version()
+    log.info(f'Running protonfixes on "{version.version_name}", build at {version.build_date}.')
     run_fix(get_game_id())

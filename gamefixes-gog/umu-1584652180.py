@@ -1,7 +1,7 @@
 """The Wheel of Time"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
-    util.winedll_override('ddraw', 'n,b')  # GOG's dxcfg
+    util.winedll_override('ddraw', util.DllOverride.NATIVE_BUILTIN)  # GOG's dxcfg
