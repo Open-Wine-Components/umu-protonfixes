@@ -818,16 +818,20 @@ def install_battleye_runtime() -> None:
     install_app('1161040')
 
 
-def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
+# os.getcwd is OK here
+def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:  # noqa: PTH109
     """Install all files from a downloaded tar.gz"""
-    cache_dir = os.path.expanduser('~/.cache/protonfixes')
-    os.makedirs(cache_dir, exist_ok=True)
-    tgz_file_name = os.path.basename(url)
-    tgz_file_path = os.path.join(cache_dir, tgz_file_name)
+    # TODO: Consider getting rid of this functionality or at least refactoring.
+    # For this to be more useful and valuable,  be more generic by handling different
+    # archive/compression types (e.g., zip, zstd, tar) and download/extract more efficiently
+    cache_dir = Path('~/.cache/protonfixes').expanduser()
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    tgz_file_name = Path(url).expanduser().name
+    tgz_file_path = cache_dir.joinpath(tgz_file_name)
 
     if tgz_file_name not in os.listdir(cache_dir):
         log.info('Downloading ' + tgz_file_name)
-        urllib.request.urlretrieve(url, tgz_file_path)
+        urllib.request.urlretrieve(url, str(tgz_file_path))
 
     with tarfile.open(tgz_file_path, 'r:gz') as tgz_obj:
         log.info(f'Extracting {tgz_file_name} to {path}')
