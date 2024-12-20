@@ -1,11 +1,13 @@
-import unittest
+import io
 import os
 import tempfile
+import unittest
+import urllib.request
+
 from pathlib import Path
 from unittest.mock import patch, mock_open
-import io
-import urllib.request
-import fix
+
+from . import fix
 
 
 class TestProtonfixes(unittest.TestCase):
@@ -192,8 +194,8 @@ class TestProtonfixes(unittest.TestCase):
         self.assertTrue('SteamGameId' not in os.environ, 'SteamGameId is set')
         self.assertTrue('UMU_ID' not in os.environ, 'UMU_ID is set')
         self.assertTrue('SteamAppId' not in os.environ, 'SteamAppId is set')
-        result = func()
-        self.assertFalse(result, 'None was not returned')
+        with self.assertRaises(SystemExit):
+            func()
 
     def testGetStoreNameZoom(self):
         """Pass zoomplatform as store name
@@ -315,7 +317,7 @@ class TestProtonfixes(unittest.TestCase):
 
         with patch('builtins.open', mock_open()) as mocked_open:
             mocked_open.side_effect = FileNotFoundError
-            with patch('fix.log') as mocked_log:  # Mock the logger separately
+            with patch('protonfixes.fix.log') as mocked_log:  # Mock the logger separately
                 func = fix.get_game_name.__wrapped__  # Do not reference the cache
                 result = func()
                 self.assertEqual(result, 'UNKNOWN')
@@ -329,7 +331,7 @@ class TestProtonfixes(unittest.TestCase):
 
         with patch('builtins.open', mock_open()) as mocked_open:
             mocked_open.side_effect = OSError
-            with patch('fix.log') as mocked_log:  # Mock the logger separately
+            with patch('protonfixes.fix.log') as mocked_log:  # Mock the logger separately
                 func = fix.get_game_name.__wrapped__  # Do not reference the cache
                 result = func()
                 self.assertEqual(result, 'UNKNOWN')
@@ -357,7 +359,7 @@ class TestProtonfixes(unittest.TestCase):
 
         with patch('builtins.open', mock_open()) as mocked_open:
             mocked_open.side_effect = UnicodeDecodeError('utf-8', b'', 0, 1, '')
-            with patch('fix.log') as mocked_log:  # Mock the logger separately
+            with patch('protonfixes.fix.log') as mocked_log:  # Mock the logger separately
                 func = fix.get_game_name.__wrapped__  # Do not reference the cache
                 result = func()
                 self.assertEqual(result, 'UNKNOWN')
