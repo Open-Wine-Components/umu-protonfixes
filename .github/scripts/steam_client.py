@@ -8,8 +8,9 @@ from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_to_dict
 from steam.core.connection import WebsocketConnection
 
-class Steam: # noqa: D101
-    def __init__(self) -> None: # noqa: D107
+
+class Steam:  # noqa: D101
+    def __init__(self) -> None:  # noqa: D107
         self.logged_on_once = False
 
         self.steam = client = SteamClient()
@@ -50,12 +51,12 @@ class Steam: # noqa: D101
         """
         # https://github.com/SteamRE/SteamKit/blob/master/SteamKit2/SteamKit2/Base/Generated/SteamMsgClientServerAppInfo.cs#L331
         resp = self.steam.send_job_and_wait(
-            message = MsgProto(EMsg.ClientPICSProductInfoRequest),
-            body_params = {
+            message=MsgProto(EMsg.ClientPICSProductInfoRequest),
+            body_params={
                 'apps': map(lambda x: {'appid': x}, appids),
-                'meta_data_only': True
+                'meta_data_only': True,
             },
-            timeout=15
+            timeout=15,
         )
 
         if not resp:

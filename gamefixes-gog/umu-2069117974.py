@@ -1,5 +1,5 @@
 """METAL GEAR SOLID 2 SUBSTANCE"""
-# GOG-ID 2069117974	
+# GOG-ID 2069117974
 
 from protonfixes import util
 

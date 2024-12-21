@@ -24,6 +24,7 @@ headers = {
     'Accept-Language': 'en-US,en;q=0.5',
 }
 
+
 def check_steamfixes(project: Path) -> None:
     """Verifies if the name of Steam gamefix modules are valid entries.
 

@@ -45,7 +45,6 @@ def get_game_name() -> str:
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     if os.environ.get('UMU_ID'):
-
         if os.path.isfile(f'{pfx}/game_title'):
             with open(f'{pfx}/game_title', encoding='utf-8') as file:
                 return file.readline()
@@ -61,15 +60,19 @@ def get_game_name() -> str:
                     # Check if the row has enough columns and matches both UMU_ID and STORE
                     if len(row) > 3 and row[3] == umu_id and row[1] == store:
                         title = row[0]  # Title is the first entry
-                        with open(os.path.join(script_dir, 'game_title'), 'w', encoding='utf-8') as file:
+                        with open(
+                            os.path.join(script_dir, 'game_title'),
+                            'w',
+                            encoding='utf-8',
+                        ) as file:
                             file.write(title)
                         return title
         except FileNotFoundError:
-            log.warn(f"CSV file not found: {csv_file_path}")
+            log.warn(f'CSV file not found: {csv_file_path}')
         except Exception as ex:
-            log.debug(f"Error reading CSV file: {ex}")
+            log.debug(f'Error reading CSV file: {ex}')
 
-        log.warn("Game title not found in CSV")
+        log.warn('Game title not found in CSV')
         return 'UNKNOWN'
 
     try:

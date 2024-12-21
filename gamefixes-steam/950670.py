@@ -46,8 +46,8 @@ def clear_logs() -> None:
     # Clear all logs > 10 MB
     log_files = Path('GothicRemake/Saved/Logs').glob('*.log')
     for file in log_files:
-        file_size = file.stat().st_size         # Bytes
-        file_size = file_size // 1000 // 1000   # Megabytes
+        file_size = file.stat().st_size  # Bytes
+        file_size = file_size // 1000 // 1000  # Megabytes
         if file.is_file() and file_size > 10:
             log.info(f'Removing log file "{file}" with a size of {file_size} MB.')
             file.unlink()
