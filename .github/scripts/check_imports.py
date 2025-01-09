@@ -13,7 +13,7 @@ async def run_subproc(py_bin: str, file: Path) -> tuple[int, Path]:
     # Ensure this module is in PYTHONPATH
     args = file.resolve(strict=True)
     proc = await create_subprocess_exec(
-        py_bin, args, cwd=args.parent, env={'PYTHONPATH': str(PROJECT.parent.parent)}
+        py_bin, args, cwd=args.parent, env={'PYTHONPATH': str(PROJECT.parent)}
     )
     ret = await proc.wait()
     return ret, file
