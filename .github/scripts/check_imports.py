@@ -14,11 +14,7 @@ async def run_subproc(py_bin: str, file: Path) -> None:
     """Run a module via the Python interpreter"""
     # Ensure this module is in PYTHONPATH
     path = await file.resolve(strict=True)
-    proc = await open_process(
-        [py_bin, str(path), PROTON_VERB],
-        cwd=str(path.parent),
-        env={'PYTHONPATH': str(PROJECT.parent)},
-    )
+    proc = await open_process([py_bin, str(path), PROTON_VERB], cwd=str(path.parent))
     ret = await proc.wait()
 
     if ret != 0:
