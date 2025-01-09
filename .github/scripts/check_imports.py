@@ -7,13 +7,19 @@ EXCLUDES = ('__init__.py', 'default.py')
 
 PROJECT = Path(__file__).parent.parent.parent
 
+PROTON_VERB = 'waitforexitandrun'
+
 
 async def run_subproc(py_bin: str, file: Path) -> tuple[int, Path]:
     """Run a module via the Python interpreter"""
     # Ensure this module is in PYTHONPATH
-    args = file.resolve(strict=True)
+    path = file.resolve(strict=True)
     proc = await create_subprocess_exec(
-        py_bin, args, cwd=args.parent, env={'PYTHONPATH': str(PROJECT.parent)}
+        py_bin,
+        path,
+        PROTON_VERB,
+        cwd=path.parent,
+        env={'PYTHONPATH': str(PROJECT.parent)},
     )
     ret = await proc.wait()
     return ret, file
