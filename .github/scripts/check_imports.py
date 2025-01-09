@@ -22,6 +22,9 @@ async def main() -> None:  # noqa: D103
     )
     py_bin = which('python')
 
+    # Ensure this module is in PYTHONPATH
+    sys.path.insert(0, str(project.parent))
+
     if not py_bin:
         sys.exit(1)
 
