@@ -26,8 +26,8 @@ async def main() -> None:  # noqa: D103
         sys.exit(1)
 
     # Expect this operation to fail
-    for future in gather(*[run_subproc(py_bin, file) for file in files]):
-        ret, file = await future
+    for future in await gather(*[run_subproc(py_bin, file) for file in files]):
+        ret, file = future
         if ret != 0:
             err = f'The following file has an invalid import: {file}'
             raise RuntimeError(err)
