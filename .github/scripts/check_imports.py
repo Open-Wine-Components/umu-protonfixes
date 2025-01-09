@@ -12,7 +12,6 @@ PROTON_VERB = 'waitforexitandrun'
 
 async def run_subproc(py_bin: str, file: Path) -> None:
     """Run a module via the Python interpreter"""
-    # Ensure this module is in PYTHONPATH
     path = await file.resolve(strict=True)
     proc = await open_process(
         [py_bin, str(path), PROTON_VERB],
@@ -28,7 +27,7 @@ async def run_subproc(py_bin: str, file: Path) -> None:
     print(f"File '{file.parent / file.name}' has valid imports")
 
 
-async def main() -> None:  # noqa: D103
+async def main() -> None:
     """Validate import statements for files in gamefixes-*. by running them."""
     py_bin = which('python')
 
