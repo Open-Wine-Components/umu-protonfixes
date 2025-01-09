@@ -2,13 +2,11 @@ import sys  # noqa: D100
 from pathlib import Path
 from asyncio import run as run_async, create_subprocess_exec, gather
 from shutil import which
-from typing import Any
-from collections.abc import Coroutine
 
 EXCLUDES = ('__init__.py', 'default.py')
 
 
-async def run_subproc(py_bin: str, file: Path):
+async def run_subproc(py_bin: str, file: Path) -> tuple[int, Path]:
     """Run a module via the Python interpreter"""
     proc = await create_subprocess_exec(py_bin, file.resolve(strict=True))
     ret = await proc.wait()
