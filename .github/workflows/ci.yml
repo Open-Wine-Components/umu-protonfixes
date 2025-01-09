@@ -42,7 +42,7 @@ jobs:
       - name: Check import statements
         run: |
           cd ..
-          ln -s umu-protonfixes protonfixes
+          mv umu-protonfixes protonfixes
           cd protonfixes
           python3 .github/scripts/check_imports.py
       - name: Test with unittest
