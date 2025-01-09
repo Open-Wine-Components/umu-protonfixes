@@ -5,32 +5,27 @@ from shutil import which
 
 EXCLUDES = ('__init__.py', 'default.py')
 
+PROJECT = Path(__file__).parent.parent.parent
+
 
 async def run_subproc(py_bin: str, file: Path) -> tuple[int, Path]:
     """Run a module via the Python interpreter"""
+    # Ensure this module is in PYTHONPATH
     args = file.resolve(strict=True)
-    proc = await create_subprocess_exec(py_bin, args, cwd=args.parent)
+    proc = await create_subprocess_exec(
+        py_bin, args, cwd=args.parent, env={'PYTHONPATH': str(PROJECT.parent.parent)}
+    )
     ret = await proc.wait()
     return ret, file
 
 
 async def main() -> None:  # noqa: D103
     """Validate import statements for files in gamefixes-*. by running them."""
-    project = Path(__file__).parent.parent.parent
     files = filter(
         lambda file: not file.name.startswith(EXCLUDES),
-        project.rglob('gamefixes-*/*.py'),
+        PROJECT.rglob('gamefixes-*/*.py'),
     )
     py_bin = which('python')
-
-    # Ensure this module is in PYTHONPATH
-    sys.path = [
-        str(project.parent.parent),
-        str(project.parent),
-        str(project),
-        *sys.path,
-    ]
-    print(f'PYTHONPATH: {sys.path}')
 
     if not py_bin:
         sys.exit(1)
