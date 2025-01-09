@@ -8,7 +8,8 @@ EXCLUDES = ('__init__.py', 'default.py')
 
 async def run_subproc(py_bin: str, file: Path) -> tuple[int, Path]:
     """Run a module via the Python interpreter"""
-    proc = await create_subprocess_exec(py_bin, file.resolve(strict=True))
+    args = file.resolve(strict=True)
+    proc = await create_subprocess_exec(py_bin, args, cwd=args.parent)
     ret = await proc.wait()
     return ret, file
 
