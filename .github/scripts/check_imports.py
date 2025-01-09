@@ -1,7 +1,7 @@
 import sys  # noqa: D100
-from pathlib import Path
-from asyncio import run as run_async, create_subprocess_exec, gather
 from shutil import which
+from trio import Path, run as async_run, open_nursery
+from trio.lowlevel import open_process
 
 EXCLUDES = ('__init__.py', 'default.py')
 
@@ -10,39 +10,35 @@ PROJECT = Path(__file__).parent.parent.parent
 PROTON_VERB = 'waitforexitandrun'
 
 
-async def run_subproc(py_bin: str, file: Path) -> tuple[int, Path]:
+async def run_subproc(py_bin: str, file: Path) -> None:
     """Run a module via the Python interpreter"""
     # Ensure this module is in PYTHONPATH
-    path = file.resolve(strict=True)
-    proc = await create_subprocess_exec(
-        py_bin,
-        path,
-        PROTON_VERB,
-        cwd=path.parent,
+    path = await file.resolve(strict=True)
+    proc = await open_process(
+        [py_bin, str(path), PROTON_VERB],
+        cwd=str(path.parent),
         env={'PYTHONPATH': str(PROJECT.parent)},
     )
     ret = await proc.wait()
-    return ret, file
+
+    if ret != 0:
+        err = f'The following file has an invalid import: {file}'
+        raise RuntimeError(err)
 
 
 async def main() -> None:  # noqa: D103
     """Validate import statements for files in gamefixes-*. by running them."""
-    files = filter(
-        lambda file: not file.name.startswith(EXCLUDES),
-        PROJECT.rglob('gamefixes-*/*.py'),
-    )
     py_bin = which('python')
 
     if not py_bin:
         sys.exit(1)
 
-    # Expect this operation to fail
-    for future in await gather(*[run_subproc(py_bin, file) for file in files]):
-        ret, file = future
-        if ret != 0:
-            err = f'The following file has an invalid import: {file}'
-            raise RuntimeError(err)
+    async with open_nursery() as nursery:
+        for file in await PROJECT.rglob('gamefixes-*/*.py'):
+            if file.name.startswith(EXCLUDES):
+                continue
+            nursery.start_soon(run_subproc, py_bin, file)
 
 
 if __name__ == '__main__':
-    run_async(main())
+    async_run(main)
