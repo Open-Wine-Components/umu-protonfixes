@@ -28,6 +28,7 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install ruff
           pip install ijson
+          pip install trio
           pip install "git+https://github.com/njbooher/steam.git@wsproto#egg=steam[client]"
       - name: Lint with Shellcheck
         run: |
