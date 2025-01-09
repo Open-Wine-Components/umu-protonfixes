@@ -47,6 +47,10 @@ jobs:
           mv umu-protonfixes protonfixes
           cd protonfixes/protonfixes
           python3 .github/scripts/check_imports.py
+          cd ..
+          mv protonfixes umu-protonfixes
+          cd ..
+          mv protonfixes umu-protonfixes
       - name: Test with unittest
         run: |
           python3 protonfixes_test.py
