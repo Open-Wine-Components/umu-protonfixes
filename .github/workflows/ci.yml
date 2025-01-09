@@ -40,7 +40,7 @@ jobs:
         run: |
           python3 .github/scripts/check_gamefixes.py
           python3 .github/scripts/check_verbs.py
-      - name: Check import statements
+      - name: Validate gamefix imports 
         run: |
           cd ..
           ln -s umu-protonfixes protonfixes
