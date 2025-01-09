@@ -25,6 +25,8 @@ async def run_subproc(py_bin: str, file: Path) -> None:
         err = f'The following file has an invalid import: {file}'
         raise RuntimeError(err)
 
+    print(f"File '{file}' has valid imports")
+
 
 async def main() -> None:  # noqa: D103
     """Validate import statements for files in gamefixes-*. by running them."""
