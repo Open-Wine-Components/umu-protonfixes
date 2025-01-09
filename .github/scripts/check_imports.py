@@ -24,7 +24,12 @@ async def main() -> None:  # noqa: D103
     py_bin = which('python')
 
     # Ensure this module is in PYTHONPATH
-    sys.path = [str(project.parent.parent), *sys.path]
+    sys.path = [
+        str(project.parent.parent),
+        str(project.parent),
+        str(project),
+        *sys.path,
+    ]
     print(f'PYTHONPATH: {sys.path}')
 
     if not py_bin:
