@@ -39,6 +39,9 @@ jobs:
         run: |
           python3 .github/scripts/check_gamefixes.py
           python3 .github/scripts/check_verbs.py
+      - name: Check import statements
+        run: |
+          python3 .github/scripts/check_imports.py
       - name: Test with unittest
         run: |
           python3 protonfixes_test.py
