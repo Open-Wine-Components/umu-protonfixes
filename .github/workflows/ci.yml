@@ -28,6 +28,7 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install ruff
           pip install ijson
+          pip install trio
           pip install "git+https://github.com/njbooher/steam.git@wsproto#egg=steam[client]"
       - name: Lint with Shellcheck
         run: |
@@ -39,6 +40,12 @@ jobs:
         run: |
           python3 .github/scripts/check_gamefixes.py
           python3 .github/scripts/check_verbs.py
+      - name: Validate gamefix imports 
+        run: |
+          cd ..
+          ln -s umu-protonfixes protonfixes
+          cd protonfixes
+          python3 .github/scripts/check_imports.py
       - name: Test with unittest
         run: |
           python3 protonfixes_test.py
