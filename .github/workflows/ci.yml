@@ -31,6 +31,12 @@ jobs:
           pip install trio
           pip install "steam[client]"
 
+      # PyRight, the unit tests, and other scripts import/resolve the "protonfixes" module
+      # We are using the path "umu-protonfixes", which isn't a valid module name and can't be used
+      # However: this simple, hacky symbolic link in the parent folder can fix this inconvenience
+      - name: Fix python module resolution
+        run: ln -rs . ../protonfixes
+
       # FIXME: problem matcher is currently disabled upstream, using a fork for the moment
       # https://github.com/ludeeus/action-shellcheck/pull/103
       # FIXME: symlinks don't work upstream
@@ -53,12 +59,6 @@ jobs:
         run: |
           python3 .github/scripts/check_gamefixes.py
           python3 .github/scripts/check_verbs.py
-
-      # We need a known parent package in the unit tests, so we need to change to the parent dir
-      # As "umu-protonfixes" is not a valid package name, we create a symbolic link to "protonfixes"
-      - name: Fix package resolution
-        run: |
-          ln -s umu-protonfixes ../protonfixes
 
       - name: Validate gamefix imports
         run: |
