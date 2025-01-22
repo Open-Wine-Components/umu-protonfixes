@@ -4,7 +4,6 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Borderlands 3 vcrun2019 fix"""
+    """Borderlands 3"""
     # Fixes the startup process.
-    util.protontricks('vcrun2019')
     util.protontricks('d3dcompiler_47')
