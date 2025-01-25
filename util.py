@@ -970,3 +970,44 @@ def set_game_drive(enabled: bool) -> None:
         protonmain.g_session.compat_config.add('gamedrive')
     else:
         protonmain.g_session.compat_config.discard('gamedrive')
+
+def import_saves_folder(from_appid: int, relative_path: str) -> None:
+    """Creates a symlink to a folder in another game's prefix.
+    You can use this for games that have functionality that depends on having save data for another game, which does NOT store its save data in its steamapps/common folder.
+    This will only work for Steam games.
+    
+    from_appid: Steam App ID of the game you're trying to get the saves folder from
+    relative_path: Path to reach the target folder that has the save data, starting from .../pfx/drive_c/users/steamuser
+    """
+    from pathlib import Path
+    paths = []
+    # Locate the prefix for from_appid
+    # The location of Steam's main folder can be found in the STEAM_BASE_FOLDER environment variable
+    # The libraryfolders.vdf file contains the paths for all your Steam library folders, including those on external drives or SD cards.
+    with open(f'{os.environ["STEAM_BASE_FOLDER"]}/steamapps/libraryfolders.vdf') as f:
+        for i in f.readlines():
+            if '"path"' in i:
+                paths.append(i[11:-1])
+    # Find which of the library folders the prefix is in
+    for i in paths:
+        if Path(f'{i}/steamapps/compatdata/{from_appid}').exists():
+            # The prefix location for from_appid
+            prefix = f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c'
+            break
+    # If it wasn't found, do nothing.
+    else:
+        return
+    # Create the symlink
+    # STEAM_COMPAT_DATA_PATH contains the location of the prefix for the game you're trying to play.
+    goal = Path(f'{os.environ["STEAM_COMPAT_DATA_PATH"]}/pfx/drive_c/users/steamuser/{relative_path}')
+    # The goal is where we intend to create the symlink
+    if not goal.exists():
+        # Create the necessary parent folders if needed
+        goal.parent.mkdir(parents=True, exist_ok=True)
+        goal.symlink_to(f'{prefix}/users/steamuser/{relative_path}', True)
+    elif not goal.is_symlink():
+        return
+    elif not goal.readlink().exists():
+        # In the case the prefix was moved to another drive, remove and re-create the symlink to point to the correct location
+        goal.unlink()
+        goal.symlink_to(f'{prefix}/users/steamuser/{relative_path}', True)
