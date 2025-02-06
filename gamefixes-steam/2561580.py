@@ -1,7 +1,5 @@
 """Horizon Zero Dawn Remastered"""
 
-from sys import argv
-from os import environ
 from protonfixes import util
 
 
