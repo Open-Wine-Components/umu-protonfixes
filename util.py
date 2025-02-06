@@ -1005,10 +1005,10 @@ def import_saves_folder(from_appid: int, relative_path: str) -> bool:
     for i in paths:
         if Path(f'{i}/steamapps/compatdata/{from_appid}').exists():
             # The user's folder in the prefix location for from_appid
-            prefix = f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c/users/steamuser/{relative_location}'
+            prefix = f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c/users/steamuser/{relative_path}'
             if not Path(prefix).exists():
                 # Better to just abort than create a broken symlink
-                log.info(f'Skipping save data folder import due to location `{relative_location}` not existing in the prefix for {from_appid}.')
+                log.info(f'Skipping save data folder import due to location `{relative_path}` not existing in the prefix for {from_appid}.')
                 return False
             break
     # If one wasn't found, do nothing.
