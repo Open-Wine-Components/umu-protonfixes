@@ -6,8 +6,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Won't connect to internet to login to PSN without using `-showlinkingqr` or `SteamDeck=1` options."""
-    if environ.get('SteamDeck', '0') == '0' and '-showlinkingqr' not in argv:
-        util.append_argument('-showlinkingqr')
-    # this allows the game to detect saves from the original Complete Edition
+    """Game allows playing saves from the original Complete Edition, but by default it can't find them."""
     util.import_saves_folder(1151640, 'My Documents/Horizon Zero Dawn')
