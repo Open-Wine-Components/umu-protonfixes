@@ -1,11 +1,8 @@
-"""Game fix for Horizon Zero Dawn Remastered"""
+"""Horizon Zero Dawn Remastered"""
 
-from sys import argv
-from os import environ
 from protonfixes import util
 
 
 def main() -> None:
-    """Won't connect to internet without using `-showlinkingqr` or `SteamDeck=1` options."""
-    if environ.get('SteamDeck', '0') == '0' and '-showlinkingqr' not in argv:
-        util.append_argument('-showlinkingqr')
+    """Game allows playing saves from the original Complete Edition, but by default it can't find them."""
+    util.import_saves_folder(1151640, 'My Documents/Horizon Zero Dawn')

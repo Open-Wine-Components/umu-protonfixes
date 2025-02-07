@@ -970,3 +970,67 @@ def set_game_drive(enabled: bool) -> None:
         protonmain.g_session.compat_config.add('gamedrive')
     else:
         protonmain.g_session.compat_config.discard('gamedrive')
+
+def import_saves_folder(from_appid: int, relative_path: str) -> bool:
+    """Creates a symlink in the prefix for the game you're trying to play, to a folder from another game's prefix (it needs to be in a Steam library folder).
+    You can use this for games that have functionality that depends on having save data for another game or demo,
+        which does NOT store its save data in its steamapps/common folder.
+    This will only work for Steam games.
+
+    from_appid: Steam App ID of the game you're trying to get the saves folder from
+        You can find this number in the URL for the game's store page, or through looking up the game in SteamDB.
+    relative_path: Path to reach the target folder that has the save data, starting from the .../pfx/drive_c/users/steamuser folder
+        For example for the "My Documents/(Game name)" folder, just use "My Documents/(Game name)".
+    """
+    from pathlib import Path
+    paths = []
+    # Valid Steam app IDs always end with a zero.
+    if from_appid <= 0 or from_appid % 10 != 0:
+        log.warn(f'Invalid ID used for import_saves_folder ({from_appid}).')
+        return False
+    # Locate the prefix for from_appid
+    # The location of Steam's main folder can be found in the STEAM_BASE_FOLDER environment variable
+    # The libraryfolders.vdf file contains the paths for all your Steam library folders that are known to the Steam client, including those on external drives or SD cards.
+    try:
+        with open(f'{os.environ["STEAM_BASE_FOLDER"]}/steamapps/libraryfolders.vdf') as f:
+            for i in f.readlines():
+                # Looking for lines of the format 
+                # \t\t"path"\t\t"(the path)"
+                if '"path"' in i:
+                    paths.append(i[11:-1])
+    except FileNotFoundError:
+        log.info("Could not find Steam's libraryfolders.vdf file.")
+        return False
+    # Find which of the library folders the prefix is in
+    for i in paths:
+        if Path(f'{i}/steamapps/compatdata/{from_appid}').exists():
+            # The user's folder in the prefix location for from_appid
+            prefix = f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c/users/steamuser/{relative_path}'
+            if not Path(prefix).exists():
+                # Better to just abort than create a broken symlink
+                log.info(f'Skipping save data folder import due to location `{relative_path}` not existing in the prefix for {from_appid}.')
+                return False
+            break
+    # If one wasn't found, do nothing.
+    else:
+        log.info(f'Skipping save data folder import, due to not finding a prefix for game {from_appid} to get the folder from.')
+        return False
+    # Create the symlink
+    goal = Path(f'{protonprefix()}/drive_c/users/steamuser/{relative_path}')
+    # The goal is where we intend to create the symlink
+    if not goal.exists():
+        # Create the necessary parent folders if needed
+        goal.parent.mkdir(parents=True, exist_ok=True)
+        goal.symlink_to(prefix, True)
+        log.info(f'Created a symlink at `{goal}` to go to `{prefix}`')
+        return True
+    elif not goal.is_symlink():
+        return False
+    elif not goal.readlink().exists():
+        # In the case the prefix for the other game was moved to another location, remove and re-create the symlink to point to the correct location
+        goal.unlink()
+        goal.symlink_to(prefix, True)
+        log.info(f'Replaced symlink at `{goal}` to go to `{prefix}`')
+        return True
+    else:
+        return False
