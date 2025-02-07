@@ -973,6 +973,7 @@ def set_game_drive(enabled: bool) -> None:
 
 def import_saves_folder(from_appid: int, relative_path: str) -> bool:
     """Creates a symlink in the prefix for the game you're trying to play, to a folder from another game's prefix (it needs to be in a Steam library folder).
+
     You can use this for games that have functionality that depends on having save data for another game or demo,
         which does NOT store its save data in its steamapps/common folder.
     This will only work for Steam games.
