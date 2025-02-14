@@ -971,7 +971,7 @@ def set_game_drive(enabled: bool) -> None:
     else:
         protonmain.g_session.compat_config.discard('gamedrive')
 
-def import_saves_folder(from_appid: int, relative_path: str) -> bool:
+def import_saves_folder(from_appid: int, relative_path: str, is_demo: bool = False) -> bool:
     """Creates a symlink in the prefix for the game you're trying to play, to a folder from another game's prefix (it needs to be in a Steam library folder).
 
     You can use this for games that have functionality that depends on having save data for another game or demo,
@@ -982,6 +982,9 @@ def import_saves_folder(from_appid: int, relative_path: str) -> bool:
         You can find this number in the URL for the game's store page, or through looking up the game in SteamDB.
     relative_path: Path to reach the target folder that has the save data, starting from the .../pfx/drive_c/users/steamuser folder
         For example for the "My Documents/(Game name)" folder, just use "My Documents/(Game name)".
+    is_demo: If True, will copy files from the folder in the other game's prefix instead of symlinking the whole folder.
+        This is good for obtaining save data from demos that save in the same location as the full game, in case the full game already made the target folder.
+        This also means you won't lose the files if you delete the demo's prefix.
     """
     from pathlib import Path
     paths = []
@@ -1006,8 +1009,8 @@ def import_saves_folder(from_appid: int, relative_path: str) -> bool:
     for i in paths:
         if Path(f'{i}/steamapps/compatdata/{from_appid}').exists():
             # The user's folder in the prefix location for from_appid
-            prefix = f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c/users/steamuser/{relative_path}'
-            if not Path(prefix).exists():
+            prefix = Path(f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c/users/steamuser/{relative_path}')
+            if not prefix.exists():
                 # Better to just abort than create a broken symlink
                 log.info(f'Skipping save data folder import due to location `{relative_path}` not existing in the prefix for {from_appid}.')
                 return False
@@ -1022,11 +1025,30 @@ def import_saves_folder(from_appid: int, relative_path: str) -> bool:
     if not goal.exists():
         # Create the necessary parent folders if needed
         goal.parent.mkdir(parents=True, exist_ok=True)
-        goal.symlink_to(prefix, True)
-        log.info(f'Created a symlink at `{goal}` to go to `{prefix}`')
+        if not is_demo:
+            goal.symlink_to(prefix, True)
+            log.info(f'Created a symlink at `{goal}` to go to `{prefix}`')
+        else:
+            shutil.copytree(prefix, goal)
+            log.info(f'Copied folder from `{prefix}` to `{goal}`')
         return True
     elif not goal.is_symlink():
-        return False
+        if is_demo and goal.is_dir():
+            changesMade = False
+            for i in prefix.iterdir():
+                # To prevent overwriting files from the full game
+                if not (goal / i.name).exists():
+                    if i.is_file():
+                        shutil.copyfile(i, goal / i.name)
+                        log.info(f'Copied file from `{i}` to `{goal / i.name}`')
+                        changesMade = True
+                    elif i.is_dir():
+                        shutil.copytree(i, goal / i.name)
+                        log.info(f'Copied folder from `{i}` to `{goal / i.name}`')
+                        changesMade = True
+            return changesMade
+        else:
+            return False
     elif not goal.readlink().exists():
         # In the case the prefix for the other game was moved to another location, remove and re-create the symlink to point to the correct location
         goal.unlink()
