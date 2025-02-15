@@ -971,6 +971,7 @@ def set_game_drive(enabled: bool) -> None:
     else:
         protonmain.g_session.compat_config.discard('gamedrive')
 
+
 def import_saves_folder(from_appid: int, relative_path: str, is_demo: bool = False) -> bool:
     """Creates a symlink in the prefix for the game you're trying to play, to a folder from another game's prefix (it needs to be in a Steam library folder).
 
@@ -1057,3 +1058,15 @@ def import_saves_folder(from_appid: int, relative_path: str, is_demo: bool = Fal
         return True
     else:
         return False
+
+
+def get_steam_account_id() -> str:
+    """Returns your 17-digit Steam account ID"""
+    # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
+    with open(f'{os.environ["STEAM_BASE_FOLDER"]}/config/loginusers.vdf') as f:
+        lastFoundId = None
+        for i in f.readlines():
+            if len(i) > 1 and i[2:-1].isdigit():
+                lastFoundId = i[2:-1]
+            elif i == f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"':
+                return lastFoundId
