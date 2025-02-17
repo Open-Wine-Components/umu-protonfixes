@@ -29,7 +29,7 @@ jobs:
           pip install ruff
           pip install ijson
           pip install trio
-          pip install "git+https://github.com/njbooher/steam.git@wsproto#egg=steam[client]"
+          pip install "steam[client]"
       - name: Lint with Shellcheck
         run: |
           shellcheck winetricks
