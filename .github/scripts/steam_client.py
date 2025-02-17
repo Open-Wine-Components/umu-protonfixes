@@ -6,15 +6,12 @@ from steam.core.msg import MsgProto
 from steam.enums import EResult
 from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_to_dict
-from steam.core.connection import WebsocketConnection
-
 
 class Steam:  # noqa: D101
     def __init__(self) -> None:  # noqa: D107
         self.logged_on_once = False
 
         self.steam = client = SteamClient()
-        client.connection = WebsocketConnection()
 
         @client.on('error')
         def handle_error(result: EResult) -> None:
