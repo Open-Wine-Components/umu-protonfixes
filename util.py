@@ -222,7 +222,7 @@ def check_internet() -> bool:
             sock.settimeout(5)
             sock.connect(('1.1.1.1', 53))
         return True
-    except (TimeoutError, OSError):
+    except (TimeoutError, OSError, PermissionError):
         return False
 
 
