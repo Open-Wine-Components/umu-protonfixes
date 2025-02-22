@@ -1007,7 +1007,7 @@ def import_saves_folder(
                 # Looking for lines of the format
                 # \t\t"path"\t\t"(the path)"
                 if '"path"' in i:
-                    paths.append(i[11:-1])
+                    paths.append(i[11:-2])
     except FileNotFoundError:
         log.info("Could not find Steam's libraryfolders.vdf file.")
         return False
@@ -1075,9 +1075,9 @@ def get_steam_account_id() -> str:
     """Returns your 17-digit Steam account ID"""
     # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
     with open(f'{os.environ["STEAM_BASE_FOLDER"]}/config/loginusers.vdf') as f:
-        lastFoundId = None
+        lastFoundId = "None"
         for i in f.readlines():
-            if len(i) > 1 and i[2:-1].isdigit():
-                lastFoundId = i[2:-1]
-            elif i == f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"':
+            if len(i) > 1 and i[2:-2].isdigit():
+                lastFoundId = i[2:-2]
+            elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
                 return lastFoundId
