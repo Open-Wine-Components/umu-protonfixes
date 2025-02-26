@@ -1,8 +1,12 @@
-"""Game fix for Café Stella and the Reaper's Butterflies"""
-
+""" Game fix for Cafe Stella
+"""
 from protonfixes import util
 
+def main():
+    """Install quartz, wmp11, qasf
 
-def main() -> None:
-    """Fixes in-game video playback for the intro and ending."""
-    util.disable_protonmediaconverter()
+    Fixes in-game video playback for the intro and ending.
+    """
+    util.protontricks('quartz')
+    util.protontricks('wmp11')
+    util.protontricks('qasf')
