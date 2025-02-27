@@ -1,3 +1,5 @@
+"""Fixes in-game media playback."""
+
 from protonfixes import util
 
 
