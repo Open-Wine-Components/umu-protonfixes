@@ -1,4 +1,4 @@
-""" Game fix for Sanoba Witch FHD Edition
+""" Game fix for Senren＊Banka
 """
 from protonfixes import util
 
