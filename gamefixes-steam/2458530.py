@@ -1,8 +1,8 @@
-""" Game fix for Sanoba Witch FHD Edition
-"""
+"""Game fix for Sanoba Witch FHD Edition"""
+
 from protonfixes import util
 
-def main():
+def main() -> None:
     """Install quartz, wmp11, qasf
 
     Fixes in-game video playback for the intro and ending.
