@@ -61,7 +61,7 @@ def get_game_name() -> str:
                     if len(row) > 3 and row[3] == umu_id and row[1] == store:
                         title = row[0]  # Title is the first entry
                         with open(
-                            os.path.join(script_dir, 'game_title'),
+                            os.path.join(pfx, 'game_title'),
                             'w',
                             encoding='utf-8',
                         ) as file:
