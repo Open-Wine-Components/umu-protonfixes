@@ -40,15 +40,10 @@ def get_game_id() -> str:
 
 @lru_cache
 def get_game_name() -> str:
-    """Trys to return the game name from environment variables"""
-    pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
+    """Tries to return the game name from environment variables"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     if os.environ.get('UMU_ID'):
-        if os.path.isfile(f'{pfx}/game_title'):
-            with open(f'{pfx}/game_title', encoding='utf-8') as file:
-                return file.readline()
-
         umu_id = os.environ['UMU_ID']
         store = os.getenv('STORE', 'none')
         csv_file_path = os.path.join(script_dir, 'umu-database.csv')
@@ -60,12 +55,6 @@ def get_game_name() -> str:
                     # Check if the row has enough columns and matches both UMU_ID and STORE
                     if len(row) > 3 and row[3] == umu_id and row[1] == store:
                         title = row[0]  # Title is the first entry
-                        with open(
-                            os.path.join(pfx, 'game_title'),
-                            'w',
-                            encoding='utf-8',
-                        ) as file:
-                            file.write(title)
                         return title
         except FileNotFoundError:
             log.warn(f'CSV file not found: {csv_file_path}')
