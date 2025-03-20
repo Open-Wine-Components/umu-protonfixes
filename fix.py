@@ -55,18 +55,16 @@ def get_game_name() -> str:
 
         try:
             with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
-                csvreader = csv.reader(csvfile)
+                csvreader = csv.DictReader(csvfile)  # Reads CSV as a dictionary per row
                 for row in csvreader:
-                    # Check if the row has enough columns and matches both UMU_ID and STORE
-                    if len(row) > 3 and row[3] == umu_id and row[1] == store:
-                        title = row[0]  # Title is the first entry
+                    if row["UMU_ID"] == umu_id and row["STORE"] == store:
                         with open(
-                            os.path.join(pfx, 'game_title'),
-                            'w',
-                            encoding='utf-8',
+                                os.path.join(pfx, 'game_title'),
+                                'w',
+                                encoding='utf-8',
                         ) as file:
-                            file.write(title)
-                        return title
+                            file.write(row["TITLE"])
+                        return row["TITLE"]
         except FileNotFoundError:
             log.warn(f'CSV file not found: {csv_file_path}')
         except Exception as ex:
