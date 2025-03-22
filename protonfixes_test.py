@@ -401,5 +401,27 @@ class TestProtonfixes(unittest.TestCase):
         result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
         self.assertEqual(result, 'Red Dead Redemption 2')
 
+    def testGetTitleNameNoEntry(self):
+        """Pass a game id with no database entry
+
+        Expects the string 'UNKNOWN' when STORE is falsey, unset or valid
+        when reading the CSV file
+        """
+        os.environ['WINEPREFIX'] = self.pfx.as_posix()
+        os.environ['STORE'] = ''
+        os.environ["UMU_ID"] = 'umu-default'
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        self.assertEqual(result, 'UNKNOWN')
+
+        # STORE is unset
+        os.environ.pop('STORE')
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        self.assertEqual(result, 'UNKNOWN')
+
+        # STORE is valid
+        os.environ['STORE'] = 'gog'
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        self.assertEqual(result, 'UNKNOWN')
+
 if __name__ == '__main__':
     unittest.main()
