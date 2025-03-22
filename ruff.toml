@@ -54,11 +54,15 @@ select = [
     "FLY",
     # Simplify and update syntax to our target Python version
     "UP",
-    "D"
+    "D",
+    # Check for invalid assignments to os.environ
+    "B003",
+    # Check for shallow copies of os.environ
+    "PLW1507",
+    # Check for invalid types for environment variables
+    "PLW1508"
 ]
 ignore = [
-    # Requiring a type for self is deprecated
-    "ANN101",
     # Ignore starting with 'This'
     "D404",
     # Ignore imperative mood
