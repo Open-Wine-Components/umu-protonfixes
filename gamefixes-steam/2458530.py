@@ -2,6 +2,7 @@
 
 from protonfixes import util
 
+
 def main() -> None:
     """Install quartz, wmp11, qasf
 

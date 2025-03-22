@@ -1075,7 +1075,7 @@ def get_steam_account_id() -> str:
     """Returns your 17-digit Steam account ID"""
     # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
     with open(f'{os.environ["STEAM_BASE_FOLDER"]}/config/loginusers.vdf') as f:
-        lastFoundId = "None"
+        lastFoundId = 'None'
         for i in f.readlines():
             if len(i) > 1 and i[2:-2].isdigit():
                 lastFoundId = i[2:-2]
