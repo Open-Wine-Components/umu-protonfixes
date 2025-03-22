@@ -38,42 +38,45 @@ def get_game_id() -> str:
     return None
 
 
+def get_game_title(pfx: str, database: str) -> str:
+    """Get the game name from the local umu database"""
+    umu_id = os.environ['UMU_ID']
+    store = os.environ.get('STORE') or 'none'
+    title = 'UNKNOWN'
+
+    try:
+        with open(database, newline='', encoding='utf-8') as csvfile:
+            csvreader = csv.reader(csvfile)
+            for row in csvreader:
+                # Check if the row has enough columns and matches both UMU_ID and STORE
+                if len(row) > 3 and row[3] == umu_id and row[1] == store:
+                    with open(
+                        os.path.join(pfx, 'game_title'), 'w', encoding='utf-8'
+                    ) as file:
+                        file.write(row[0])
+                    title = row[0]
+                    break
+    except FileNotFoundError:
+        log.warn(f'CSV file not found: {database}')
+    except Exception as ex:
+        log.debug(f'Error reading CSV file: {ex}')
+
+    log.warn('Game title not found in CSV')
+
+    return title
+
+
 @lru_cache
 def get_game_name() -> str:
     """Trys to return the game name from environment variables"""
     pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
-    script_dir = os.path.dirname(os.path.abspath(__file__))
 
     if os.environ.get('UMU_ID'):
         if os.path.isfile(f'{pfx}/game_title'):
             with open(f'{pfx}/game_title', encoding='utf-8') as file:
                 return file.readline()
-
-        umu_id = os.environ['UMU_ID']
-        store = os.getenv('STORE', 'none')
-        csv_file_path = os.path.join(script_dir, 'umu-database.csv')
-
-        try:
-            with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
-                csvreader = csv.reader(csvfile)
-                for row in csvreader:
-                    # Check if the row has enough columns and matches both UMU_ID and STORE
-                    if len(row) > 3 and row[3] == umu_id and row[1] == store:
-                        title = row[0]  # Title is the first entry
-                        with open(
-                            os.path.join(pfx, 'game_title'),
-                            'w',
-                            encoding='utf-8',
-                        ) as file:
-                            file.write(title)
-                        return title
-        except FileNotFoundError:
-            log.warn(f'CSV file not found: {csv_file_path}')
-        except Exception as ex:
-            log.debug(f'Error reading CSV file: {ex}')
-
-        log.warn('Game title not found in CSV')
-        return 'UNKNOWN'
+        database = f'{os.path.dirname(os.path.abspath(__file__))}/umu-database.csv'
+        return get_game_title(pfx, database)
 
     try:
         log.debug('UMU_ID is not in environment')

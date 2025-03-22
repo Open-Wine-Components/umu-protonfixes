@@ -20,6 +20,14 @@ class TestProtonfixes(unittest.TestCase):
         }
         self.game_id = '1293820'
         self.pfx = Path(tempfile.mkdtemp())
+        self.db = Path(tempfile.mktemp())
+        self.db_data = (
+            "TITLE,STORE,CODENAME,UMU_ID,COMMON ACRONYM (Optional),NOTE (Optional)\n"
+            "Age of Wonders,gog,1207658883,umu-61500,aow,\n"
+            "Age of Wonders,humble,ageofwonders,umu-61500,aow,\n"
+            "Red Dead Redemption 2,none,none,umu-1174180,rdr2,Standalone Rockstar installer"
+        )
+        self.db.write_text(self.db_data, encoding="utf-8")
 
     def tearDown(self):
         for key in self.env:
@@ -33,6 +41,8 @@ class TestProtonfixes(unittest.TestCase):
                 self.pfx.joinpath('steamapps').rmdir()
             self.pfx.joinpath('game_title').unlink(missing_ok=True)
             self.pfx.rmdir()
+        Path(self.db).unlink(missing_ok=True)
+
 
     def testModuleName(self):
         """Pass a non-numeric game id
@@ -372,6 +382,45 @@ class TestProtonfixes(unittest.TestCase):
         os.makedirs(steamapps, exist_ok=True)
         func = fix.get_game_name.__wrapped__  # Do not reference the cache
         result = func()
+        self.assertEqual(result, 'UNKNOWN')
+
+    def testGetTitleNameNoStore(self):
+        """Pass a valid game id with a database entry but with no store
+
+        Expects a string that refers to the game's title when STORE is falsey
+        or unset when reading the CSV file
+        """
+        os.environ['WINEPREFIX'] = self.pfx.as_posix()
+        os.environ['STORE'] = ''
+        os.environ["UMU_ID"] = 'umu-1174180'
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        self.assertEqual(result, 'Red Dead Redemption 2')
+
+        # STORE is unset
+        os.environ.pop('STORE')
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        self.assertEqual(result, 'Red Dead Redemption 2')
+
+    def testGetTitleNameNoEntry(self):
+        """Pass a game id with no database entry
+
+        Expects the string 'UNKNOWN' when STORE is falsey, unset or valid
+        when reading the CSV file
+        """
+        os.environ['WINEPREFIX'] = self.pfx.as_posix()
+        os.environ['STORE'] = ''
+        os.environ["UMU_ID"] = 'umu-default'
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        self.assertEqual(result, 'UNKNOWN')
+
+        # STORE is unset
+        os.environ.pop('STORE')
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        self.assertEqual(result, 'UNKNOWN')
+
+        # STORE is valid
+        os.environ['STORE'] = 'gog'
+        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
 
 if __name__ == '__main__':
