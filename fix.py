@@ -50,7 +50,7 @@ def get_game_name() -> str:
                 return file.readline()
 
         umu_id = os.environ['UMU_ID']
-        store = os.getenv('STORE', 'none')
+        store = os.getenv('STORE') or 'none'
         csv_file_path = os.path.join(script_dir, 'umu-database.csv')
 
         try:
