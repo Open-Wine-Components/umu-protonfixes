@@ -61,7 +61,8 @@ def get_game_title(pfx: str, database: str) -> str:
     except Exception as ex:
         log.debug(f'Error reading CSV file: {ex}')
 
-    log.warn('Game title not found in CSV')
+    if title=='UNKNOWN':
+        log.warn('Game title not found in CSV')
 
     return title
 
