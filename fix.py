@@ -54,15 +54,13 @@ def get_game_title(pfx: str, database: str) -> str:
                         os.path.join(pfx, 'game_title'), 'w', encoding='utf-8'
                     ) as file:
                         file.write(row[0])
-                    title = row[0]
-                    break
+                    return row[0]
     except FileNotFoundError:
         log.warn(f'CSV file not found: {database}')
     except Exception as ex:
         log.debug(f'Error reading CSV file: {ex}')
 
-    if title=='UNKNOWN':
-        log.warn('Game title not found in CSV')
+    log.warn('Game title not found in CSV')
 
     return title
 
