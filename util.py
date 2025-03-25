@@ -1017,7 +1017,7 @@ def import_saves_folder(
             # The user's folder in the prefix location for from_appid
             prefix = Path(
                 f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c/users/steamuser/{relative_path}'
-            )
+            ).resolve()
             if not prefix.exists():
                 # Better to just abort than create a broken symlink
                 log.info(
@@ -1032,7 +1032,7 @@ def import_saves_folder(
         )
         return False
     # Create the symlink
-    goal = Path(f'{protonprefix()}/drive_c/users/steamuser/{relative_path}')
+    goal = Path(f'{protonprefix()}/drive_c/users/steamuser/{relative_path}').resolve()
     # The goal is where we intend to create the symlink
     if not goal.exists():
         # Create the necessary parent folders if needed
