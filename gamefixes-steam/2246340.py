@@ -5,7 +5,7 @@ from protonfixes import util
 
 
 def main() -> None:
-    """imports Monster Hunter: World save from remote steam cloud folder. We need to get steam cloud ID, not steamID, which is only reported as folder name in local"""
+    """Imports Monster Hunter: World save from remote steam cloud folder. We need to get steam cloud ID, not steamID, which is only reported as folder name in local"""
     #get all remote IDs to anticipate for multi accounts
     listRemoteID = [name for name in os.listdir(f'{os.environ["STEAM_BASE_FOLDER"]}/userdata')]
     
