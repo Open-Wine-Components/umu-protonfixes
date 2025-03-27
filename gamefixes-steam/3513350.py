@@ -10,8 +10,6 @@ def main() -> None:
        This disables Proton mfplat at the cost
        of in-game experience for now.
     """
-    util.disable_protonmediaconverter()
-    util.winedll_override('winegstreamer', '')
     util.winedll_override('mfplat', 'd')
     """In-game browser fix.
     """
