@@ -28,7 +28,7 @@ class Log:
         reset = self.colors['RESET']
         logtext = pfx + str(msg) + os.linesep
         fulltext = color + pfx + str(msg) + reset + os.linesep
-        sys.stderr.write(fulltext)
+        sys.stderr.write(fulltext if os.isatty(sys.stderr.fileno()) else logtext)
         sys.stderr.flush()
         with open('/tmp/protonfixes_test.log', 'a', 1, encoding='utf-8') as testfile:
             testfile.write(logtext)
