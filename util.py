@@ -410,14 +410,22 @@ def get_game_install_path() -> str:
     return install_path
 
 
-def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
-    """Add WINE dll override"""
-    log.info(f'Overriding {dll}.dll = {dtype}')
-    setting = f'{dll}={dtype}'
+def winepe_override(target: str, filetype: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+    """Add WINE file override"""
+    log.info(f'Overriding {target}.{filetype} = {dtype}')
+    target_file = target if filetype == "dll" else f'{target}.{filetype}'
+    setting = f'{target_file}={dtype}'
     protonmain.append_to_env_str(
         protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';'
     )
 
+def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+    """Add WINE dll override"""
+    winefile_override(target=dll, filetype="dll", dtype=dtype)
+
+def wineexe_override(exe: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+    """Add WINE executable override"""
+    winefile_override(target=exe, filetype="exe", dtype=dtype)
 
 def patch_libcuda() -> bool:
     """Patches libcuda to work around games that crash when initializing libcuda and are using DLSS.
