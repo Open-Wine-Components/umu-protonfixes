@@ -421,11 +421,11 @@ def winepe_override(target: str, filetype: str, dtype: Literal['n', 'b', 'n,b', 
 
 def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
     """Add WINE dll override"""
-    winefile_override(target=dll, filetype="dll", dtype=dtype)
+    winepe_override(target=dll, filetype="dll", dtype=dtype)
 
 def wineexe_override(exe: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
     """Add WINE executable override"""
-    winefile_override(target=exe, filetype="exe", dtype=dtype)
+    winepe_override(target=exe, filetype="exe", dtype=dtype)
 
 def patch_libcuda() -> bool:
     """Patches libcuda to work around games that crash when initializing libcuda and are using DLSS.
