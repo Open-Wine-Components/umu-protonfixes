@@ -17,7 +17,7 @@ except ImportError:
     from logger import log
 
 try:
-    import __main__ as protonmain
+    import __main__ as protonmain  # noqa F401
 except ImportError:
     log.warn('Unable to hook into Proton main script environment')
 
@@ -38,7 +38,7 @@ def get_game_id() -> str:
     return None
 
 
-def get_game_title(pfx: str, database: str) -> str:
+def get_game_title(database: str) -> str:
     """Get the game name from the local umu database"""
     umu_id = os.environ['UMU_ID']
     store = os.environ.get('STORE') or 'none'
@@ -50,10 +50,6 @@ def get_game_title(pfx: str, database: str) -> str:
             for row in csvreader:
                 # Check if the row has enough columns and matches both UMU_ID and STORE
                 if len(row) > 3 and row[3] == umu_id and row[1] == store:
-                    with open(
-                        os.path.join(pfx, 'game_title'), 'w', encoding='utf-8'
-                    ) as file:
-                        file.write(row[0])
                     return row[0]
     except FileNotFoundError:
         log.warn(f'CSV file not found: {database}')
@@ -67,15 +63,10 @@ def get_game_title(pfx: str, database: str) -> str:
 
 @lru_cache
 def get_game_name() -> str:
-    """Trys to return the game name from environment variables"""
-    pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
-
+    """Tries to return the game name from environment variables"""
     if os.environ.get('UMU_ID'):
-        if os.path.isfile(f'{pfx}/game_title'):
-            with open(f'{pfx}/game_title', encoding='utf-8') as file:
-                return file.readline()
         database = f'{os.path.dirname(os.path.abspath(__file__))}/umu-database.csv'
-        return get_game_title(pfx, database)
+        return get_game_title(database)
 
     try:
         log.debug('UMU_ID is not in environment')

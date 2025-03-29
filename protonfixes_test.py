@@ -286,23 +286,6 @@ class TestProtonfixes(unittest.TestCase):
         result = fix.get_store_name(store)
         self.assertFalse(result, 'Expected None')
 
-    def testGetGameName(self):
-        """Set UMU_ID and access the game_title file for its title
-
-        The get_game_name function returns a string of the running game's
-        title.
-
-        It checks a few system paths in the user's system to try to
-        determine it, and makes a callout to an owc endpoint to get an
-        official title by its UMU_ID.
-        """
-        os.environ['UMU_ID'] = self.game_id
-        os.environ['WINEPREFIX'] = self.pfx.as_posix()
-        self.pfx.joinpath('game_title').touch()
-        func = fix.get_game_name.__wrapped__  # Do not reference the cache
-        result = func()
-        self.assertFalse(result, 'Expected an empty string')
-
     def testGetGameNameDB(self):
         """Set UMU_ID and access umu database"""
         os.environ['UMU_ID'] = 'umu-35140'
@@ -393,12 +376,12 @@ class TestProtonfixes(unittest.TestCase):
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
         os.environ['STORE'] = ''
         os.environ["UMU_ID"] = 'umu-1174180'
-        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'Red Dead Redemption 2')
 
         # STORE is unset
         os.environ.pop('STORE')
-        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'Red Dead Redemption 2')
 
     def testGetTitleNameNoEntry(self):
@@ -410,17 +393,17 @@ class TestProtonfixes(unittest.TestCase):
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
         os.environ['STORE'] = ''
         os.environ["UMU_ID"] = 'umu-default'
-        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
 
         # STORE is unset
         os.environ.pop('STORE')
-        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
 
         # STORE is valid
         os.environ['STORE'] = 'gog'
-        result = fix.get_game_title(self.pfx.as_posix(), self.db.as_posix())
+        result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
 
 if __name__ == '__main__':
