@@ -11,6 +11,5 @@ def main() -> None:
    of in-game experience for now.
    """
    util.winedll_override('mfplat', 'd')
-   """In-game browser fix.
-   """
+   """In-game browser fix."""
    util.wineexe_override('KRSDKExternal', 'd')
