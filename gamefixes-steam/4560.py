@@ -1,4 +1,4 @@
-u"""Game fix for Transformers: War for Cybertron"""
+"""Game fix for Transformers: War for Cybertron"""
 
 
 from protonfixes import util
