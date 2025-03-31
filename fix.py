@@ -8,9 +8,14 @@ import csv
 from functools import lru_cache
 from importlib import import_module
 
-from . import config
-from .checks import run_checks
-from .logger import log
+try:
+    from .config import config
+    from .checks import run_checks
+    from .logger import log
+except ImportError:
+    from config import config
+    from checks import run_checks
+    from logger import log
 
 try:
     import __main__ as protonmain  # noqa F401
@@ -164,15 +169,15 @@ def run_fix(game_id: str) -> None:
     if game_id is None:
         return
 
-    if config.enable_checks:
+    if config.main.enable_checks:
         run_checks()
 
     # execute default.py (local)
-    if not _run_fix_local(game_id, True) and config.enable_global_fixes:
+    if not _run_fix_local(game_id, True) and config.main.enable_global_fixes:
         _run_fix(game_id, True)  # global
 
     # execute <game_id>.py (local)
-    if not _run_fix_local(game_id, False) and config.enable_global_fixes:
+    if not _run_fix_local(game_id, False) and config.main.enable_global_fixes:
         _run_fix(game_id, False)  # global
 
 
