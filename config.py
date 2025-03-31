@@ -1,8 +1,9 @@
 """Load configuration settings for protonfixes"""
 
-from .config_base import ConfigBase
 from dataclasses import dataclass
 from pathlib import Path
+
+from .config_base import ConfigBase
 
 
 class Config(ConfigBase):
