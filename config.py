@@ -4,12 +4,14 @@ from .config_base import ConfigBase
 from dataclasses import dataclass
 from pathlib import Path
 
+
 class Config(ConfigBase):
     """Configuration for umu-protonfix"""
 
     @dataclass
     class MainSection:
         """General parameters
+
         Attributes:
             enable_checks (bool): Run checks (`checks.py`) before the fix is executed.
             enable_global_fixes (bool): Enables included fixes. If deactivated, only local fixes (`~/.config/protonfixes/localfixes`) are executed.
@@ -32,5 +34,6 @@ class Config(ConfigBase):
 
     main: MainSection
     path: PathSection
+
 
 config = Config(Path.home() / '.config/protonfixes/config.ini')
