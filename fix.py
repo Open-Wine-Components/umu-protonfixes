@@ -13,9 +13,9 @@ try:
     from .checks import run_checks
     from .logger import log
 except ImportError:
-    from config import config
-    from checks import run_checks
-    from logger import log
+    from .config import config
+    from .checks import run_checks
+    from .logger import log
 
 try:
     import __main__ as protonmain  # noqa F401
