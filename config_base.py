@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from collections.abc import Callable
 
-from .logger import log
+from .logger import log, LogLevel
 
 
 class ConfigBase:
@@ -38,7 +38,7 @@ class ConfigBase:
         return cls.__CAMEL_CASE_PATTERN.sub(r'_\1', input).lower()
 
     @staticmethod
-    def __log(message: str, level: str = 'INFO') -> None:
+    def __log(message: str, level: LogLevel = LogLevel.INFO) -> None:
         log.log(f'[CONFIG]: {message}', level)
 
     def __init__(self, path: Path) -> None:
@@ -138,7 +138,7 @@ class ConfigBase:
                         value = parser_items.get
                         self.__log(
                             f'Unknown type "{type_name}", falling back to "str".',
-                            'WARN',
+                            LogLevel.WARN
                         )
                     return value
 
@@ -151,7 +151,8 @@ class ConfigBase:
                     setattr(section, option_name, value)
         except Exception as ex:
             self.__log(
-                f'Failed to parse config file "{file}". Exception: "{ex}"', 'CRIT'
+                f'Failed to parse config file "{file}". Exception: "{ex}"',
+                LogLevel.CRIT
             )
             return False
         return True
@@ -169,7 +170,8 @@ class ConfigBase:
         # Only precede if the parent directory exists
         if not file.parent.is_dir():
             self.__log(
-                f'Parent directory "{file.parent}" does not exist. Abort.', 'WARN'
+                f'Parent directory "{file.parent}" does not exist. Abort.',
+                LogLevel.WARN
             )
             return False
 
@@ -189,7 +191,8 @@ class ConfigBase:
                 parser.write(stream)
         except Exception as ex:
             self.__log(
-                f'Failed to create config file "{file}". Exception: "{ex}"', 'CRIT'
+                f'Failed to create config file "{file}". Exception: "{ex}"',
+                LogLevel.CRIT
             )
             return False
         return True

@@ -595,7 +595,7 @@ def patch_libcuda() -> bool:
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
         protonmain.g_session.env['LD_LIBRARY_PATH'] = (
-            f'{os.path.dirname(patched_library)}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
+            f'{patched_library.parent}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
         )
 
         return True
@@ -1157,16 +1157,17 @@ def import_saves_folder(
         return False
 
 
-def get_steam_account_id() -> str:
+def get_steam_account_id() -> Optional[str]:
     """Returns your 17-digit Steam account ID"""
     # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
     with open(f'{os.environ["STEAM_BASE_FOLDER"]}/config/loginusers.vdf') as f:
-        lastFoundId = 'None'
+        lastFoundId = None
         for i in f.readlines():
             if len(i) > 1 and i[2:-2].isdigit():
                 lastFoundId = i[2:-2]
             elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
                 return lastFoundId
+    return None
 
 
 def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
