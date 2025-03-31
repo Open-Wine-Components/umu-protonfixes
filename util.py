@@ -22,9 +22,9 @@ try:
     from .config import config
     from .steamhelper import install_app
 except ImportError:
-    from logger import log
-    from config import config
-    from steamhelper import install_app
+    from .logger import log
+    from .config import config
+    from .steamhelper import install_app
 
 try:
     import __main__ as protonmain
