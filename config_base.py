@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from collections.abc import Callable
 
-from logger import log
+from .logger import log
 
 class ConfigBase:
     """Base class for configuration objects.
