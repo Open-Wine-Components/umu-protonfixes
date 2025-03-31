@@ -556,7 +556,7 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        set_environment('LD_PRELOAD', patched_library)
+        set_environment('LD_PRELOAD', patched_library.absolute().as_posix())
         return True
 
     except Exception as e:
@@ -628,7 +628,7 @@ def disable_uplay_overlay() -> bool:
         log.info('Disabled UPlay overlay')
         return True
     except OSError as err:
-        log.warn('Could not disable UPlay overlay: ' + err.strerror)
+        log.warn(f'Could not disable UPlay overlay: {err.strerror}')
 
     return False
 
@@ -1109,13 +1109,14 @@ def import_saves_folder(
         return False
 
 
-def get_steam_account_id() -> str:
+def get_steam_account_id() -> Optional[str]:
     """Returns your 17-digit Steam account ID"""
     # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
     with open(f'{os.environ["STEAM_BASE_FOLDER"]}/config/loginusers.vdf') as f:
-        lastFoundId = 'None'
+        lastFoundId = None
         for i in f.readlines():
             if len(i) > 1 and i[2:-2].isdigit():
                 lastFoundId = i[2:-2]
             elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
                 return lastFoundId
+    return None
