@@ -1,8 +1,6 @@
-import io
 import os
 import tempfile
 import unittest
-import urllib.request
 
 from pathlib import Path
 from unittest.mock import patch, mock_open

@@ -12,11 +12,6 @@ from .config import config
 from .checks import run_checks
 from .logger import log
 
-try:
-    import __main__ as protonmain  # noqa F401
-except ImportError:
-    log.warn('Unable to hook into Proton main script environment')
-
 
 @lru_cache
 def get_game_id() -> str:
