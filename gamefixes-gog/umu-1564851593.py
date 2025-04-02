@@ -36,23 +36,17 @@ def main() -> None:
         )
         return
 
-    config = open(path_config, mode='rb')
-    dll = open(path_dll, mode='rb')
-
     # Check if the text injection framework files have already been replaced
-    if (
-        sha256(config.read()).hexdigest() == hashsum_config
-        and sha256(dll.read()).hexdigest() == hashsum_d3d9
-    ):
-        log.info(
-            "Fix for 'Flowers - Le Volume Sur Hiver' has already been applied, skipping..."
-        )
-        config.close()
-        dll.close()
-        return
-
-    config.close()
-    dll.close()
+    with open(path_config, mode='rb') as config:
+        with open(path_dll, mode='rb') as dll:
+            if (
+                sha256(config.read()).hexdigest() == hashsum_config
+                and sha256(dll.read()).hexdigest() == hashsum_d3d9
+            ):
+                log.info(
+                    "Fix for 'Flowers - Le Volume Sur Hiver' already been applied, skipping..."
+                )
+                return
 
     # Download the archive
     with urlopen(arc, timeout=30) as resp:
