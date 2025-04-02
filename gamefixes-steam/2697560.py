@@ -7,6 +7,7 @@ def main() -> None:
     """Install xact, disable esync, disable fsync"""
     # Fixes the game from crashing or hanging during intro
     util.protontricks('xact')
+    util.protontricks('xaudio29')
     util.disable_esync()
     util.disable_fsync()
     # Fixes audio not playing for in-game videos
