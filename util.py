@@ -12,6 +12,7 @@ import subprocess
 import urllib.request
 import functools
 
+from enum import Enum
 from pathlib import Path
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -29,6 +30,24 @@ try:
 except ImportError:
     log.crit('Unable to hook into Proton main script environment')
     exit()
+
+
+# Enums
+class DosDevice(Enum):
+    """Enum for dos device types (mounted at 'prefix/dosdevices/')
+
+    Attributes:
+        NETWORK: A network device (UNC)
+        FLOPPY: A floppy drive
+        CD_ROM: A CD ROM drive
+        HD: A hard disk drive
+
+    """
+
+    NETWORK = 'network'
+    FLOPPY = 'floppy'
+    CD_ROM = 'cdrom'
+    HD = 'hd'
 
 
 # Helper classes
@@ -1095,3 +1114,28 @@ def get_steam_account_id() -> str:
                 lastFoundId = i[2:-2]
             elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
                 return lastFoundId
+
+
+def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
+    """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
+
+    Args:
+        letter (str, optional): Letter that the device gets assigned to, must be len = 1
+        dev_type (DosDevice, optional): The device's type which will be registered to wine
+
+    Returns:
+        bool: True, if device was created
+
+    """
+    assert len(letter) == 1
+
+    dosdevice = protonprefix() / f'dosdevices/{letter}:'
+    if dosdevice.exists():
+        return False
+
+    # Create a symlink in dosdevices
+    dosdevice.symlink_to('/tmp', True)
+
+    # designate device as CD-ROM, requires 64-bit access
+    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type.value, True)
+    return True

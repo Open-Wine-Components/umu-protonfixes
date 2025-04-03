@@ -12,12 +12,9 @@ from protonfixes import util
 
 
 def main() -> None:
-    dosdevice = os.path.join(util.protonprefix(), 'dosdevices/r:')
-    if not os.path.exists(dosdevice):
-        os.symlink('/tmp', dosdevice)  # create symlink for dosdevices
-        util.regedit_add(
-            'HKLM\\Software\\Wine\\Drives', 'r:', 'REG_SZ', 'cdrom', True
-        )  # designate drive as CD-ROM, requires 64-bit access
+    # Create a symlink in dosdevices
+    util.create_dos_device()
+
     util.protontricks('quartz')
     util.protontricks('amstream')
 
@@ -30,7 +27,7 @@ def main() -> None:
     # Everything after this call should only be executed once
     if not util.protontricks('dgvoodoo2'):
         return
-    
+
     # Get width of resolution
     screen_width, screen_height = util.get_resolution()
     width = int(screen_width / screen_height * 768 // 1)

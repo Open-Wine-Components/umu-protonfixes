@@ -1,14 +1,11 @@
 """Game fix for Putt-Putt: Pep's Birthday Surprise"""
 
-import os
 from protonfixes import util
 
 
 def main() -> None:
     """The game doesn't run unless there is a CD-ROM drive attached."""
-    dosdevice = os.path.join(util.protonprefix(), 'dosdevices/r:')
-    if not os.path.exists(dosdevice):
-        os.symlink('/tmp', dosdevice)  # create symlink for dosdevices
+    util.create_dos_device()
 
     # sets up ID? exported from regedit
     util.regedit_add(
@@ -24,9 +21,4 @@ def main() -> None:
         '\\DosDevices\\R:',
         'REG_BINARY',
         '5c005c002e005c0064003a000000',
-    )
-
-    # designate drive as CD-ROM, requires 64-bit access
-    util.regedit_add(
-        'HKLM\\Software\\Wine\\Drives', 'r:', 'REG_SZ', 'cdrom', True
     )
