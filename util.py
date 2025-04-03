@@ -147,7 +147,7 @@ def _forceinstalled(verb: str) -> None:
     """Records verb into the winetricks.log.forced file"""
     forced_log = os.path.join(protonprefix(), 'winetricks.log.forced')
     with open(forced_log, 'a', encoding='ascii') as forcedlog:
-        forcedlog.write(verb + '\n')
+        forcedlog.write(f'{verb}\n')
 
 
 def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
@@ -185,7 +185,7 @@ def checkinstalled(verb: str) -> bool:
     if verb == 'gui':
         return False
 
-    log.info(f'Checking if winetricks {verb} is installed')
+    log.info(f'Checking if winetricks "{verb}" is installed')
     if _checkinstalled(verb, 'winetricks.log.forced'):
         return True
     return _checkinstalled(verb)
@@ -202,13 +202,13 @@ def is_custom_verb(verb: str) -> Union[bool, str]:
     # check local custom verbs
     verbpath = os.path.expanduser('~/.config/protonfixes/localfixes/' + verb_dir)
     if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using local custom winetricks verb from: ' + verbpath)
+        log.debug(f'Using local custom winetricks verb from: {verbpath}')
         return os.path.join(verbpath, verb_name)
 
     # check custom verbs
     verbpath = os.path.join(os.path.dirname(__file__), verb_dir)
     if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using custom winetricks verb from: ' + verbpath)
+        log.debug(f'Using custom winetricks verb from: {verbpath}')
         return os.path.join(verbpath, verb_name)
 
     return False
@@ -258,7 +258,7 @@ def protontricks(verb: str) -> bool:
             log.warn('No winetricks was found in $PATH')
 
         if winetricks_bin is not None:
-            log.debug('Using winetricks command: ' + str(winetricks_cmd))
+            log.debug(f'Using winetricks command: {winetricks_cmd}')
 
             # make sure proton waits for winetricks to finish
             for idx, arg in enumerate(sys.argv):
@@ -266,7 +266,7 @@ def protontricks(verb: str) -> bool:
                     sys.argv[idx] = arg.replace('run', 'waitforexitandrun')
                     log.debug(str(sys.argv))
 
-            log.info('Using winetricks verb ' + verb)
+            log.info(f'Using winetricks verb "{verb}"')
             subprocess.call([env['WINESERVER'], '-w'], env=env)
             with subprocess.Popen(winetricks_cmd, env=env) as process:
                 process.wait()
@@ -583,7 +583,7 @@ def disable_uplay_overlay() -> bool:
         log.info('Disabled UPlay overlay')
         return True
     except OSError as err:
-        log.warn('Could not disable UPlay overlay: ' + err.strerror)
+        log.warn(f'Could not disable UPlay overlay: {err.strerror}')
 
     return False
 
@@ -665,7 +665,7 @@ def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
         log.debug('Found config file: ' + cfg_path)
         return cfg_path
 
-    log.warn('Config file not found: ' + cfg_path)
+    log.warn(f'Config file not found: {cfg_path}')
     return None
 
 
@@ -695,7 +695,7 @@ def set_ini_options(
 
     conf.read(cfg_path, encoding)
 
-    log.info(f'Addinging INI options into {cfile}:\n{str(ini_opts)}')
+    log.info(f'Addinging INI options into "{cfile}":\n{ini_opts}')
     conf.read_string(ini_opts)
 
     with open(cfg_path, 'w', encoding=encoding) as configfile:
@@ -797,7 +797,7 @@ def set_dxvk_option(
         log.debug(f'{conf.items(section)}')
 
     # set option
-    log.info('Addinging DXVK option: ' + str(opt) + ' = ' + str(val))
+    log.info(f'Addinging DXVK option: "{opt}" = "{val}"')
     conf.set(section, opt, str(val))
 
     with open(cfile, 'w', encoding='ascii') as configfile:
@@ -833,7 +833,7 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
 def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     """Install a file from a downloaded zip"""
     if filename in os.listdir(path):
-        log.info(f'File {filename} found in {path}')
+        log.info(f'File "{filename}" found in "{path}"')
         return
 
     config.path.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -842,11 +842,11 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     zip_file_path = config.path.cache_dir / zip_file_name
 
     if not zip_file_path.is_file():
-        log.info(f'Downloading {filename} to {zip_file_path}')
+        log.info(f'Downloading "{filename}" to "{zip_file_path}"')
         urllib.request.urlretrieve(url, zip_file_path)
 
     with zipfile.ZipFile(zip_file_path, 'r') as zip_obj:
-        log.info(f'Extracting {filename} to {path}')
+        log.info(f'Extracting "{filename}" to "{path}"')
         zip_obj.extract(filename, path=path)
 
 
