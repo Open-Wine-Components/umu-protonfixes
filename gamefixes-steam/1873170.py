@@ -1,5 +1,5 @@
 """Cease to Breathe
-Replace included nwjs(0.71) wich doesn't work with 0.86
+Replace included nwjs (0.71) - which doesn't work - with 0.86
 Fix cursor hitbox (set frame=false in package.json)
 Updated from 0.85 that didn't display custom cursors.
 """

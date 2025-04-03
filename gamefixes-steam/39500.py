@@ -1,4 +1,4 @@
-"""Game fix for Gothic 3"""
+"""Game fix for Gothic 3 (and Forsaken Gods Enhanced Edition)"""
 
 import os
 from protonfixes import util

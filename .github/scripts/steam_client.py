@@ -7,9 +7,16 @@ from steam.enums import EResult
 from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_to_dict
 
+class Steam:
+    """Minimal implementation of the SteamClient package that allows app id validation"""
 
-class Steam:  # noqa: D101
-    def __init__(self) -> None:  # noqa: D107
+    def __init__(self) -> None:
+        """Setup SteamClient and it's events
+
+        Raises:
+            ValueError: When the SteamClient fires it's "error" event
+
+        """
         self.logged_on_once = False
 
         self.steam = client = SteamClient()
@@ -40,12 +47,19 @@ class Steam:  # noqa: D101
 
         client.anonymous_login()
 
+
     def get_valid_appids(self, appids: set[int]) -> set[int]:
         """Queries Steam for the specified appids.
 
-        If an appid doesn't exist, it won't be in the response.
+        Args:
+            appids (set[int]): The app ids that should be validated
 
-        Raises a ValueError if Steam returns unexpected data
+        Raises:
+            ValueError: When the response is empty / unexpected
+
+        Returns:
+            set[int]: Only valid app ids will be returned
+
         """
         # https://github.com/SteamRE/SteamKit/blob/master/SteamKit2/SteamKit2/Base/Generated/SteamMsgClientServerAppInfo.cs#L331
         resp = self.steam.send_job_and_wait(

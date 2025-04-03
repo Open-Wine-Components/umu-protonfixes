@@ -773,6 +773,8 @@ def set_dxvk_option(
     """
     conf = configparser.ConfigParser()
     conf.optionxform = str
+
+    # FIXME: Python 3.13 implements `allow_unnamed_section=True`
     section = conf.default_section
     dxvk_conf = os.path.join(os.environ['PWD'], 'dxvk.conf')
 
@@ -959,15 +961,10 @@ def set_game_drive(enabled: bool) -> None:
     This function modifies the `compat_config` to include or exclude
     the "gamedrive" option based on the `enabled` parameter.
 
-    Parameters
-    ----------
-    enabled : bool
-        If True, add "gamedrive" to `compat_config`.
-        If False, remove "gamedrive" from `compat_config`.
-
-    Returns
-    -------
-    None
+    Args:
+        enabled (bool):
+            If True, add "gamedrive" to `compat_config`.
+            If False, remove "gamedrive" from `compat_config`.
 
     """
     if enabled:
