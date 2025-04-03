@@ -12,7 +12,9 @@ import subprocess
 import urllib.request
 import functools
 
+from pathlib import Path
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from io import TextIOWrapper
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Literal, Any, Callable, Union
@@ -38,6 +40,48 @@ class ReplaceType:
     to_value: str
 
 
+class ProtonVersion:
+    """Parses the proton version and build timestamp"""
+
+    @classmethod
+    # FIXME: use "Self" as return type with 3.11 and newer
+    def from_version_file(cls) -> "ProtonVersion":
+        """Returns the version of proton"""
+        fullpath = protondir() / 'version'
+        try:
+            version_string = fullpath.read_text(encoding='ascii')
+            return cls(version_string)
+        except OSError:
+            log.warn(f'Proton version file not found in: {fullpath}')
+            return cls('0 Unknown')
+
+
+    def __init__(self, version_string: str) -> None:
+        """Initialize from a given version string"""
+        # Example string '1722141596 GE-Proton9-10-18-g3763cd3a\n'
+        parts = version_string.split()
+        if len(parts) != 2 or not parts[0].isnumeric():
+            log.crit(f'Version string "{version_string}" is invalid!')
+            return
+        self.build_date: datetime = datetime.fromtimestamp(int(parts[0]), tz=timezone.utc)
+        self.version_name: str = parts[1]
+
+
+
+# Functions
+@functools.lru_cache
+def protondir() -> Path:
+    """Returns the path to proton"""
+    return Path(sys.argv[0]).parent
+
+
+@functools.lru_cache
+def protonprefix() -> Path:
+    """Returns wineprefix's path used by proton"""
+    return Path(os.environ.get('STEAM_COMPAT_DATA_PATH', '')) / 'pfx'
+
+
+@functools.lru_cache
 def which(appname: str) -> Union[str, None]:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
@@ -46,47 +90,6 @@ def which(appname: str) -> Union[str, None]:
             return fullpath
     log.warn(f'{appname} not found in $PATH')
     return None
-
-
-def protondir() -> str:
-    """Returns the path to proton"""
-    proton_dir = os.path.dirname(sys.argv[0])
-    return proton_dir
-
-
-def protonprefix() -> str:
-    """Returns the wineprefix used by proton"""
-    return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
-
-
-def protonnameversion() -> Union[str, None]:
-    """Returns the version of proton from sys.argv[0]"""
-    version = re.search('Proton ([0-9]*\\.[0-9]*)', sys.argv[0])
-    if version:
-        return version.group(1)
-    log.warn('Proton version not parsed from command line')
-    return None
-
-
-def protontimeversion() -> int:
-    """Returns the version timestamp of proton from the `version` file"""
-    fullpath = os.path.join(protondir(), 'version')
-    try:
-        with open(fullpath, encoding='ascii') as version:
-            for timestamp in version.readlines():
-                return int(timestamp.strip())
-    except OSError:
-        log.warn('Proton version file not found in: ' + fullpath)
-        return 0
-    log.warn('Proton version not parsed from file: ' + fullpath)
-    return 0
-
-
-def protonversion(timestamp: bool = False) -> Union[str, None, int]:
-    """Returns the version of proton"""
-    if timestamp:
-        return protontimeversion()
-    return protonnameversion()
 
 
 def once(
@@ -247,7 +250,7 @@ def protontricks(verb: str) -> bool:
 
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
-        env['WINEPREFIX'] = protonprefix()
+        env['WINEPREFIX'] = str(protonprefix())
         env['WINE'] = protonmain.g_proton.wine_bin
         env['WINELOADER'] = protonmain.g_proton.wine_bin
         env['WINESERVER'] = protonmain.g_proton.wineserver_bin
@@ -308,7 +311,7 @@ def regedit_add(
 ) -> None:
     """Add regedit keys"""
     env = dict(protonmain.g_session.env)
-    env['WINEPREFIX'] = protonprefix()
+    env['WINEPREFIX'] = str(protonprefix())
     env['WINE'] = protonmain.g_proton.wine_bin
     env['WINELOADER'] = protonmain.g_proton.wine_bin
     env['WINESERVER'] = protonmain.g_proton.wineserver_bin
@@ -521,7 +524,7 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        set_environment('LD_PRELOAD', patched_library)
+        set_environment('LD_PRELOAD', str(patched_library))
         return True
 
     except Exception as e:
