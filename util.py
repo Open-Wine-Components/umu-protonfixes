@@ -12,6 +12,7 @@ import subprocess
 import urllib.request
 import functools
 
+from dataclasses import dataclass
 from io import TextIOWrapper
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Literal, Any, Callable, Union
@@ -28,13 +29,22 @@ except ImportError:
     exit()
 
 
+# Helper classes
+@dataclass
+class ReplaceType:
+    """Used for replacements"""
+
+    from_value: str
+    to_value: str
+
+
 def which(appname: str) -> Union[str, None]:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
         if os.path.exists(fullpath) and os.access(fullpath, os.X_OK):
             return fullpath
-    log.warn(str(appname) + 'not found in $PATH')
+    log.warn(f'{appname} not found in $PATH')
     return None
 
 
