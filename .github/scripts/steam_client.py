@@ -21,27 +21,28 @@ class Steam:
 
         self.steam = client = SteamClient()
 
-        @client.on('error')
+        # FIXME: pyright outputs 'error: Object of type "None" cannot be called (reportOptionalCall)'
+        @client.on(SteamClient.EVENT_ERROR) # pyright: ignore (reportOptionalCall)
         def handle_error(result: EResult) -> None:
             raise ValueError(f'Steam error: {repr(result)}')
 
-        @client.on('connected')
+        @client.on(SteamClient.EVENT_CONNECTED) # pyright: ignore (reportOptionalCall)
         def handle_connected() -> None:
             print(f'Connected to {client.current_server_addr}', file=sys.stderr)
 
-        @client.on('channel_secured')
+        @client.on(SteamClient.EVENT_CHANNEL_SECURED) # pyright: ignore (reportOptionalCall)
         def send_login() -> None:
             if self.logged_on_once and self.steam.relogin_available:
                 self.steam.relogin()
 
-        @client.on('disconnected')
+        @client.on(SteamClient.EVENT_DISCONNECTED) # pyright: ignore (reportOptionalCall)
         def handle_disconnect() -> None:
             print('Steam disconnected', file=sys.stderr)
             if self.logged_on_once:
                 print('Reconnecting...', file=sys.stderr)
                 client.reconnect(maxdelay=30)
 
-        @client.on('logged_on')
+        @client.on(SteamClient.EVENT_LOGGED_ON) # pyright: ignore (reportOptionalCall)
         def handle_after_logon() -> None:
             self.logged_on_once = True
 
