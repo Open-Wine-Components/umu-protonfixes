@@ -701,12 +701,13 @@ def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
     return None
 
 
-def create_backup_config(cfg_path: str) -> None:
+def create_backup_config(cfg_path: str) -> bool:
     """Create backup config file"""
-    # Backup
     if not os.path.exists(cfg_path + '.protonfixes.bak'):
         log.info('Creating backup for config file')
         shutil.copyfile(cfg_path, cfg_path + '.protonfixes.bak')
+        return True
+    return False
 
 
 def set_ini_options(
@@ -717,7 +718,9 @@ def set_ini_options(
     if not cfg_path:
         return False
 
-    create_backup_config(cfg_path)
+    # Check if backup already exists
+    if not create_backup_config(cfg_path):
+        return False
 
     # set options
     conf = configparser.ConfigParser(
@@ -743,7 +746,9 @@ def set_xml_options(
     if not xml_path:
         return False
 
-    create_backup_config(xml_path)
+    # Check if backup already exists
+    if not create_backup_config(xml_path):
+        return False
 
     # set options
 
