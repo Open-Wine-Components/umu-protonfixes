@@ -106,5 +106,39 @@ libmspack-install: libmspack-dist
 	rm -r $(INSTALL_DIR)/usr
 	rm    $(INSTALL_DIR)/libmspack.la
 
+#
+# unzip
+#
+
+DEB_HOST_GNU_TYPE := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+CC = $(DEB_HOST_GNU_TYPE)-gcc
+CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
+LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
+CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+DEFINES = -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT \
+ -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD \
+ -DDATE_FORMAT=DF_YMD -DUSE_BZIP2 -DIZ_HAVE_UXUIDGID -DNOMEMCPY \
+ -DNO_WORKING_ISPRINT
+
+$(OBJDIR)/.build-unzip-dist: | $(OBJDIR)
+	$(info :: Building unzip )
+	cd subprojects/unzip && \
+	dpkg-source --before-build . && \
+	export DEB_BUILD_MAINT_OPTIONS=hardening=-format && \
+	make -f unix/Makefile prefix=/usr D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 CC="$(CC) -Wall" LF2="$(LDFLAGS)" CF="$(CFLAGS) $(CPPFLAGS) -I. $(DEFINES)" unzips
+	touch $(@)
+
+.PHONY: unzip-dist
+
+unzip-dist: $(OBJDIR)/.build-unzip-dist
+
+unzip-install: unzip-dist
+	$(info :: Installing unzip )
+	cd subprojects/unzip && \
+	make -f unix/Makefile prefix=$(INSTALL_DIR) install
+	# Post install
+	cp -a $(INSTALL_DIR)/bin/unzip $(INSTALL_DIR)
+	rm -r $(INSTALL_DIR)/bin $(INSTALL_DIR)/man
+
 $(OBJDIR):
 	@mkdir -p $(@)
