@@ -13,3 +13,6 @@
 [submodule "subprojects/umu-database"]
         path = subprojects/umu-database
         url = https://github.com/Open-Wine-Components/umu-database
+[submodule "subprojects/unzip"]
+	path = subprojects/unzip
+	url = https://salsa.debian.org/sanvila/unzip.git
