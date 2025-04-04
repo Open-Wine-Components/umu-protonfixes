@@ -6,11 +6,11 @@ INSTALL_DIR ?= $(shell pwd)/dist/protonfixes
 
 .PHONY: all
 
-all: xrandr-dist cabextract-dist libmspack-dist
+all: xrandr-dist cabextract-dist libmspack-dist unzip-dist
 
 .PHONY: install
 
-install: protonfixes-install xrandr-install cabextract-install libmspack-install
+install: protonfixes-install xrandr-install cabextract-install libmspack-install unzip-install
 
 #
 # protonfixes
