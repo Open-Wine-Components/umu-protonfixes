@@ -15,10 +15,12 @@ def check_conditions() -> bool:
         bool: True, if the fix should be executed.
 
     """
-    return len(sys.argv) >= 1 and \
-        'STEAM_COMPAT_DATA_PATH' in os.environ and \
-        'PROTONFIXES_DISABLE' not in os.environ and \
-        'waitforexitandrun' in sys.argv[1]
+    return (
+        len(sys.argv) >= 1
+        and 'STEAM_COMPAT_DATA_PATH' in os.environ
+        and 'PROTONFIXES_DISABLE' not in os.environ
+        and 'waitforexitandrun' in sys.argv[1]
+    )
 
 
 def check_iscriptevaluator() -> bool:
@@ -28,8 +30,7 @@ def check_iscriptevaluator() -> bool:
         bool: True, if we were invoked while running "iscriptevaluator.exe".
 
     """
-    return len(sys.argv) >= 3 and \
-        'iscriptevaluator.exe' in sys.argv[2]
+    return len(sys.argv) >= 3 and 'iscriptevaluator.exe' in sys.argv[2]
 
 
 if check_iscriptevaluator():
