@@ -124,7 +124,6 @@ $(OBJDIR)/.build-unzip-dist: | $(OBJDIR)
 	$(info :: Building unzip )
 	cd subprojects/unzip && \
 	dpkg-source --before-build . && \
-	export DEB_BUILD_MAINT_OPTIONS=hardening=-format && \
 	make -f unix/Makefile prefix=/usr D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 CC="$(CC) -Wall" LF2="$(LDFLAGS)" CF="$(CFLAGS) $(CPPFLAGS) -I. $(DEFINES)" unzips
 	touch $(@)
 
