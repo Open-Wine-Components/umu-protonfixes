@@ -10,6 +10,7 @@ all: xrandr-dist cabextract-dist libmspack-dist unzip-dist
 
 .PHONY: install
 
+# Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
 install: protonfixes-install xrandr-install cabextract-install libmspack-install unzip-install
 
 #
