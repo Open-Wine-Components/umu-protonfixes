@@ -6,6 +6,7 @@ from steam.core.msg import MsgProto
 from steam.enums import EResult
 from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_to_dict
+from typing import Any
 
 
 class Steam:  # noqa: D101
@@ -61,7 +62,6 @@ class Steam:  # noqa: D101
             err = 'Error retrieving appinfo from Steam'
             raise ValueError(err)
 
-        data = proto_to_dict(resp)
-        appids = {app['appid'] for app in data['apps']}
+        apps: dict[str, Any] = proto_to_dict(resp).get('apps') or dict()
 
-        return appids
+        return {app['appid'] for app in apps}
