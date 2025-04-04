@@ -20,4 +20,5 @@ jobs:
           fetch-depth: 0
       - name: Build umu-protonfixes
         run: |
+          export DEB_BUILD_MAINT_OPTIONS=hardening=-format
           make
