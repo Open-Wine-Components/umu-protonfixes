@@ -8,8 +8,8 @@ def main() -> None:
     """Change setting FSAA to 0 in graphics.config"""
     config = (
         util.protonprefix()
-        + 'drive_c/users/steamuser/Local Settings/'
-        + 'Application Data/Crashday/config/graphics.config'
+        / 'drive_c/users/steamuser/Local Settings/'
+        / 'Application Data/Crashday/config/graphics.config'
     )
 
     # https://stackoverflow.com/a/45435707

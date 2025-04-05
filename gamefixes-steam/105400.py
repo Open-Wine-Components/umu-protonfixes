@@ -23,4 +23,4 @@ def main() -> None:
     if os.path.exists(dirpath):
         shutil.rmtree(dirpath)
     else:
-        log(f"Path '{dirpath}' could not be found")
+        log.info(f"Path '{dirpath}' could not be found")
