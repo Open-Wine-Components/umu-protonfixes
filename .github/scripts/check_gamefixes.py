@@ -124,13 +124,13 @@ def _batch_generator(gamefix: Path, size: int = 50) -> Generator[set[str], Any, 
         if is_steam and not appid.isnumeric():
             continue
 
+        count += 1
         appids.add(appid)
         if count == size:
             yield appids
             appids.clear()
             count = 0
             continue
-        count += 1
 
     yield appids
 
