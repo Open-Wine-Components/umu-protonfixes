@@ -12,4 +12,4 @@ def main() -> None:
     FpS.Max=0
     """
 
-    util.set_ini_options(game_opts, os.path.join('Ini', 'ge3.ini'), 'cp1251', 'game')
+    util.set_ini_options(game_opts, os.path.join('Ini', 'ge3.ini'), 'cp1251')
