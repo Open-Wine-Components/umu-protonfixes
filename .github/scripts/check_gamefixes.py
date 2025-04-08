@@ -35,8 +35,11 @@ def check_steamfixes(project: Path) -> None:
     invalid_appids = set()
 
     for appids in _batch_generator(project.joinpath('gamefixes-steam'), 50):
-        appids = {int(x) for x in appids}
+        # If no more ids are produced by the generator, stop processing.
+        if not appids:
+            continue
 
+        appids = {int(x) for x in appids}
         steam_appids = steam.get_valid_appids(appids)
 
         # If an ID doesn't exist in the Steam result then it's invalid
@@ -58,6 +61,10 @@ def check_gogfixes(project: Path, url: str, api: ApiEndpoint) -> None:
     # Find all IDs in batches of 50. The gog api enforces 50 ids per request
     # See https://gogapidocs.readthedocs.io/en/latest/galaxy.html#get--products
     for gogids in _batch_generator(project.joinpath('gamefixes-gog')):
+        # If no more ids are produced by the generator, stop processing.
+        if not gogids:
+            continue
+
         sep = '%2C'  # Required comma separator character. See the docs.
         appids = gogids.copy()
 
@@ -124,13 +131,13 @@ def _batch_generator(gamefix: Path, size: int = 50) -> Generator[set[str], Any, 
         if is_steam and not appid.isnumeric():
             continue
 
+        count += 1
         appids.add(appid)
         if count == size:
             yield appids
             appids.clear()
             count = 0
             continue
-        count += 1
 
     yield appids
 
