@@ -13,4 +13,4 @@ def main() -> None:
     try:
         Path(save_dir).mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        log(f"Not able to make the settings directory at '{save_dir}': {e}")
+        log.warn(f"Not able to make the settings directory at '{save_dir}': {e}")
