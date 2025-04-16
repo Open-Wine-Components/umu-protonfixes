@@ -9,9 +9,11 @@ import time
 from Xlib.X import LASTEvent
 from Xlib.display import Display
 from Xlib.ext import xinput
+from Xlib.protocol.request import GetProperty
+from Xlib.xobject.drawable import Window
 
 
-def is_window_focused(dpy, window):
+def is_window_focused(dpy: Display, window: Window) -> bool:
     """Returns True if the given window is currently focused (active)."""
     root = dpy.screen().root
     net_active_window = dpy.get_atom('_NET_ACTIVE_WINDOW')
@@ -21,7 +23,7 @@ def is_window_focused(dpy, window):
     return prop.value[0] == window.id
 
 
-def get_window_name(dpy, win):
+def get_window_name(dpy: Display, win: Window) -> GetProperty | None:
     """Retrieve the window name using WM_NAME or _NET_WM_NAME."""
     name = win.get_wm_name()
     if name:
@@ -32,7 +34,9 @@ def get_window_name(dpy, win):
     return None
 
 
-def find_window_by_title(dpy, title, win=None):
+def find_window_by_title(
+    dpy: Display, title: str, win: Display | None = None
+) -> Window | None:
     """Recursively find a window with a title containing the given string."""
     if win is None:
         win = dpy.screen().root
@@ -46,7 +50,7 @@ def find_window_by_title(dpy, title, win=None):
     return None
 
 
-def get_game_window(dpy, title):
+def get_game_window(dpy: Display, title: str) -> Window | None:
     game_window = None
     while game_window is None:
         game_window = find_window_by_title(dpy, title)
@@ -55,7 +59,7 @@ def get_game_window(dpy, title):
     return game_window
 
 
-def main():
+def main() -> None:
     """Disable libglesv2"""
     ## gpu acelleration on wined3d https://bugs.winehq.org/show_bug.cgi?id=44985
     # Make the store work.
