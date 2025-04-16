@@ -10,6 +10,7 @@ from Xlib.display import Display
 from Xlib.ext import xinput
 from Xlib.protocol.request import GetProperty
 from Xlib.xobject.drawable import Window
+from typing import Union
 
 
 def is_window_focused(dpy: Display, window: Window) -> bool:
@@ -22,7 +23,7 @@ def is_window_focused(dpy: Display, window: Window) -> bool:
     return prop.value[0] == window.id
 
 
-def get_window_name(dpy: Display, win: Window) -> GetProperty | None:
+def get_window_name(dpy: Display, win: Window) -> Union[GetProperty, None]:
     """Retrieve the window name using WM_NAME or _NET_WM_NAME."""
     name = win.get_wm_name()
     if name:
@@ -34,8 +35,8 @@ def get_window_name(dpy: Display, win: Window) -> GetProperty | None:
 
 
 def find_window_by_title(
-    dpy: Display, title: str, win: Display | None = None
-) -> Window | None:
+    dpy: Display, title: str, win: Union[Display, None] = None
+) -> Union[Window, None]:
     """Recursively find a window with a title containing the given string."""
     if win is None:
         win = dpy.screen().root
@@ -49,7 +50,7 @@ def find_window_by_title(
     return None
 
 
-def get_game_window(dpy: Display, title: str) -> Window | None:
+def get_game_window(dpy: Display, title: str) -> Union[Window, None]:
     game_window = None
     while game_window is None:
         game_window = find_window_by_title(dpy, title)
