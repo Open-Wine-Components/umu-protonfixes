@@ -4,7 +4,6 @@
 from protonfixes import util
 
 import struct
-import sys
 import time
 from Xlib.X import LASTEvent
 from Xlib.display import Display
