@@ -16,7 +16,7 @@ def check_conditions() -> bool:
 
     """
     return (
-        len(sys.argv) >= 1
+        len(sys.argv) >= 2
         and 'STEAM_COMPAT_DATA_PATH' in os.environ
         and 'PROTONFIXES_DISABLE' not in os.environ
         and 'waitforexitandrun' in sys.argv[1]
