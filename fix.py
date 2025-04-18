@@ -7,6 +7,7 @@ import csv
 
 from functools import lru_cache
 from importlib import import_module
+from typing import Optional
 
 from .config import config
 from .checks import run_checks
@@ -26,7 +27,7 @@ def get_game_id() -> str:
         return re.findall(r'\d+', os.environ['STEAM_COMPAT_DATA_PATH'])[-1]
 
     log.crit('Game ID not found in environment variables')
-    return None
+    exit()
 
 
 def get_game_title(database: str) -> str:
@@ -75,7 +76,7 @@ def get_game_name() -> str:
     return 'UNKNOWN'
 
 
-def get_store_name(store: str) -> str:
+def get_store_name(store: str) -> Optional[str]:
     """Mapping for store identifier to store name"""
     return {
         'amazon': 'Amazon',
@@ -97,7 +98,7 @@ def get_module_name(game_id: str, default: bool = False, local: bool = False) ->
     if game_id.isnumeric():
         store = 'steam'
     elif os.environ.get('STORE'):
-        store = os.environ.get('STORE').lower()
+        store = os.environ.get('STORE', '').lower()
 
     if store != 'steam':
         log.info(f'Non-steam game {get_game_name()} ({game_id})')
