@@ -157,7 +157,7 @@ def main() -> None:
                      env=env)
 
 
-def main_background():
+def main_background() -> None:
     mouse_fix('The Lord of the Rings Online')
 
 
