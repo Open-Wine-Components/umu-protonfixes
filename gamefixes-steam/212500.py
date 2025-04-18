@@ -1,4 +1,5 @@
 """Game fix The Lord of the Rings Online"""
+import fcntl
 import os
 import subprocess
 import sys
@@ -71,7 +72,14 @@ def mouse_fix(title: str) -> None:
     # Check if there is a display
     if not os.getenv("DISPLAY", None):
         raise RuntimeError('No display detected')
-
+    display_id = os.getenv("DISPLAY")
+    lockfile_path = f"/tmp/mouse_fix_display_lock_{display_id.replace(':', '_')}"
+    try:
+        lockfile = open(lockfile_path, "w")
+        fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except IOError:
+        print(f"Another instance is already running on display {display_id}.")
+        return
     dpy = Display()
     # Check if the XInput extension is available
     if not dpy.query_extension('XInputExtension'):
