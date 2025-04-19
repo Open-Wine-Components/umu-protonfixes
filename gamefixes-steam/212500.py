@@ -41,7 +41,7 @@ def find_window_by_title(
     if win is None:
         win = dpy.screen().root
     name = get_window_name(dpy, win)
-    if name and title in name:
+    if name and title == name:
         return win
     for child in win.query_tree().children:
         found = find_window_by_title(dpy, title, child)
@@ -140,7 +140,7 @@ def main() -> None:
     from protonfixes import util
 
     """Disable libglesv2"""
-    ## gpu acelleration on wined3d https://bugs.winehq.org/show_bug.cgi?id=44985
+    ## gpu acceleration on wined3d https://bugs.winehq.org/show_bug.cgi?id=44985
     # Make the store work.
     util.winedll_override('libglesv2', 'd')
 
@@ -160,7 +160,7 @@ def main() -> None:
 
 
 def main_background() -> None:
-    mouse_fix('The Lord of the Rings Online')
+    mouse_fix('The Lord of the Rings Online™')
 
 
 # triggered when this file is started as a subprocess
