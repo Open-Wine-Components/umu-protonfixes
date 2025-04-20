@@ -7,6 +7,10 @@ import traceback
 from . import fix
 from .logger import log
 
+sys.path.insert(
+    0,
+    f"{os.path.dirname(os.path.realpath(__file__))}/_vendor",  # noqa: PTH120
+)
 
 def check_conditions() -> bool:
     """Determine, if the actual game was executed and protonfixes isn't deactivated.
