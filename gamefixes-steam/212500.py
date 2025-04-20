@@ -6,6 +6,7 @@ import subprocess
 import sys
 import os
 
+
 def _mouse_fix_subprocess() -> None:
     # this will only be imported in the temporary script
     import struct
@@ -28,7 +29,6 @@ def _mouse_fix_subprocess() -> None:
             return False
         return prop.value[0] == window.id
 
-
     def get_window_name(dpy: Display, win: Window) -> Union[GetProperty, None]:
         """Retrieve the window name using WM_NAME or _NET_WM_NAME."""
         name = win.get_wm_name()
@@ -39,9 +39,8 @@ def _mouse_fix_subprocess() -> None:
             return net_name.value.decode('utf-8')
         return None
 
-
     def find_window_by_title(
-            dpy: Display, title: str, win: Union[Display, None] = None
+        dpy: Display, title: str, win: Union[Display, None] = None
     ) -> Union[Window, None]:
         """Recursively find a window with a title containing the given string."""
         if win is None:
@@ -54,7 +53,6 @@ def _mouse_fix_subprocess() -> None:
             if found:
                 return found
         return None
-
 
     def get_game_window(dpy: Display, title: str) -> Union[Window, None]:
         game_window = None
@@ -71,16 +69,15 @@ def _mouse_fix_subprocess() -> None:
                     exit()
         return game_window
 
-
     def mouse_fix(title: str) -> None:
         # Check if there is a display
-        if not os.getenv("DISPLAY", None):
+        if not os.getenv('DISPLAY', None):
             raise RuntimeError('No display detected')
-        display_id = os.getenv("DISPLAY")
+        display_id = os.getenv('DISPLAY')
         # Prevent running 2 instances at once of the mouse fix
-        lockfile_path = f"/tmp/mouse_fix_display_lock_{display_id.replace(':', '_')}"
+        lockfile_path = f'/tmp/mouse_fix_display_lock_{display_id.replace(":", "_")}'
         try:
-            lockfile = open(lockfile_path, "w")
+            lockfile = open(lockfile_path, 'w')
             fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError:
             return
@@ -91,7 +88,11 @@ def _mouse_fix_subprocess() -> None:
 
         # Initialize the XInput extension
         xinput_version = xinput.query_version(dpy)
-        print('XInput version:', xinput_version.major_version, xinput_version.minor_version)
+        print(
+            'XInput version:',
+            xinput_version.major_version,
+            xinput_version.minor_version,
+        )
         # Wait for the game window to appear
         print(f"Waiting for window with title containing '{title}'...")
         game_window = get_game_window(dpy, title)
@@ -129,7 +130,10 @@ def _mouse_fix_subprocess() -> None:
                         # get the new game window when we move from launcher to actual game window, they have the same name
                         try:
                             geometry = game_window.get_geometry()
-                            if hasattr(geometry, 'data') and geometry.data.get('height', 0) == 553:
+                            if (
+                                hasattr(geometry, 'data')
+                                and geometry.data.get('height', 0) == 553
+                            ):
                                 game_window = get_game_window(dpy, title)
                                 continue
                         except XError:
@@ -146,7 +150,9 @@ def _mouse_fix_subprocess() -> None:
                         dpy.screen().root.xfixes_show_cursor()
                         dpy.sync()
                 continue
+
     mouse_fix('The Lord of the Rings Online™')
+
 
 def create_temp_script() -> str:
     source = inspect.getsource(_mouse_fix_subprocess)
@@ -159,12 +165,13 @@ if __name__ == "__main__":
     os.remove(__file__)
     sys.exit(_mouse_fix_subprocess())
     """
-    temp_file_name = "lotro_mouse_fix.py"
+    temp_file_name = 'lotro_mouse_fix.py'
     script_path = os.path.join(sys.path[0], temp_file_name)
 
-    with open(script_path, "w") as f:
+    with open(script_path, 'w') as f:
         f.write(script)
     return script_path
+
 
 def main() -> None:
     """Disable libglesv2"""
@@ -179,4 +186,9 @@ def main() -> None:
     temp_script = create_temp_script()
     env = os.environ.copy()
     env['PYTHONPATH'] = sys.path[0]
-    subprocess.Popen([python_executable, temp_script],close_fds=True,stderr=subprocess.DEVNULL,env=env)
+    subprocess.Popen(
+        [python_executable, temp_script],
+        close_fds=True,
+        stderr=subprocess.DEVNULL,
+        env=env,
+    )
