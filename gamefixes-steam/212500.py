@@ -1,12 +1,12 @@
 """Game fix The Lord of the Rings Online"""
 
 from protonfixes import util
-import inspect
 import subprocess
 import sys
-import os
+from tempfile import mkstemp
+import __main__ as protonmain
 
-
+source = """
 def _mouse_fix_subprocess() -> None:
     # this will only be imported in the temporary script
     import struct
@@ -21,7 +21,7 @@ def _mouse_fix_subprocess() -> None:
     from typing import Union
 
     def is_window_focused(dpy: Display, window: Window) -> bool:
-        """Returns True if the given window is currently focused (active)."""
+        '''Returns True if the given window is currently focused (active).'''
         root = dpy.screen().root
         net_active_window = dpy.get_atom('_NET_ACTIVE_WINDOW')
         prop = root.get_full_property(net_active_window, 0)
@@ -30,7 +30,7 @@ def _mouse_fix_subprocess() -> None:
         return prop.value[0] == window.id
 
     def get_window_name(dpy: Display, win: Window) -> Union[GetProperty, None]:
-        """Retrieve the window name using WM_NAME or _NET_WM_NAME."""
+        '''Retrieve the window name using WM_NAME or _NET_WM_NAME.'''
         name = win.get_wm_name()
         if name:
             return name
@@ -42,7 +42,7 @@ def _mouse_fix_subprocess() -> None:
     def find_window_by_title(
         dpy: Display, title: str, win: Union[Display, None] = None
     ) -> Union[Window, None]:
-        """Recursively find a window with a title containing the given string."""
+        '''Recursively find a window with a title containing the given string.'''
         if win is None:
             win = dpy.screen().root
         name = get_window_name(dpy, win)
@@ -92,11 +92,12 @@ def _mouse_fix_subprocess() -> None:
             'XInput version:',
             xinput_version.major_version,
             xinput_version.minor_version,
+            file=sys.stderr
         )
         # Wait for the game window to appear
-        print(f"Waiting for window with title containing '{title}'...")
+        print(f"Waiting for window with title containing '{title}'...", file=sys.stderr)
         game_window = get_game_window(dpy, title)
-        print(f'Found game window: {get_window_name(dpy, game_window)}')
+        print(f'Found game window: {get_window_name(dpy, game_window)}', file=sys.stderr)
         # detect button press and button release events
         dpy.screen().root.xinput_select_events(
             [
@@ -152,25 +153,16 @@ def _mouse_fix_subprocess() -> None:
                 continue
 
     mouse_fix('The Lord of the Rings Online™')
+"""
 
-
-def create_temp_script() -> str:
-    source = inspect.getsource(_mouse_fix_subprocess)
-    script = f"""
+script = f"""
 import os
 import sys
 {source}
 
 if __name__ == "__main__":
-    os.remove(__file__)
     sys.exit(_mouse_fix_subprocess())
     """
-    temp_file_name = 'lotro_mouse_fix.py'
-    script_path = os.path.join(sys.path[0], temp_file_name)
-
-    with open(script_path, 'w') as f:
-        f.write(script)
-    return script_path
 
 
 def main() -> None:
@@ -182,13 +174,11 @@ def main() -> None:
     # This needs to run as a subprocess while the game is running,
     # the proces will close itself when the game window isn't detected for 30 seconds
     util.log.info('Applying mouse fix')
-    python_executable = sys.executable
-    temp_script = create_temp_script()
-    env = os.environ.copy()
-    env['PYTHONPATH'] = sys.path[0]
+    _, tmp = mkstemp(suffix='.py', text=True)
+    with open(tmp, mode='w', encoding='utf-8') as f:
+        f.write(script)
+    env = protonmain.g_session.env.copy()
+    env['PYTHONPATH'] = ':'.join(sys.path)
     subprocess.Popen(
-        [python_executable, temp_script],
-        close_fds=True,
-        stderr=subprocess.DEVNULL,
-        env=env,
+        [sys.executable, tmp], close_fds=True, stderr=subprocess.DEVNULL, env=env
     )
