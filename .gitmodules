@@ -16,3 +16,6 @@
 [submodule "subprojects/unzip"]
 	path = subprojects/unzip
 	url = https://salsa.debian.org/sanvila/unzip.git
+[submodule "subprojects/python-xlib"]
+	path = subprojects/python-xlib
+	url = https://salsa.debian.org/python-team/packages/python-xlib.git
