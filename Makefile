@@ -6,12 +6,12 @@ INSTALL_DIR ?= $(shell pwd)/dist/protonfixes
 
 .PHONY: all
 
-all: xrandr-dist cabextract-dist libmspack-dist unzip-dist
+all: xrandr-dist cabextract-dist libmspack-dist unzip-dist python-xlib-dist
 
 .PHONY: install
 
 # Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
-install: protonfixes-install xrandr-install cabextract-install libmspack-install unzip-install
+install: protonfixes-install xrandr-install cabextract-install libmspack-install unzip-install python-xlib-install
 
 #
 # protonfixes
@@ -139,6 +139,27 @@ unzip-install: unzip-dist
 	# Post install
 	cp -a $(INSTALL_DIR)/bin/unzip $(INSTALL_DIR)
 	rm -r $(INSTALL_DIR)/bin $(INSTALL_DIR)/man
+
+#
+# python-xlib
+#
+
+$(OBJDIR)/.build-python-xlib-dist: | $(OBJDIR)
+	$(info :: Building python-xlib )
+	cd subprojects/python-xlib && \
+	dpkg-source --before-build . && \
+	dh_auto_build -O--buildsystem=pybuild
+	touch $(@)
+
+.PHONY: python-xlib-dist
+
+python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
+
+python-xlib-install: python-xlib-dist
+	$(info :: Installing python-xlib )
+	mkdir $(INSTALL_DIR)/_vendor && \
+	cd subprojects/python-xlib && \
+	find .pybuild -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
 
 $(OBJDIR):
 	@mkdir -p $(@)
