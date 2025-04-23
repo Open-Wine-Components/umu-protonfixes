@@ -111,21 +111,20 @@ libmspack-install: libmspack-dist
 # unzip
 #
 
-DEB_HOST_GNU_TYPE := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-CC = $(DEB_HOST_GNU_TYPE)-gcc
-CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
-LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
-CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+# Flags are from Proton
+CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
+LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
 DEFINES = -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT \
  -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD \
  -DDATE_FORMAT=DF_YMD -DUSE_BZIP2 -DIZ_HAVE_UXUIDGID -DNOMEMCPY \
  -DNO_WORKING_ISPRINT
+UNZIP_PATCHES := $(shell cat subprojects/unzip/debian/patches/series)
 
 $(OBJDIR)/.build-unzip-dist: | $(OBJDIR)
 	$(info :: Building unzip )
 	cd subprojects/unzip && \
-	dpkg-source --before-build . && \
-	make -f unix/Makefile prefix=/usr D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 CC="$(CC) -Wall" LF2="$(LDFLAGS)" CF="$(CFLAGS) $(CPPFLAGS) -I. $(DEFINES)" unzips
+	$(foreach pch, $(UNZIP_PATCHES),patch -Np1 -i debian/patches/$(pch) &&) \
+	make -f unix/Makefile prefix=/usr D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 LF2="$(LDFLAGS)" CF="$(CFLAGS) -I. $(DEFINES)" unzips
 	touch $(@)
 
 .PHONY: unzip-dist
@@ -147,8 +146,7 @@ unzip-install: unzip-dist
 $(OBJDIR)/.build-python-xlib-dist: | $(OBJDIR)
 	$(info :: Building python-xlib )
 	cd subprojects/python-xlib && \
-	dpkg-source --before-build . && \
-	dh_auto_build -O--buildsystem=pybuild
+	python setup.py build
 	touch $(@)
 
 .PHONY: python-xlib-dist
@@ -158,9 +156,9 @@ python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
 python-xlib-install: python-xlib-dist
 	$(info :: Installing python-xlib )
 	mkdir $(INSTALL_DIR)/_vendor && \
-	cd subprojects/python-xlib && \
-	dh_auto_install -O--buildsystem=pybuild && \
-	find debian/tmp -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
+	cd subprojects/python-xlib && mkdir dist && \
+	python setup.py install --root=dist --optimize=1 --skip-build && \
+	find dist -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
 
 $(OBJDIR):
 	@mkdir -p $(@)
