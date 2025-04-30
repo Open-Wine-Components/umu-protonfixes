@@ -43,7 +43,10 @@ def get_redirect_name(game_id: str) -> Redirect:
         '22370': ('FalloutLauncher.exe', 'fose_loader.exe'),  # Fallout 3
         '377160': ('Fallout4Launcher.exe', 'f4se_loader.exe'),  # Fallout 4
         '22330': ('OblivionLauncher.exe', 'obse_loader.exe'),  # Oblivion
-        '2623190': ('OblivionRemastered.exe', 'OblivionRemastered/Binaries/Win64/obse64_loader.exe'),  # Oblivion Remastered
+        '2623190': (
+            'OblivionRemastered.exe',
+            'OblivionRemastered/Binaries/Win64/obse64_loader.exe',
+        ),  # Oblivion Remastered
         '72850': ('SkyrimLauncher.exe', 'skse_loader.exe'),  # Skyrim
         '489830': ('SkyrimSELauncher.exe', 'skse64_loader.exe'),  # Skyrim SE
         '1716740': ('Starfield.exe', 'sfse_loader.exe'),  # Starfield
