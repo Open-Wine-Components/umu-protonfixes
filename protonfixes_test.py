@@ -288,17 +288,17 @@ class TestProtonfixes(unittest.TestCase):
 
     def testGetGameNameDB(self):
         """Set UMU_ID and access umu database"""
-        os.environ['UMU_ID'] = 'umu-207350'
+        os.environ['UMU_ID'] = 'umu-35140'
         os.environ['STORE'] = 'gog'
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
 
         # Mock CSV content
-        csv_content = """Ys Origin,gog,1422357892,umu-207350,,"""
+        csv_content = """Batman: Arkham Asylum Game of the Year Edition,gog,1482504285,umu-35140,,"""
 
         with patch('builtins.open', mock_open(read_data=csv_content)):
             func = fix.get_game_name.__wrapped__  # Do not reference the cache
             result = func()
-            self.assertEqual(result, 'Ys Origin')
+            self.assertEqual(result, 'Batman: Arkham Asylum Game of the Year Edition')
 
     def testGetGameNameDBFileNotFound(self):
         """Set UMU_ID and simulate FileNotFoundError for the CSV file"""
@@ -330,12 +330,12 @@ class TestProtonfixes(unittest.TestCase):
 
     def testGetGameNameDbIndex(self):
         """Set UMU_ID and simulate IndexError with malformed CSV data"""
-        os.environ['UMU_ID'] = 'umu-207350'
+        os.environ['UMU_ID'] = 'umu-35140'
         os.environ['STORE'] = 'gog'
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
 
         # Mock CSV content with missing columns
-        csv_content = """Ys Origin,gog,1422357892,umu-207350,,"""
+        csv_content = """Batman: Arkham Asylum Game of the Year Edition,gog"""
 
         with patch('builtins.open', mock_open(read_data=csv_content)):
             func = fix.get_game_name.__wrapped__  # Do not reference the cache
