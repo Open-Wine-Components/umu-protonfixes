@@ -335,7 +335,7 @@ class TestProtonfixes(unittest.TestCase):
         os.environ['WINEPREFIX'] = self.pfx.as_posix()
 
         # Mock CSV content with missing columns
-        csv_content = """Ys Origin,gog"""
+        csv_content = """Ys Origin,gog,1422357892,umu-207350,,"""
 
         with patch('builtins.open', mock_open(read_data=csv_content)):
             func = fix.get_game_name.__wrapped__  # Do not reference the cache
