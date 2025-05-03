@@ -143,10 +143,12 @@ unzip-install: unzip-dist
 # python-xlib
 #
 
+PYTHON_XLIB_ARTIFACT_URL := https://salsa.debian.org/python-team/packages/python-xlib/-/jobs/7055382/artifacts/download
+PYTHON_XLIB_DEB := python3-xlib_0.33-3+salsaci+20250208+30_all.deb
+
 $(OBJDIR)/.build-python-xlib-dist: | $(OBJDIR)
 	$(info :: Building python-xlib )
-	cd subprojects/python-xlib && \
-	python setup.py build
+	curl --proto '=https' --tlsv1.2 -LJO $(PYTHON_XLIB_ARTIFACT_URL) --output-dir $(OBJDIR)
 	touch $(@)
 
 .PHONY: python-xlib-dist
@@ -156,9 +158,9 @@ python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
 python-xlib-install: python-xlib-dist
 	$(info :: Installing python-xlib )
 	mkdir $(INSTALL_DIR)/_vendor && \
-	cd subprojects/python-xlib && mkdir dist && \
-	python setup.py install --root=dist --optimize=1 --skip-build && \
-	find dist -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
+	unzip $(OBJDIR)/build_master.zip -d $(OBJDIR) 
+	dpkg-deb -R $(OBJDIR)/debian/output/$(PYTHON_XLIB_DEB) $(OBJDIR)/tmp && \
+	find $(OBJDIR)/tmp -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
 
 $(OBJDIR):
 	@mkdir -p $(@)

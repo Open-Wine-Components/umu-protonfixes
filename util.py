@@ -516,7 +516,9 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        protonmain.g_session.env['LD_LIBRARY_PATH'] = f'{os.path.dirname(patched_library)}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
+        protonmain.g_session.env['LD_LIBRARY_PATH'] = (
+            f'{os.path.dirname(patched_library)}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
+        )
 
         return True
 

@@ -10,7 +10,7 @@ def main() -> None:
     This disables Proton mfplat at the cost
     of in-game experience for now.
     """
-    util.winedll_override('mfplat', 'd')
+    util.winedll_override('mfplat', '')
     """In-game browser fix."""
     util.wineexe_override('KRSDKExternal', 'd')
     """Font fixes for in-game resources, if any."""
