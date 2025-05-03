@@ -6,11 +6,12 @@ INSTALL_DIR ?= $(shell pwd)/dist/protonfixes
 
 .PHONY: all
 
-all: xrandr-dist cabextract-dist libmspack-dist
+all: xrandr-dist cabextract-dist libmspack-dist unzip-dist python-xlib-dist
 
 .PHONY: install
 
-install: protonfixes-install xrandr-install cabextract-install libmspack-install
+# Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
+install: protonfixes-install xrandr-install cabextract-install libmspack-install unzip-install python-xlib-install
 
 #
 # protonfixes
@@ -105,6 +106,61 @@ libmspack-install: libmspack-dist
 	cp -d $(INSTALL_DIR)/usr/lib/libmspack* $(INSTALL_DIR)
 	rm -r $(INSTALL_DIR)/usr
 	rm    $(INSTALL_DIR)/libmspack.la
+
+#
+# unzip
+#
+
+# Flags are from Proton
+CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
+LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
+DEFINES = -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT \
+ -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD \
+ -DDATE_FORMAT=DF_YMD -DUSE_BZIP2 -DIZ_HAVE_UXUIDGID -DNOMEMCPY \
+ -DNO_WORKING_ISPRINT
+UNZIP_PATCHES := $(shell cat subprojects/unzip/debian/patches/series)
+
+$(OBJDIR)/.build-unzip-dist: | $(OBJDIR)
+	$(info :: Building unzip )
+	cd subprojects/unzip && \
+	$(foreach pch, $(UNZIP_PATCHES),patch -Np1 -i debian/patches/$(pch) &&) \
+	make -f unix/Makefile prefix=/usr D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 LF2="$(LDFLAGS)" CF="$(CFLAGS) -I. $(DEFINES)" unzips
+	touch $(@)
+
+.PHONY: unzip-dist
+
+unzip-dist: $(OBJDIR)/.build-unzip-dist
+
+unzip-install: unzip-dist
+	$(info :: Installing unzip )
+	cd subprojects/unzip && \
+	make -f unix/Makefile prefix=$(INSTALL_DIR) install
+	# Post install
+	cp -a $(INSTALL_DIR)/bin/unzip $(INSTALL_DIR)
+	rm -r $(INSTALL_DIR)/bin $(INSTALL_DIR)/man
+
+#
+# python-xlib
+#
+
+PYTHON_XLIB_ARTIFACT_URL := https://salsa.debian.org/python-team/packages/python-xlib/-/jobs/7055382/artifacts/download
+PYTHON_XLIB_DEB := python3-xlib_0.33-3+salsaci+20250208+30_all.deb
+
+$(OBJDIR)/.build-python-xlib-dist: | $(OBJDIR)
+	$(info :: Building python-xlib )
+	curl --proto '=https' --tlsv1.2 -LJO $(PYTHON_XLIB_ARTIFACT_URL) --output-dir $(OBJDIR)
+	touch $(@)
+
+.PHONY: python-xlib-dist
+
+python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
+
+python-xlib-install: python-xlib-dist
+	$(info :: Installing python-xlib )
+	mkdir $(INSTALL_DIR)/_vendor && \
+	unzip $(OBJDIR)/build_master.zip -d $(OBJDIR) 
+	dpkg-deb -R $(OBJDIR)/debian/output/$(PYTHON_XLIB_DEB) $(OBJDIR)/tmp && \
+	find $(OBJDIR)/tmp -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
 
 $(OBJDIR):
 	@mkdir -p $(@)

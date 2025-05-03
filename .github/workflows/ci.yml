@@ -49,7 +49,7 @@ jobs:
 
       # Ruff uses ruff.toml for it's configuration
       - name: Lint with Ruff
-        uses: astral-sh/ruff-action@v1
+        uses: astral-sh/ruff-action@v3
 
       # Pyright uses pyproject.toml for it's configuration
       - name: Static type checking with Pyright
