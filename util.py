@@ -12,6 +12,10 @@ import subprocess
 import urllib.request
 import functools
 
+from enum import Enum
+from pathlib import Path
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from io import TextIOWrapper
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Literal, Any, Callable, Union
@@ -28,55 +32,83 @@ except ImportError:
     exit()
 
 
+# Enums
+class DosDevice(Enum):
+    """Enum for dos device types (mounted at 'prefix/dosdevices/')
+
+    Attributes:
+        NETWORK: A network device (UNC)
+        FLOPPY: A floppy drive
+        CD_ROM: A CD ROM drive
+        HD: A hard disk drive
+
+    """
+
+    NETWORK = 'network'
+    FLOPPY = 'floppy'
+    CD_ROM = 'cdrom'
+    HD = 'hd'
+
+
+# Helper classes
+@dataclass
+class ReplaceType:
+    """Used for replacements"""
+
+    from_value: str
+    to_value: str
+
+
+class ProtonVersion:
+    """Parses the proton version and build timestamp"""
+
+    @classmethod
+    # FIXME: use "Self" as return type with 3.11 and newer
+    def from_version_file(cls) -> "ProtonVersion":
+        """Returns the version of proton"""
+        fullpath = protondir() / 'version'
+        try:
+            version_string = fullpath.read_text(encoding='ascii')
+            return cls(version_string)
+        except OSError:
+            log.warn(f'Proton version file not found in: {fullpath}')
+            return cls('0 Unknown')
+
+
+    def __init__(self, version_string: str) -> None:
+        """Initialize from a given version string"""
+        # Example string '1722141596 GE-Proton9-10-18-g3763cd3a\n'
+        parts = version_string.split()
+        if len(parts) != 2 or not parts[0].isnumeric():
+            log.crit(f'Version string "{version_string}" is invalid!')
+            return
+        self.build_date: datetime = datetime.fromtimestamp(int(parts[0]), tz=timezone.utc)
+        self.version_name: str = parts[1]
+
+
+
+# Functions
+@functools.lru_cache
+def protondir() -> Path:
+    """Returns the path to proton"""
+    return Path(sys.argv[0]).parent
+
+
+@functools.lru_cache
+def protonprefix() -> Path:
+    """Returns wineprefix's path used by proton"""
+    return Path(os.environ.get('STEAM_COMPAT_DATA_PATH', '')) / 'pfx'
+
+
+@functools.lru_cache
 def which(appname: str) -> Union[str, None]:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
         if os.path.exists(fullpath) and os.access(fullpath, os.X_OK):
             return fullpath
-    log.warn(str(appname) + 'not found in $PATH')
+    log.warn(f'{appname} not found in $PATH')
     return None
-
-
-def protondir() -> str:
-    """Returns the path to proton"""
-    proton_dir = os.path.dirname(sys.argv[0])
-    return proton_dir
-
-
-def protonprefix() -> str:
-    """Returns the wineprefix used by proton"""
-    return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
-
-
-def protonnameversion() -> Union[str, None]:
-    """Returns the version of proton from sys.argv[0]"""
-    version = re.search('Proton ([0-9]*\\.[0-9]*)', sys.argv[0])
-    if version:
-        return version.group(1)
-    log.warn('Proton version not parsed from command line')
-    return None
-
-
-def protontimeversion() -> int:
-    """Returns the version timestamp of proton from the `version` file"""
-    fullpath = os.path.join(protondir(), 'version')
-    try:
-        with open(fullpath, encoding='ascii') as version:
-            for timestamp in version.readlines():
-                return int(timestamp.strip())
-    except OSError:
-        log.warn('Proton version file not found in: ' + fullpath)
-        return 0
-    log.warn('Proton version not parsed from file: ' + fullpath)
-    return 0
-
-
-def protonversion(timestamp: bool = False) -> Union[str, None, int]:
-    """Returns the version of proton"""
-    if timestamp:
-        return protontimeversion()
-    return protonnameversion()
 
 
 def once(
@@ -147,7 +179,7 @@ def _forceinstalled(verb: str) -> None:
     """Records verb into the winetricks.log.forced file"""
     forced_log = os.path.join(protonprefix(), 'winetricks.log.forced')
     with open(forced_log, 'a', encoding='ascii') as forcedlog:
-        forcedlog.write(verb + '\n')
+        forcedlog.write(f'{verb}\n')
 
 
 def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
@@ -185,7 +217,7 @@ def checkinstalled(verb: str) -> bool:
     if verb == 'gui':
         return False
 
-    log.info(f'Checking if winetricks {verb} is installed')
+    log.info(f'Checking if winetricks "{verb}" is installed')
     if _checkinstalled(verb, 'winetricks.log.forced'):
         return True
     return _checkinstalled(verb)
@@ -202,13 +234,13 @@ def is_custom_verb(verb: str) -> Union[bool, str]:
     # check local custom verbs
     verbpath = os.path.expanduser('~/.config/protonfixes/localfixes/' + verb_dir)
     if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using local custom winetricks verb from: ' + verbpath)
+        log.debug(f'Using local custom winetricks verb from: {verbpath}')
         return os.path.join(verbpath, verb_name)
 
     # check custom verbs
     verbpath = os.path.join(os.path.dirname(__file__), verb_dir)
     if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using custom winetricks verb from: ' + verbpath)
+        log.debug(f'Using custom winetricks verb from: {verbpath}')
         return os.path.join(verbpath, verb_name)
 
     return False
@@ -237,7 +269,7 @@ def protontricks(verb: str) -> bool:
 
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
-        env['WINEPREFIX'] = protonprefix()
+        env['WINEPREFIX'] = str(protonprefix())
         env['WINE'] = protonmain.g_proton.wine_bin
         env['WINELOADER'] = protonmain.g_proton.wine_bin
         env['WINESERVER'] = protonmain.g_proton.wineserver_bin
@@ -258,7 +290,7 @@ def protontricks(verb: str) -> bool:
             log.warn('No winetricks was found in $PATH')
 
         if winetricks_bin is not None:
-            log.debug('Using winetricks command: ' + str(winetricks_cmd))
+            log.debug(f'Using winetricks command: {winetricks_cmd}')
 
             # make sure proton waits for winetricks to finish
             for idx, arg in enumerate(sys.argv):
@@ -266,7 +298,7 @@ def protontricks(verb: str) -> bool:
                     sys.argv[idx] = arg.replace('run', 'waitforexitandrun')
                     log.debug(str(sys.argv))
 
-            log.info('Using winetricks verb ' + verb)
+            log.info(f'Using winetricks verb "{verb}"')
             subprocess.call([env['WINESERVER'], '-w'], env=env)
             with subprocess.Popen(winetricks_cmd, env=env) as process:
                 process.wait()
@@ -298,7 +330,7 @@ def regedit_add(
 ) -> None:
     """Add regedit keys"""
     env = dict(protonmain.g_session.env)
-    env['WINEPREFIX'] = protonprefix()
+    env['WINEPREFIX'] = str(protonprefix())
     env['WINE'] = protonmain.g_proton.wine_bin
     env['WINELOADER'] = protonmain.g_proton.wine_bin
     env['WINESERVER'] = protonmain.g_proton.wineserver_bin
@@ -591,7 +623,7 @@ def disable_uplay_overlay() -> bool:
         log.info('Disabled UPlay overlay')
         return True
     except OSError as err:
-        log.warn('Could not disable UPlay overlay: ' + err.strerror)
+        log.warn(f'Could not disable UPlay overlay: {err.strerror}')
 
     return False
 
@@ -673,16 +705,17 @@ def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
         log.debug('Found config file: ' + cfg_path)
         return cfg_path
 
-    log.warn('Config file not found: ' + cfg_path)
+    log.warn(f'Config file not found: {cfg_path}')
     return None
 
 
-def create_backup_config(cfg_path: str) -> None:
+def create_backup_config(cfg_path: str) -> bool:
     """Create backup config file"""
-    # Backup
     if not os.path.exists(cfg_path + '.protonfixes.bak'):
         log.info('Creating backup for config file')
         shutil.copyfile(cfg_path, cfg_path + '.protonfixes.bak')
+        return True
+    return False
 
 
 def set_ini_options(
@@ -693,7 +726,9 @@ def set_ini_options(
     if not cfg_path:
         return False
 
-    create_backup_config(cfg_path)
+    # Check if backup already exists
+    if not create_backup_config(cfg_path):
+        return False
 
     # set options
     conf = configparser.ConfigParser(
@@ -703,7 +738,7 @@ def set_ini_options(
 
     conf.read(cfg_path, encoding)
 
-    log.info(f'Addinging INI options into {cfile}:\n{str(ini_opts)}')
+    log.info(f'Addinging INI options into "{cfile}":\n{ini_opts}')
     conf.read_string(ini_opts)
 
     with open(cfg_path, 'w', encoding=encoding) as configfile:
@@ -719,7 +754,9 @@ def set_xml_options(
     if not xml_path:
         return False
 
-    create_backup_config(xml_path)
+    # Check if backup already exists
+    if not create_backup_config(xml_path):
+        return False
 
     # set options
 
@@ -781,6 +818,8 @@ def set_dxvk_option(
     """
     conf = configparser.ConfigParser()
     conf.optionxform = str
+
+    # FIXME: Python 3.13 implements `allow_unnamed_section=True`
     section = conf.default_section
     dxvk_conf = os.path.join(os.environ['PWD'], 'dxvk.conf')
 
@@ -803,7 +842,7 @@ def set_dxvk_option(
         log.debug(f'{conf.items(section)}')
 
     # set option
-    log.info('Addinging DXVK option: ' + str(opt) + ' = ' + str(val))
+    log.info(f'Addinging DXVK option: "{opt}" = "{val}"')
     conf.set(section, opt, str(val))
 
     with open(cfile, 'w', encoding='ascii') as configfile:
@@ -839,7 +878,7 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
 def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     """Install a file from a downloaded zip"""
     if filename in os.listdir(path):
-        log.info(f'File {filename} found in {path}')
+        log.info(f'File "{filename}" found in "{path}"')
         return
 
     config.path.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -848,11 +887,11 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     zip_file_path = config.path.cache_dir / zip_file_name
 
     if not zip_file_path.is_file():
-        log.info(f'Downloading {filename} to {zip_file_path}')
+        log.info(f'Downloading "{filename}" to "{zip_file_path}"')
         urllib.request.urlretrieve(url, zip_file_path)
 
     with zipfile.ZipFile(zip_file_path, 'r') as zip_obj:
-        log.info(f'Extracting {filename} to {path}')
+        log.info(f'Extracting "{filename}" to "{path}"')
         zip_obj.extract(filename, path=path)
 
 
@@ -967,15 +1006,10 @@ def set_game_drive(enabled: bool) -> None:
     This function modifies the `compat_config` to include or exclude
     the "gamedrive" option based on the `enabled` parameter.
 
-    Parameters
-    ----------
-    enabled : bool
-        If True, add "gamedrive" to `compat_config`.
-        If False, remove "gamedrive" from `compat_config`.
-
-    Returns
-    -------
-    None
+    Args:
+        enabled (bool):
+            If True, add "gamedrive" to `compat_config`.
+            If False, remove "gamedrive" from `compat_config`.
 
     """
     if enabled:
@@ -1093,3 +1127,28 @@ def get_steam_account_id() -> str:
                 lastFoundId = i[2:-2]
             elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
                 return lastFoundId
+
+
+def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
+    """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
+
+    Args:
+        letter (str, optional): Letter that the device gets assigned to, must be len = 1
+        dev_type (DosDevice, optional): The device's type which will be registered to wine
+
+    Returns:
+        bool: True, if device was created
+
+    """
+    assert len(letter) == 1
+
+    dosdevice = protonprefix() / f'dosdevices/{letter}:'
+    if dosdevice.exists():
+        return False
+
+    # Create a symlink in dosdevices
+    dosdevice.symlink_to('/tmp', True)
+
+    # designate device as CD-ROM, requires 64-bit access
+    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type.value, True)
+    return True
