@@ -21,11 +21,10 @@ extraPaths = [ ".." ] # Fix "protonfixes" module resolution
 pythonVersion = "3.9"
 pythonPlatform = "Linux"
 
-typeCheckingMode = "off"
-reportMissingImports = "error"
+# Pyright rules, that are not covered by `typeCheckingMode = 'standard'`
+# https://microsoft.github.io/pyright/#/configuration?id=diagnostic-settings-defaults
 reportMissingModuleSource = "error"
 reportUnusedImport = "error"
 reportDuplicateImport = "error"
 reportWildcardImportFromLibrary = "error"
-reportPrivateImportUsage = "error"
 reportShadowedImports = "error"
