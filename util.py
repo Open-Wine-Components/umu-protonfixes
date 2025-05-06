@@ -822,6 +822,18 @@ def set_xml_options(
     return True
 
 
+def is_x_session() -> bool:
+    """Returns True if the current session is X11/XWayland"""
+    with Path('/proc/net/unix').open(mode='r', encoding='utf-8') as socks:
+        for sock in socks:
+            sock = sock.split()
+            if not sock or not sock[-1].startswith('/tmp/.X11-unix'):
+                continue
+            return os.environ.get('DISPLAY') is not None
+
+    return False
+
+
 def get_resolution() -> Union[tuple[int, int], None]:
     """Returns screen res width, height using xrandr"""
     # Execute xrandr command and capture its output
@@ -829,6 +841,10 @@ def get_resolution() -> Union[tuple[int, int], None]:
 
     if not xrandr_bin:
         log.info('xrandr not found in PATH, skipping screen resolution determination')
+        return None
+
+    if not is_x_session():
+        log.info('X server does not exist, skipping screen resolution determination')
         return None
 
     xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
