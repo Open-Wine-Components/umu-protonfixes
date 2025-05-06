@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  container-test-job:
+  steamrt3:
     runs-on: ubuntu-latest
     container: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:beta
     steps:
@@ -20,6 +20,17 @@ jobs:
       - name: Install python-xlib build dependencies
         run: |
           sudo apt -y install debhelper-compat dh-sequence-python3 python3-all python3-setuptools python3-setuptools-scm
+      - name: Build umu-protonfixes
+        run: |
+          ./build.sh
+
+  umu:
+    runs-on: ubuntu-latest
+    container: ghcr.io/open-wine-components/umu-sdk:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Build umu-protonfixes
         run: |
           ./build.sh
