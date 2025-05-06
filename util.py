@@ -834,7 +834,7 @@ def is_x_session() -> bool:
     return False
 
 
-def get_resolution() -> Union[tuple[int, int], None]:
+def get_resolution() -> Optional[tuple[int, int]]:
     """Returns screen res width, height using xrandr"""
     # Execute xrandr command and capture its output
     xrandr_bin = shutil.which('xrandr')
