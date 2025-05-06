@@ -6,12 +6,12 @@ INSTALL_DIR ?= $(shell pwd)/dist/protonfixes
 
 .PHONY: all
 
-all: xrandr-dist cabextract-dist libmspack-dist unzip-dist python-xlib-dist
+all: cabextract-dist libmspack-dist unzip-dist python-xlib-dist
 
 .PHONY: install
 
 # Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
-install: protonfixes-install xrandr-install cabextract-install libmspack-install unzip-install python-xlib-install
+install: protonfixes-install cabextract-install libmspack-install unzip-install python-xlib-install
 
 #
 # protonfixes
@@ -28,36 +28,6 @@ protonfixes-install: protonfixes
 	cp         winetricks   $(INSTALL_DIR)
 	cp         umu-database.csv   $(INSTALL_DIR)
 	rm $(INSTALL_DIR)/protonfixes_test.py
-
-#
-# xrandr
-#
-
-$(OBJDIR)/.build-xrandr-dist: | $(OBJDIR)
-	$(info :: Installing xorg-macros )
-	cd subprojects/xutils-dev/util-macros && \
-	autoreconf -iv && \
-	./configure --prefix=/usr && \
-	make DESTDIR=$(INSTALL_DIR) install
-	$(info :: Building xrandr )
-	cd subprojects/x11-xserver-utils/xrandr && \
-	autoreconf -iv -I$(INSTALL_DIR)/usr/share/aclocal && \
-	./configure --prefix=/usr && \
-	make
-	touch $(@)
-
-.PHONY: xrandr-dist
-
-xrandr-dist: $(OBJDIR)/.build-xrandr-dist
-
-xrandr-install: xrandr-dist
-	$(info :: Installing xrandr )
-	# Install
-	cd subprojects/x11-xserver-utils/xrandr && \
-	make DESTDIR=$(INSTALL_DIR) install
-	# Post install
-	cp $(INSTALL_DIR)/usr/bin/xrandr $(INSTALL_DIR)
-	rm -r $(INSTALL_DIR)/usr
 
 #
 # cabextract

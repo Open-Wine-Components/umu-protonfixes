@@ -1,6 +1,3 @@
-[submodule "subprojects/x11-xserver-utils"]
-	path = subprojects/x11-xserver-utils
-	url = https://salsa.debian.org/xorg-team/app/x11-xserver-utils.git
 [submodule "subprojects/libmspack"]
 	path = subprojects/libmspack
 	url = https://github.com/kyz/libmspack.git
