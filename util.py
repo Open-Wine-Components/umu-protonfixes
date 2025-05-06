@@ -831,10 +831,10 @@ def get_resolution() -> Optional[tuple[int, int]]:
         log.info('xrandr not found in PATH, skipping screen resolution determination')
         return None
 
-    # Current session must be X11/XWayland for to get the resolution and xrandr
+    # Current session must be X11/XWayland to get the resolution and xrandr
     # requires DISPLAY to be set
     if not os.environ.get('DISPLAY'):
-        log.info('X server does not exist, skipping screen resolution determination')
+        log.info('DISPLAY does not exist, skipping screen resolution determination')
         return None
 
     xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
