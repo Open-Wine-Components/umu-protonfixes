@@ -18,8 +18,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import TextIOWrapper
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Any, Callable, Union
-from collections.abc import Mapping, Generator
+from typing import Any, Union, Optional
+from collections.abc import Mapping, Generator, Callable
 
 from .logger import log
 from .config import config
@@ -32,7 +32,52 @@ except ImportError:
     exit()
 
 
+
+# TypeAliases
+StrPath = Union[str, Path]
+
 # Enums
+class BasePath(Enum):
+    """Enum for base paths
+
+    Attributes:
+        USER: User's "My Documents" folder in the current prefix
+        GAME: Game's install folder
+    """
+    USER = 'user'
+    GAME = 'game'
+
+
+class OverrideOrder(Enum):
+    """Enum for Wine dll/file override order
+
+    Builtin means dlls/files that are provided by Wine.
+    Native means dlls/files that are provided by the user or application.
+
+    https://gitlab.winehq.org/wine/wine/-/wikis/Wine-User%27s-Guide#dll-overrides
+
+    Files are usually resolved in the following order:
+
+    1. The directory the program was started from.
+    2. The current directory.
+    3. The Windows system directory.
+    4. The Windows directory.
+    5. The PATH variable directories.
+
+    Attributes:
+        DISABLED: Disable file
+        NATIVE: Load native file
+        BUILTIN: Load builtin file
+        NATIVE_BUILTIN: Load native file first, builtin second
+        BUILTIN_NATIVE: Load builtin file first, native second
+    """
+    DISABLED = ''
+    NATIVE = 'n'
+    BUILTIN = 'b'
+    NATIVE_BUILTIN = 'n,b'
+    BUILTIN_NATIVE = 'b,n'
+
+
 class DosDevice(Enum):
     """Enum for dos device types (mounted at 'prefix/dosdevices/')
 
@@ -50,6 +95,7 @@ class DosDevice(Enum):
     HD = 'hd'
 
 
+
 # Helper classes
 @dataclass
 class ReplaceType:
@@ -57,6 +103,7 @@ class ReplaceType:
 
     from_value: str
     to_value: str
+
 
 
 class ProtonVersion:
@@ -101,7 +148,7 @@ def protonprefix() -> Path:
 
 
 @functools.lru_cache
-def which(appname: str) -> Union[str, None]:
+def which(appname: str) -> Optional[str]:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
@@ -112,8 +159,8 @@ def which(appname: str) -> Union[str, None]:
 
 
 def once(
-    func: Union[Callable, None] = None, retry: bool = False
-) -> Union[None, Callable[..., Any]]:
+    func: Optional[Callable] = None, retry: bool = False
+) -> Callable[..., Any]:
     """Decorator to use on functions which should only run once in a prefix.
 
     Error handling:
@@ -323,9 +370,9 @@ def protontricks(verb: str) -> bool:
 
 def regedit_add(
     folder: str,
-    name: Union[str, None] = None,
-    typ: Union[str, None] = None,
-    value: Union[str, None] = None,
+    name: Optional[str] = None,
+    typ: Optional[str] = None,
+    value: Optional[str] = None,
     arch: bool = False,
 ) -> None:
     """Add regedit keys"""
@@ -433,34 +480,33 @@ def del_environment(envvar: str) -> None:
 
 def get_game_install_path() -> str:
     """Game installation path"""
-    install_path = os.environ['PWD']
-    if 'STEAM_COMPAT_INSTALL_PATH' in os.environ:
-        install_path = os.environ['STEAM_COMPAT_INSTALL_PATH']
-    log.debug('Detected path to game: ' + install_path)
-    # only for `waitforexitandrun` command
+    install_path = os.environ.get('STEAM_COMPAT_INSTALL_PATH', os.getcwd())
+    log.debug(f'Detected path to game: {install_path}')
     return install_path
 
 
 def _winepe_override(
-    target: str, filetype: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']
+    target: str, filetype: str, dtype: OverrideOrder
 ) -> None:
     """Add WINE file override"""
-    log.info(f'Overriding {target}.{filetype} = {dtype}')
+    log.info(f'Overriding {target}.{filetype} = {dtype.value}')
     target_file = target if filetype == 'dll' else f'{target}.{filetype}'
-    setting = f'{target_file}={dtype}'
+    setting = f'{target_file}={dtype.value}'
     protonmain.append_to_env_str(
         protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';'
     )
 
 
-def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+def winedll_override(dll: str, dtype: OverrideOrder) -> None:
     """Add WINE dll override"""
     _winepe_override(target=dll, filetype='dll', dtype=dtype)
 
 
-def wineexe_override(exe: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+
+def wineexe_override(exe: str, dtype: OverrideOrder) -> None:
     """Add WINE executable override"""
     _winepe_override(target=exe, filetype='exe', dtype=dtype)
+
 
 
 def patch_libcuda() -> bool:
@@ -549,7 +595,7 @@ def patch_libcuda() -> bool:
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
         protonmain.g_session.env['LD_LIBRARY_PATH'] = (
-            f'{os.path.dirname(patched_library)}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
+            f'{patched_library.parent}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
         )
 
         return True
@@ -562,12 +608,12 @@ def patch_libcuda() -> bool:
 def disable_nvapi() -> None:
     """Disable WINE nv* dlls"""
     log.info('Disabling NvAPI')
-    winedll_override('nvapi', '')
-    winedll_override('nvapi64', '')
-    winedll_override('nvcuda', '')
-    winedll_override('nvcuvid', '')
-    winedll_override('nvencodeapi', '')
-    winedll_override('nvencodeapi64', '')
+    winedll_override('nvapi', OverrideOrder.DISABLED)
+    winedll_override('nvapi64', OverrideOrder.DISABLED)
+    winedll_override('nvcuda', OverrideOrder.DISABLED)
+    winedll_override('nvcuvid', OverrideOrder.DISABLED)
+    winedll_override('nvencodeapi', OverrideOrder.DISABLED)
+    winedll_override('nvencodeapi64', OverrideOrder.DISABLED)
 
 
 def disable_esync() -> None:
@@ -629,7 +675,7 @@ def disable_uplay_overlay() -> bool:
 
 
 def create_dosbox_conf(
-    conf_file: str, conf_dict: Mapping[str, Mapping[str, Any]]
+    conf_file: StrPath, conf_dict: Mapping[str, Mapping[str, Any]]
 ) -> None:
     """Create DOSBox configuration file.
 
@@ -687,19 +733,18 @@ def _get_case_insensitive_name(path: str) -> str:
     return root
 
 
-def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
+def _get_config_full_path(cfile: StrPath, base_path: BasePath) -> Optional[str]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
-    if base_path == 'user':
+    if base_path == BasePath.USER:
         cfg_path = os.path.join(
             protonprefix(), 'drive_c/users/steamuser/My Documents', cfile
         )
+    elif base_path == BasePath.GAME:
+        cfg_path = os.path.join(get_game_install_path(), cfile)
     else:
-        if base_path == 'game':
-            cfg_path = os.path.join(get_game_install_path(), cfile)
-        else:
-            cfg_path = cfile
-    cfg_path = _get_case_insensitive_name(cfg_path)
+        cfg_path = cfile
+    cfg_path = _get_case_insensitive_name(str(cfg_path))
 
     if os.path.exists(cfg_path) and os.access(cfg_path, os.F_OK):
         log.debug('Found config file: ' + cfg_path)
@@ -719,7 +764,7 @@ def create_backup_config(cfg_path: str) -> bool:
 
 
 def set_ini_options(
-    ini_opts: str, cfile: str, encoding: str, base_path: str = 'user'
+    ini_opts: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -734,7 +779,8 @@ def set_ini_options(
     conf = configparser.ConfigParser(
         empty_lines_in_values=True, allow_no_value=True, strict=False
     )
-    conf.optionxform = str
+    # Preserve option name case (default converts to lower case)
+    conf.optionxform = lambda optionstr: optionstr
 
     conf.read(cfg_path, encoding)
 
@@ -747,7 +793,7 @@ def set_ini_options(
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: str, base_path: str = 'user'
+    base_attibutte: str, xml_line: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
@@ -757,28 +803,20 @@ def set_xml_options(
     # Check if backup already exists
     if not create_backup_config(xml_path):
         return False
+    xml_path_obj = Path(xml_path)
 
     # set options
+    i = 0
+    contents = xml_path_obj.read_text(encoding).splitlines()
+    for line in contents:
+        i += 1
+        if base_attibutte not in line:
+            continue
+        log.info(f'Adding XML options into "{cfile}", line {i}:\n{xml_line}')
+        contents.insert(i, xml_line + '\n')
 
-    base_size = os.path.getsize(xml_path)
-    backup_size = os.path.getsize(xml_path + '.protonfixes.bak')
-
-    if base_size != backup_size:
-        return False
-
-    with open(xml_path, encoding='utf-8') as file:
-        contents = file.readlines()
-        i = 0
-        for line in contents:
-            i += 1
-            if base_attibutte in line:
-                log.info(f'Adding XML options into {cfile}, line {i}:\n{xml_line}')
-                contents.insert(i, xml_line + '\n')
-
-    with open(xml_path, 'w', encoding='utf-8') as file:
-        for eachitem in contents:
-            file.write(eachitem)
-
+    data = str.join('\n', contents)
+    xml_path_obj.write_text(data, encoding)
     log.info('XML config patch applied')
     return True
 
@@ -810,16 +848,17 @@ def read_dxvk_conf(cfp: TextIOWrapper) -> Generator[str, None, None]:
 
 
 def set_dxvk_option(
-    opt: str, val: str, cfile: str = '/tmp/protonfixes_dxvk.conf'
+    opt: str, val: str, cfile: StrPath = '/tmp/protonfixes_dxvk.conf'
 ) -> None:
     """Create custom DXVK config file
 
     See https://github.com/doitsujin/dxvk/wiki/Configuration for details
     """
     conf = configparser.ConfigParser()
-    conf.optionxform = str
 
     # FIXME: Python 3.13 implements `allow_unnamed_section=True`
+    # Preserve option name case (default converts to lower case)
+    conf.optionxform = lambda optionstr: optionstr
     section = conf.default_section
     dxvk_conf = os.path.join(os.environ['PWD'], 'dxvk.conf')
 
@@ -830,10 +869,11 @@ def set_dxvk_option(
         or conf.getint(section, 'session') != os.getpid()
     ):
         log.info('Creating new DXVK config')
-        set_environment('DXVK_CONFIG_FILE', cfile)
+        set_environment('DXVK_CONFIG_FILE', str(cfile))
 
         conf = configparser.ConfigParser()
-        conf.optionxform = str
+        # Preserve option name case (default converts to lower case)
+        conf.optionxform = lambda optionstr: optionstr
         conf.set(section, 'session', str(os.getpid()))
 
         if os.access(dxvk_conf, os.F_OK):
@@ -859,7 +899,7 @@ def install_battleye_runtime() -> None:
     install_app('1161040')
 
 
-def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
+def install_all_from_tgz(url: str, path: StrPath = os.getcwd()) -> None:
     """Install all files from a downloaded tar.gz"""
     config.path.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -875,7 +915,7 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
         tgz_obj.extractall(path)
 
 
-def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
+def install_from_zip(url: str, filename: str, path: StrPath = os.getcwd()) -> None:
     """Install a file from a downloaded zip"""
     if filename in os.listdir(path):
         log.info(f'File "{filename}" found in "{path}"')
@@ -1117,16 +1157,17 @@ def import_saves_folder(
         return False
 
 
-def get_steam_account_id() -> str:
+def get_steam_account_id() -> Optional[str]:
     """Returns your 17-digit Steam account ID"""
     # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
     with open(f'{os.environ["STEAM_BASE_FOLDER"]}/config/loginusers.vdf') as f:
-        lastFoundId = 'None'
+        lastFoundId = None
         for i in f.readlines():
             if len(i) > 1 and i[2:-2].isdigit():
                 lastFoundId = i[2:-2]
             elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
                 return lastFoundId
+    return None
 
 
 def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
