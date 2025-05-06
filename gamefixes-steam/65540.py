@@ -11,7 +11,9 @@ def main() -> None:
 
     # Fix background music / Gothic 2 startup
     util.protontricks('directmusic')
-    util.winedll_override('*dsound', util.OverrideOrder.BUILTIN)  # Override registry entry
+    util.winedll_override(
+        '*dsound', util.OverrideOrder.BUILTIN
+    )  # Override registry entry
 
     # Fix crackling audio
     util.set_environment('PULSE_LATENCY_MSEC', '90')

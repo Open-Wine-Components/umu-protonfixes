@@ -8,6 +8,7 @@ from steam.enums.emsg import EMsg
 from steam.utils.proto import proto_to_dict
 from typing import Any
 
+
 class Steam:
     """Minimal implementation of the SteamClient package that allows app id validation"""
 
@@ -23,32 +24,31 @@ class Steam:
         self.steam = client = SteamClient()
 
         # FIXME: pyright outputs 'error: Object of type "None" cannot be called (reportOptionalCall)'
-        @client.on(SteamClient.EVENT_ERROR) # pyright: ignore (reportOptionalCall)
+        @client.on(SteamClient.EVENT_ERROR)  # pyright: ignore (reportOptionalCall)
         def handle_error(result: EResult) -> None:
             raise ValueError(f'Steam error: {repr(result)}')
 
-        @client.on(SteamClient.EVENT_CONNECTED) # pyright: ignore (reportOptionalCall)
+        @client.on(SteamClient.EVENT_CONNECTED)  # pyright: ignore (reportOptionalCall)
         def handle_connected() -> None:
             print(f'Connected to {client.current_server_addr}', file=sys.stderr)
 
-        @client.on(SteamClient.EVENT_CHANNEL_SECURED) # pyright: ignore (reportOptionalCall)
+        @client.on(SteamClient.EVENT_CHANNEL_SECURED)  # pyright: ignore (reportOptionalCall)
         def send_login() -> None:
             if self.logged_on_once and self.steam.relogin_available:
                 self.steam.relogin()
 
-        @client.on(SteamClient.EVENT_DISCONNECTED) # pyright: ignore (reportOptionalCall)
+        @client.on(SteamClient.EVENT_DISCONNECTED)  # pyright: ignore (reportOptionalCall)
         def handle_disconnect() -> None:
             print('Steam disconnected', file=sys.stderr)
             if self.logged_on_once:
                 print('Reconnecting...', file=sys.stderr)
                 client.reconnect(maxdelay=30)
 
-        @client.on(SteamClient.EVENT_LOGGED_ON) # pyright: ignore (reportOptionalCall)
+        @client.on(SteamClient.EVENT_LOGGED_ON)  # pyright: ignore (reportOptionalCall)
         def handle_after_logon() -> None:
             self.logged_on_once = True
 
         client.anonymous_login()
-
 
     def get_valid_appids(self, appids: set[int]) -> set[int]:
         """Queries Steam for the specified appids.

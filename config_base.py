@@ -138,7 +138,7 @@ class ConfigBase:
                         value = parser_items.get
                         self.__log(
                             f'Unknown type "{type_name}", falling back to "str".',
-                            LogLevel.WARN
+                            LogLevel.WARN,
                         )
                     return value
 
@@ -152,7 +152,7 @@ class ConfigBase:
         except Exception as ex:
             self.__log(
                 f'Failed to parse config file "{file}". Exception: "{ex}"',
-                LogLevel.CRIT
+                LogLevel.CRIT,
             )
             return False
         return True
@@ -171,7 +171,7 @@ class ConfigBase:
         if not file.parent.is_dir():
             self.__log(
                 f'Parent directory "{file.parent}" does not exist. Abort.',
-                LogLevel.WARN
+                LogLevel.WARN,
             )
             return False
 
@@ -192,7 +192,7 @@ class ConfigBase:
         except Exception as ex:
             self.__log(
                 f'Failed to create config file "{file}". Exception: "{ex}"',
-                LogLevel.CRIT
+                LogLevel.CRIT,
             )
             return False
         return True

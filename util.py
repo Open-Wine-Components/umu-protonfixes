@@ -32,9 +32,9 @@ except ImportError:
     exit()
 
 
-
 # TypeAliases
 StrPath = Union[str, Path]
+
 
 # Enums
 class BasePath(Enum):
@@ -44,6 +44,7 @@ class BasePath(Enum):
         USER: User's "My Documents" folder in the current prefix
         GAME: Game's install folder
     """
+
     USER = 'user'
     GAME = 'game'
 
@@ -71,6 +72,7 @@ class OverrideOrder(Enum):
         NATIVE_BUILTIN: Load native file first, builtin second
         BUILTIN_NATIVE: Load builtin file first, native second
     """
+
     DISABLED = ''
     NATIVE = 'n'
     BUILTIN = 'b'
@@ -95,7 +97,6 @@ class DosDevice(Enum):
     HD = 'hd'
 
 
-
 # Helper classes
 @dataclass
 class ReplaceType:
@@ -105,13 +106,12 @@ class ReplaceType:
     to_value: str
 
 
-
 class ProtonVersion:
     """Parses the proton version and build timestamp"""
 
     @classmethod
     # FIXME: use "Self" as return type with 3.11 and newer
-    def from_version_file(cls) -> "ProtonVersion":
+    def from_version_file(cls) -> 'ProtonVersion':
         """Returns the version of proton"""
         fullpath = protondir() / 'version'
         try:
@@ -121,7 +121,6 @@ class ProtonVersion:
             log.warn(f'Proton version file not found in: {fullpath}')
             return cls('0 Unknown')
 
-
     def __init__(self, version_string: str) -> None:
         """Initialize from a given version string"""
         # Example string '1722141596 GE-Proton9-10-18-g3763cd3a\n'
@@ -129,9 +128,10 @@ class ProtonVersion:
         if len(parts) != 2 or not parts[0].isnumeric():
             log.crit(f'Version string "{version_string}" is invalid!')
             return
-        self.build_date: datetime = datetime.fromtimestamp(int(parts[0]), tz=timezone.utc)
+        self.build_date: datetime = datetime.fromtimestamp(
+            int(parts[0]), tz=timezone.utc
+        )
         self.version_name: str = parts[1]
-
 
 
 # Functions
@@ -158,9 +158,7 @@ def which(appname: str) -> Optional[str]:
     return None
 
 
-def once(
-    func: Optional[Callable] = None, retry: bool = False
-) -> Callable[..., Any]:
+def once(func: Optional[Callable] = None, retry: bool = False) -> Callable[..., Any]:
     """Decorator to use on functions which should only run once in a prefix.
 
     Error handling:
@@ -485,9 +483,7 @@ def get_game_install_path() -> str:
     return install_path
 
 
-def _winepe_override(
-    target: str, filetype: str, dtype: OverrideOrder
-) -> None:
+def _winepe_override(target: str, filetype: str, dtype: OverrideOrder) -> None:
     """Add WINE file override"""
     log.info(f'Overriding {target}.{filetype} = {dtype.value}')
     target_file = target if filetype == 'dll' else f'{target}.{filetype}'
@@ -502,11 +498,9 @@ def winedll_override(dll: str, dtype: OverrideOrder) -> None:
     _winepe_override(target=dll, filetype='dll', dtype=dtype)
 
 
-
 def wineexe_override(exe: str, dtype: OverrideOrder) -> None:
     """Add WINE executable override"""
     _winepe_override(target=exe, filetype='exe', dtype=dtype)
-
 
 
 def patch_libcuda() -> bool:
@@ -764,7 +758,10 @@ def create_backup_config(cfg_path: str) -> bool:
 
 
 def set_ini_options(
-    ini_opts: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
+    ini_opts: str,
+    cfile: StrPath,
+    encoding: str = 'utf-8',
+    base_path: BasePath = BasePath.GAME,
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -793,7 +790,11 @@ def set_ini_options(
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: StrPath, encoding: str = 'utf-8', base_path: BasePath = BasePath.GAME
+    base_attibutte: str,
+    xml_line: str,
+    cfile: StrPath,
+    encoding: str = 'utf-8',
+    base_path: BasePath = BasePath.GAME,
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
@@ -1170,7 +1171,9 @@ def get_steam_account_id() -> Optional[str]:
     return None
 
 
-def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
+def create_dos_device(
+    letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM
+) -> bool:
     """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
 
     Args:
@@ -1191,5 +1194,7 @@ def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM)
     dosdevice.symlink_to('/tmp', True)
 
     # designate device as CD-ROM, requires 64-bit access
-    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type.value, True)
+    regedit_add(
+        'HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type.value, True
+    )
     return True

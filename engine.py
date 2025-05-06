@@ -10,7 +10,7 @@ class Engine:
     """Game engines"""
 
     def __init__(self) -> None:
-        """Trys to figure out which engine is used in the current game"""     
+        """Trys to figure out which engine is used in the current game"""
         self.engine_name = ''
         self.supported = {
             'Dunia 2': 'https://pcgamingwiki.com/wiki/Engine:Dunia_2',

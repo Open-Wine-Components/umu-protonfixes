@@ -187,5 +187,7 @@ def main() -> None:
         return
 
     version = ProtonVersion.from_version_file()
-    log.info(f'Running protonfixes on "{version.version_name}", build at {version.build_date}.')
+    log.info(
+        f'Running protonfixes on "{version.version_name}", build at {version.build_date}.'
+    )
     run_fix(get_game_id())
