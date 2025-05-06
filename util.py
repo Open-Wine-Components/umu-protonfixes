@@ -822,10 +822,21 @@ def set_xml_options(
     return True
 
 
-def get_resolution() -> tuple[int, int]:
+def get_resolution() -> Optional[tuple[int, int]]:
     """Returns screen res width, height using xrandr"""
     # Execute xrandr command and capture its output
-    xrandr_bin = os.path.abspath(__file__).replace('util.py', 'xrandr')
+    xrandr_bin = shutil.which('xrandr')
+
+    if not xrandr_bin:
+        log.info('xrandr not found in PATH, skipping screen resolution determination')
+        return None
+
+    # Current session must be X11/XWayland to get the resolution and xrandr
+    # requires DISPLAY to be set
+    if not os.environ.get('DISPLAY'):
+        log.info('DISPLAY does not exist, skipping screen resolution determination')
+        return None
+
     xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
 
     # Find the line that starts with 'Screen   0:' and extract the resolution

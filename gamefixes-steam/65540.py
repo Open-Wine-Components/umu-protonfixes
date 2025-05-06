@@ -33,8 +33,12 @@ def main() -> None:
 
 def set_resolution() -> None:
     # Patch the config to match the system resolution
-    screen_width, screen_height = util.get_resolution()
+    resolution = util.get_resolution()
 
+    if not resolution:
+        return
+
+    screen_width, screen_height = resolution
     zVidResFullscreenX = str(screen_width)
     zVidResFullscreenY = str(screen_height)
 

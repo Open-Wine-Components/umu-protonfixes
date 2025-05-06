@@ -29,7 +29,11 @@ def main() -> None:
         return
 
     # Get width of resolution
-    screen_width, screen_height = util.get_resolution()
+    resolution = util.get_resolution()
+    if not resolution:
+        return None
+
+    screen_width, screen_height = resolution
     width = int(screen_width / screen_height * 768 // 1)
 
     # dgvoodoo2 config patches
