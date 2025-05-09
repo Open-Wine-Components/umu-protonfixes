@@ -5,9 +5,7 @@ from protonfixes import util
 
 
 def main() -> None:
-
     util.replace_command('epic_launch_helper.exe', 'MarvelRivals_Launcher.exe')
-    
+
     # Set SteamDeck=1 to be able to launch the game
     util.set_environment('SteamDeck', '1')
-
