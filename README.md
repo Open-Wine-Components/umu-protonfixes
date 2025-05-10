@@ -50,9 +50,17 @@ Another type of fix is one that runs before each game. This allows you to set de
 
 > ~/.config/protonfixes/localfixes/default.py
 
-Note that local fixes override the included "global" fixes. So using an existing fix might be a good starting point for modifications, as they will not be executed.
+> [!IMPORTANT]
+> Local fixes override the included "global" fixes.
+>
+> Therefore, using an existing fix could be a good starting point for modifications, since it will no longer be executed.
 
-For example, overriding the default fix will disable [the parameter parsing for Steam games](#start-parameter-fixes). This can be restored by copying [the global default file](gamefixes-steam/default.py) and applying your changes accordingly.
+> [!NOTE]
+> As an example, you created a local `default.py`.
+>
+> This overrides the "global" default fix and disables [the parameter parsing for Steam games](#start-parameter-fixes).
+>
+> To prevent this, copy the existing [global default file](gamefixes-steam/default.py) and modify it locally.
 
 ### Verbs
 
@@ -106,15 +114,15 @@ cache_dir = ~/.cache/protonfixes
 ### Values
 
 Valid "enable" values are: `yes`, `true`, `1`, `on`
+
 Valid "disable" values are: `no`, `false`, `0`, `off`
 
-Any other value is invalid and will cause parsing errors.
+> [!WARNING]
+> Any other boolean value is invalid and will cause parsing errors.
 
 ## Building binaries
 
 UMU-Protonfixes ships some binaries - used by some fixes - that need to be built.
-
-**You probably do not need to build them to contribute.**
 
 These binaries are not included in this repository, but are built from git-submodules in the [subprojects folder](subprojects/). To get the submodules, run the following command:
 
@@ -128,9 +136,15 @@ To actually build the binaries, simply run:
 make
 ```
 
+> [!NOTE]
+> You probably do not need to build them to contribute.
+
 ## Contributing
 
-We do enforce some linting, testing and static type checking. This can and should be executed locally before you open a pull request.
+We do enforce some linting, testing and static type checking. This can and **should** be executed locally before you open a pull request.
+
+> [!TIP]
+> In order to implement a new fix, it is best practice to use [local fixes](#local-fixes).
 
 ### Fix the package name
 
@@ -142,6 +156,15 @@ You could either clone into `protonfixes` or workaround that issue with a symbol
 ```bash
 ln -rs . ../protonfixes
 ```
+
+> [!TIP]
+> You can also clone / copy / link the project directly into a GE-Proton used by Steam.
+>
+> Example: `~/.local/share/Steam/compatibilitytools.d/GE-Proton10-1/protonfixes`
+>
+> Run the game with the correct Proton version and you can test your changes under realistic conditions.
+>
+> Start `steam` from a terminal to follow the logging of `umu-protonfixes`.
 
 ### Linting
 
