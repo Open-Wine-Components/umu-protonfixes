@@ -126,7 +126,7 @@ python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
 
 python-xlib-install: python-xlib-dist
 	$(info :: Installing python-xlib )
-	mkdir $(INSTALL_DIR)/_vendor && \
+	mkdir -p $(INSTALL_DIR)/_vendor && \
 	cd subprojects/python-xlib && \
 	dh_auto_install -O--buildsystem=pybuild && \
 	find debian/tmp -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
