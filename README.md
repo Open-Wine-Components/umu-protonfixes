@@ -21,7 +21,7 @@ Please note that all occurrences of the first part (before the '=') will be repl
 You can also set [dxvk options](https://github.com/doitsujin/dxvk/wiki/Configuration).
 
 ```bash
--pf_dxvk_set=dxgi.maxFrameRate=40 -pf_dxvk_set=d3d9.maxFrameRate=40 
+-pf_dxvk_set=dxgi.maxFrameRate=40 -pf_dxvk_set=d3d9.maxFrameRate=40
 ```
 
 The order is not important and the arguments are not passed on to the game.
@@ -103,11 +103,12 @@ cache_dir = ~/.cache/protonfixes
 
 `cache_dir`: Used when something needs to be unpacked or similar.
 
-### Values 
+### Values
 
-Valid "enable" values are: `yes`, `y`, `true`, `1`
+Valid "enable" values are: `yes`, `true`, `1`, `on`
+Valid "disable" values are: `no`, `false`, `0`, `off`
 
-Any other value is interpreted as disabled.
+Any other value is invalid and will cause parsing errors.
 
 ## Building binaries
 
@@ -129,7 +130,18 @@ make
 
 ## Contributing
 
-We do enforce some linting and testing that can and should be done locally - before you open a pull request.
+We do enforce some linting, testing and static type checking. This can and should be executed locally before you open a pull request.
+
+### Fix the package name
+
+If you clone the repository, it will default to a directory named `umu-protonfixes`.
+This is not a valid name for a python module and can not be imported or executed.
+
+You could either clone into `protonfixes` or workaround that issue with a symbolic link:
+
+```bash
+ln -rs . ../protonfixes
+```
 
 ### Linting
 
@@ -160,6 +172,26 @@ If not, try letting `ruff` (the linter we use) fix it automatically:
 ruff format .
 ```
 
+### Static type checking
+
+We use [Pyright](https://microsoft.github.io/pyright/) for type checking.
+
+```bash
+python -m pip install --upgrade pip
+pip install pyright
+```
+On Arch / Manjaro you can install it as a system package:
+
+```bash
+sudo pacman -Sy pyright
+```
+
+Occasionally Pyright shows a warning, that you should use the latest version. You can force it to do so by running it like this:
+
+```bash
+PYRIGHT_PYTHON_FORCE_VERSION=latest pyright
+```
+
 ### Testing
 
 The filenames of the fixes are checked against the Steam and GOG APIs. All symbolic links are also checked. This is not mandatory to run locally, as you should have a working game fix to begin with, and it will be done automatically by Github's CI.
@@ -169,17 +201,29 @@ You can still run it though:
 ```bash
 cd .github/scripts
 python check_gamefixes.py
+python check_imports.py
+python check_verbs.py
 ```
 
-You need the following prerequisites:
+You need the following prerequisites for these checks:
 
 ```bash
 python -m pip install --upgrade pip
-pip install ijson
+pip install ijson trio "steam[client]"
 ```
 
-On Arch / Manjaro:
+On Arch / Manjaro with installed `yay`:
 
 ```bash
-sudo pacman -Sy python-ijson
+sudo pacman -Sy python-ijson python-trio
+sudo yay -Sy python-steam
+```
+
+### Unit tests
+
+You can also manually run the [unit tests](/protonfixes_test.py). This requires the [fixed package name](#fix-the-package-name).
+
+```bash
+cd ..
+python -m protonfixes.protonfixes_test
 ```
