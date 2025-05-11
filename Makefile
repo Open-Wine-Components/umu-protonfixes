@@ -116,8 +116,7 @@ unzip-install: unzip-dist
 $(OBJDIR)/.build-python-xlib-dist: | $(OBJDIR)
 	$(info :: Building python-xlib )
 	cd subprojects/python-xlib && \
-	dpkg-source --before-build . && \
-	dh_auto_build -O--buildsystem=pybuild
+	python setup.py build
 	touch $(@)
 
 .PHONY: python-xlib-dist
@@ -126,10 +125,10 @@ python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
 
 python-xlib-install: python-xlib-dist
 	$(info :: Installing python-xlib )
-	mkdir -p $(INSTALL_DIR)/_vendor && \
-	cd subprojects/python-xlib && \
-	dh_auto_install -O--buildsystem=pybuild && \
-	find debian/tmp -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
+	mkdir $(INSTALL_DIR)/_vendor && \
+	cd subprojects/python-xlib && mkdir dist && \
+	python setup.py install --root=dist --optimize=1 --skip-build && \
+	find dist -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
 
 $(OBJDIR):
 	@mkdir -p $(@)
