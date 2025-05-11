@@ -1,6 +1,6 @@
-OBJDIR  := builddir
-
+OBJDIR      := builddir
 PREFIX      ?= /files
+LIBDIR       = $(PREFIX)/lib/x86_64-linux-gnu
 DESTDIR     ?=
 INSTALL_DIR ?= $(shell pwd)/dist/protonfixes
 
@@ -31,14 +31,21 @@ protonfixes-install: protonfixes
 	rm $(INSTALL_DIR)/protonfixes_test.py
 
 #
+# libmspack and cabextract
+#
+
+$(OBJDIR)/libmspack: | $(OBJDIR)
+	rsync -arx --delete subprojects/libmspack $(OBJDIR)
+
+#
 # cabextract
 #
 
-$(OBJDIR)/.build-cabextract-dist: | $(OBJDIR)
+$(OBJDIR)/.build-cabextract-dist: | $(OBJDIR)/libmspack
 	$(info :: Building cabextract )
-	cd subprojects/libmspack/cabextract && \
+	cd $(OBJDIR)/libmspack/cabextract && \
 	autoreconf -fiv -I /usr/share/gettext/m4/ && \
-	./configure --prefix=/files --libdir=/files/lib/x86_64-linux-gnu --sysconfdir=/etc --mandir=/files/share/man && \
+	./configure --prefix=$(PREFIX) --libdir=$(LIBDIR) && \
 	make
 	touch $(@)
 
@@ -48,7 +55,7 @@ cabextract-dist: $(OBJDIR)/.build-cabextract-dist
 
 cabextract-install: cabextract-dist
 	$(info :: Installing cabextract )
-	cd subprojects/libmspack/cabextract && \
+	cd $(OBJDIR)/libmspack/cabextract && \
 	make DESTDIR=$(INSTALL_DIR) install
 	rm -r $(INSTALL_DIR)/files/share
 
@@ -56,11 +63,11 @@ cabextract-install: cabextract-dist
 # libmspack
 #
 
-$(OBJDIR)/.build-libmspack-dist: | $(OBJDIR)
+$(OBJDIR)/.build-libmspack-dist: | $(OBJDIR)/libmspack
 	$(info :: Building libmspack )
-	cd subprojects/libmspack/libmspack && \
+	cd $(OBJDIR)/libmspack/libmspack && \
 	autoreconf -vfi && \
-	./configure --prefix=/files --libdir=/files/lib/x86_64-linux-gnu --disable-static --sysconfdir=/etc --localstatedir=/var && \
+	./configure --prefix=/files --libdir=/files/lib/x86_64-linux-gnu --disable-static && \
 	sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool && \
 	make
 	touch $(@)
@@ -71,7 +78,7 @@ libmspack-dist: $(OBJDIR)/.build-libmspack-dist
 
 libmspack-install: libmspack-dist
 	$(info :: Installing libmspack )
-	cd subprojects/libmspack/libmspack && \
+	cd $(OBJDIR)/libmspack/libmspack && \
 	make DESTDIR=$(INSTALL_DIR) install
 	rm -r $(INSTALL_DIR)/files/include
 	rm -r $(INSTALL_DIR)/files/lib/x86_64-linux-gnu/pkgconfig
@@ -92,7 +99,8 @@ UNZIP_PATCHES := $(shell cat subprojects/unzip/debian/patches/series)
 
 $(OBJDIR)/.build-unzip-dist: | $(OBJDIR)
 	$(info :: Building unzip )
-	cd subprojects/unzip && \
+	rsync -arx --delete subprojects/unzip $(OBJDIR)
+	cd $(OBJDIR)/unzip && \
 	$(foreach pch, $(UNZIP_PATCHES),patch -Np1 -i debian/patches/$(pch) &&) \
 	make -f unix/Makefile D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 LF2="$(LDFLAGS)" CF="$(CFLAGS) -I. $(DEFINES)" unzips
 	touch $(@)
@@ -103,7 +111,7 @@ unzip-dist: $(OBJDIR)/.build-unzip-dist
 
 unzip-install: unzip-dist
 	$(info :: Installing unzip )
-	cd subprojects/unzip && \
+	cd $(OBJDIR)/unzip && \
 	make -f unix/Makefile prefix=$(INSTALL_DIR)/files install
 	# Post install
 	rm -r $(INSTALL_DIR)/files/man
@@ -114,7 +122,8 @@ unzip-install: unzip-dist
 
 $(OBJDIR)/.build-python-xlib-dist: | $(OBJDIR)
 	$(info :: Building python-xlib )
-	cd subprojects/python-xlib && \
+	rsync -arx --delete subprojects/python-xlib $(OBJDIR)
+	cd $(OBJDIR)/python-xlib && \
 	python setup.py build
 	touch $(@)
 
@@ -124,8 +133,8 @@ python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
 
 python-xlib-install: python-xlib-dist
 	$(info :: Installing python-xlib )
-	mkdir $(INSTALL_DIR)/_vendor && \
-	cd subprojects/python-xlib && mkdir dist && \
+	mkdir $(INSTALL_DIR)/_vendor
+	cd $(OBJDIR)/python-xlib && mkdir dist && \
 	python setup.py install --root=dist --optimize=1 --skip-build && \
 	find dist -type d -name Xlib | xargs -I {} mv {} $(INSTALL_DIR)/_vendor; \
 
