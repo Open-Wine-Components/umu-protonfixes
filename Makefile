@@ -1,6 +1,6 @@
 OBJDIR  := builddir
 
-PREFIX      ?= /usr
+PREFIX      ?= /files
 DESTDIR     ?=
 INSTALL_DIR ?= $(shell pwd)/dist/protonfixes
 
@@ -25,7 +25,8 @@ protonfixes-install: protonfixes
 	cp      -r gamefixes-*  $(INSTALL_DIR)
 	cp      -r verbs        $(INSTALL_DIR)
 	cp         *.py         $(INSTALL_DIR)
-	cp         winetricks   $(INSTALL_DIR)
+	mkdir   -p              $(INSTALL_DIR)/files/bin
+	cp         winetricks   $(INSTALL_DIR)/files/bin
 	cp         umu-database.csv   $(INSTALL_DIR)
 	rm $(INSTALL_DIR)/protonfixes_test.py
 
@@ -36,8 +37,8 @@ protonfixes-install: protonfixes
 $(OBJDIR)/.build-cabextract-dist: | $(OBJDIR)
 	$(info :: Building cabextract )
 	cd subprojects/libmspack/cabextract && \
-	./autogen.sh && \
-	./configure --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man && \
+	autoreconf -fiv -I /usr/share/gettext/m4/ && \
+	./configure --prefix=/files --libdir=/files/lib/x86_64-linux-gnu --sysconfdir=/etc --mandir=/files/share/man && \
 	make
 	touch $(@)
 
@@ -49,8 +50,7 @@ cabextract-install: cabextract-dist
 	$(info :: Installing cabextract )
 	cd subprojects/libmspack/cabextract && \
 	make DESTDIR=$(INSTALL_DIR) install
-	cp $(INSTALL_DIR)/usr/bin/cabextract $(INSTALL_DIR)
-	rm -r $(INSTALL_DIR)/usr
+	rm -r $(INSTALL_DIR)/files/share
 
 #
 # libmspack
@@ -60,7 +60,7 @@ $(OBJDIR)/.build-libmspack-dist: | $(OBJDIR)
 	$(info :: Building libmspack )
 	cd subprojects/libmspack/libmspack && \
 	autoreconf -vfi && \
-	./configure --prefix=/usr --disable-static --sysconfdir=/etc --localstatedir=/var && \
+	./configure --prefix=/files --libdir=/files/lib/x86_64-linux-gnu --disable-static --sysconfdir=/etc --localstatedir=/var && \
 	sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool && \
 	make
 	touch $(@)
@@ -73,9 +73,9 @@ libmspack-install: libmspack-dist
 	$(info :: Installing libmspack )
 	cd subprojects/libmspack/libmspack && \
 	make DESTDIR=$(INSTALL_DIR) install
-	cp -d $(INSTALL_DIR)/usr/lib/libmspack* $(INSTALL_DIR)
-	rm -r $(INSTALL_DIR)/usr
-	rm    $(INSTALL_DIR)/libmspack.la
+	rm -r $(INSTALL_DIR)/files/include
+	rm -r $(INSTALL_DIR)/files/lib/x86_64-linux-gnu/pkgconfig
+	rm    $(INSTALL_DIR)/files/lib/x86_64-linux-gnu/libmspack.la
 
 #
 # unzip
@@ -94,7 +94,7 @@ $(OBJDIR)/.build-unzip-dist: | $(OBJDIR)
 	$(info :: Building unzip )
 	cd subprojects/unzip && \
 	$(foreach pch, $(UNZIP_PATCHES),patch -Np1 -i debian/patches/$(pch) &&) \
-	make -f unix/Makefile prefix=/usr D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 LF2="$(LDFLAGS)" CF="$(CFLAGS) -I. $(DEFINES)" unzips
+	make -f unix/Makefile D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 LF2="$(LDFLAGS)" CF="$(CFLAGS) -I. $(DEFINES)" unzips
 	touch $(@)
 
 .PHONY: unzip-dist
@@ -104,10 +104,9 @@ unzip-dist: $(OBJDIR)/.build-unzip-dist
 unzip-install: unzip-dist
 	$(info :: Installing unzip )
 	cd subprojects/unzip && \
-	make -f unix/Makefile prefix=$(INSTALL_DIR) install
+	make -f unix/Makefile prefix=$(INSTALL_DIR)/files install
 	# Post install
-	cp -a $(INSTALL_DIR)/bin/unzip $(INSTALL_DIR)
-	rm -r $(INSTALL_DIR)/bin $(INSTALL_DIR)/man
+	rm -r $(INSTALL_DIR)/files/man
 
 #
 # python-xlib
