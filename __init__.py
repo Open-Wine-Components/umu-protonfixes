@@ -44,11 +44,13 @@ def check_iscriptevaluator() -> bool:
 
 
 def setup(env: dict, bin_path_var: str, lib_path_var: str, func: Callable[[dict, str, str, str], None]) -> None:
+    """Setup PATH and LD_LIBRARY_PATH to include protonfixes's binary and library paths"""
     func(env, bin_path_var, bin_dir, ':')
     func(env, lib_path_var, f'{x86_64_lib_dir}:{i386_lib_dir}', ':')
 
 
 def execute() -> None:
+    """Execute protonfixes"""
     if check_iscriptevaluator():
         log.debug('Skipping fix execution. We are running "iscriptevaluator.exe".')
     elif not check_conditions():
