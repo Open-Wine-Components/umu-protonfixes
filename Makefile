@@ -32,6 +32,7 @@ protonfixes-install: protonfixes
 	cp         *.py         $(TARGET_DIR)
 	mkdir   -p              $(TARGET_DIR)$(BASEDIR)/bin
 	cp         winetricks   $(TARGET_DIR)$(BASEDIR)/bin
+	cp         winetricks   $(TARGET_DIR)
 	cp         umu-database.csv   $(TARGET_DIR)
 	rm $(TARGET_DIR)/protonfixes_test.py
 
