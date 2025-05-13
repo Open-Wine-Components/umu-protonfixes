@@ -3,7 +3,7 @@ DIST  ?= dist
 
 OBJDIR := $(shell realpath $(BUILD))
 DSTDIR := $(shell realpath $(DIST))
-TARGET_DIR := $(DSTDIR)/protonfixes
+TARGET_DIR := $(DSTDIR)
 
 BASEDIR       := /files
 i386_LIBDIR    = $(BASEDIR)/lib/i386-linux-gnu
