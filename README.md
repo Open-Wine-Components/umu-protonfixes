@@ -146,6 +146,51 @@ We do enforce some linting, testing and static type checking. This can and **sho
 > [!TIP]
 > In order to implement a new fix, it is best practice to use [local fixes](#local-fixes).
 
+### Pre commit hooks
+
+We have some [pre-commit hooks](https://pre-commit.com/) in place.
+
+> [!TIP]
+> This is the easiest way to check for any mistakes that need fixing before we can accept a pull request.
+
+Install it:
+
+```bash
+pip install pre-commit
+```
+
+or on Arch / Manjaro:
+
+```bash
+sudo pacman -Sy pre-commit
+```
+
+To set up the hook in your work directory, run the following command:
+
+```bash
+pre-commit install
+```
+
+That's it.
+The hook should include everything you need and install all the necessary packages in a [virtual environment](https://docs.python.org/3/library/venv.html).
+
+You can also run them manually, without installing the hook:
+
+```bash
+pre-commit run
+# or on all files, not only staged ones:
+pre-commit run --all-files
+```
+
+----------
+
+> [!NOTE]
+> All of the following information is for documentation purposes only.
+>
+> The preferred way to check your contribution is to use [pre-commit hooks](#pre-commit-hooks).
+
+----------
+
 ### Fix the package name
 
 If you clone the repository, it will default to a directory named `umu-protonfixes`.
