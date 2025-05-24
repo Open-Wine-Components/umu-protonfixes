@@ -1,5 +1,6 @@
 """Game fix for Gothic 1 Classic
 Game fix for Gothic II: Gold Classic
+Game fix for The Chronicles Of Myrtana: Archolos (mod of Gothic II: Gold Classic)
 """
 
 from protonfixes import util
