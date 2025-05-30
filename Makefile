@@ -11,12 +11,12 @@ x86_64_LIBDIR  = $(BASEDIR)/lib/x86_64-linux-gnu
 
 .PHONY: all
 
-all: cabextract-dist libmspack-dist unzip-dist python-xlib-dist
+all: cabextract-dist libmspack-dist unzip-dist
 
 .PHONY: install
 
 # Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
-install: protonfixes-install cabextract-install libmspack-install unzip-install python-xlib-install
+install: protonfixes-install cabextract-install libmspack-install unzip-install
 
 #
 # protonfixes
@@ -121,28 +121,6 @@ unzip-install: unzip-dist
 	make -f unix/Makefile prefix=$(TARGET_DIR)$(BASEDIR) install
 	# Post install
 	rm -r $(TARGET_DIR)$(BASEDIR)/man
-
-#
-# python-xlib
-#
-
-$(OBJDIR)/.build-python-xlib-dist: | $(OBJDIR)
-	$(info :: Building python-xlib )
-	rsync -arx --delete subprojects/python-xlib $(OBJDIR)
-	cd $(OBJDIR)/python-xlib && \
-	python setup.py build
-	touch $(@)
-
-.PHONY: python-xlib-dist
-
-python-xlib-dist: $(OBJDIR)/.build-python-xlib-dist
-
-python-xlib-install: python-xlib-dist
-	$(info :: Installing python-xlib )
-	mkdir $(TARGET_DIR)/_vendor
-	cd $(OBJDIR)/python-xlib && mkdir dist && \
-	python setup.py install --root=dist --optimize=1 --skip-build && \
-	find dist -type d -name Xlib | xargs -I {} mv {} $(TARGET_DIR)/_vendor;
 
 $(OBJDIR):
 	@mkdir -p $(@)
