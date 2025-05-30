@@ -17,12 +17,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Install python-xlib build dependencies
-        run: |
-          sudo apt -y install debhelper-compat dh-sequence-python3 python3-all python3-setuptools python3-setuptools-scm
       - name: Build umu-protonfixes
         run: |
-          ./build.sh
+          make
 
   umu:
     runs-on: ubuntu-latest
@@ -33,4 +30,4 @@ jobs:
           submodules: recursive
       - name: Build umu-protonfixes
         run: |
-          ./build.sh
+          make
