@@ -557,7 +557,7 @@ def patch_libcuda() -> bool:
 
         patched_library = config.path.cache_dir / 'libcuda.patched.so'
         try:
-            binary_data = patched_library.read_bytes()
+            binary_data = Path(libcuda_path).read_bytes()
         except OSError as e:
             log.crit(f'Unable to read libcuda.so: {e}')
             return False
