@@ -586,10 +586,19 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        protonmain.g_session.env['LD_LIBRARY_PATH'] = (
-            f'{patched_library.parent}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
-        )
 
+        # Set LD_LIBRARY_PATH and LD_PRELOAD to include the directory (or absolute path) of the patched library
+        current_ld_path = protonmain.g_session.env.get("LD_LIBRARY_PATH")
+        protonmain.g_session.env["LD_LIBRARY_PATH"] = (
+            f"{patched_library.parent}:{current_ld_path}" if current_ld_path else str(patched_library)
+        )
+        log.info(f'LD_LIBRARY_PATH updated to {protonmain.g_session.env.get("LD_LIBRARY_PATH")}')
+
+        current_ld_preload = protonmain.g_session.env.get("LD_PRELOAD")
+        protonmain.g_session.env["LD_PRELOAD"] = (
+            f"{patched_library}:{current_ld_preload}" if current_ld_preload else str(patched_library)
+        )
+        log.info(f'LD_PRELOAD updated to {protonmain.g_session.env.get("LD_PRELOAD")}')
         return True
 
     except Exception as e:
