@@ -512,8 +512,6 @@ def patch_libcuda() -> bool:
 
     Returns true if the library was patched correctly. Otherwise returns false
     """
-    config.path.cache_dir.mkdir(parents=True, exist_ok=True)
-
     try:
         # Use shutil.which to find ldconfig binary
         ldconfig_path = shutil.which('ldconfig')
