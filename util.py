@@ -554,8 +554,8 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
-
-        patched_library = config.path.cache_dir / os.path.basename(libcuda_path)
+        from tempfile import mkdtemp
+        patched_library = Path(mkdtemp()) / os.path.basename(libcuda_path)
         try:
             binary_data = Path(libcuda_path).read_bytes()
         except OSError as e:
