@@ -512,8 +512,6 @@ def patch_libcuda() -> bool:
 
     Returns true if the library was patched correctly. Otherwise returns false
     """
-    config.path.cache_dir.mkdir(parents=True, exist_ok=True)
-
     try:
         # Use shutil.which to find ldconfig binary
         ldconfig_path = shutil.which('ldconfig')
@@ -554,8 +552,8 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
-
-        patched_library = config.path.cache_dir / 'libcuda.patched.so'
+        from tempfile import mkdtemp
+        patched_library = Path(mkdtemp()) / os.path.basename(libcuda_path)
         try:
             binary_data = Path(libcuda_path).read_bytes()
         except OSError as e:
@@ -588,10 +586,15 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        protonmain.g_session.env['LD_LIBRARY_PATH'] = (
-            f'{patched_library.parent}:{protonmain.g_session.env["LD_LIBRARY_PATH"]}'
-        )
 
+        # Set LD_LIBRARY_PATH and LD_PRELOAD to include the directory (or absolute path) of the patched library
+        ld_paths = [str(patched_library.parent), protonmain.g_session.env.get("LD_LIBRARY_PATH")]  
+        protonmain.g_session.env["LD_LIBRARY_PATH"] = ":".join(filter(None, ld_paths))  
+        log.info(f'LD_LIBRARY_PATH updated to {protonmain.g_session.env.get("LD_LIBRARY_PATH")}')
+
+        ld_paths = [str(patched_library), protonmain.g_session.env.get("LD_PRELOAD")]  
+        protonmain.g_session.env["LD_PRELOAD"] = ":".join(filter(None, ld_paths))
+        log.info(f'LD_PRELOAD updated to {protonmain.g_session.env.get("LD_PRELOAD")}')
         return True
 
     except Exception as e:
