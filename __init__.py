@@ -14,8 +14,12 @@ sys.path.insert(
 )
 
 bin_dir: str = f'{os.path.dirname(os.path.realpath(__file__))}/files/bin'
-i386_lib_dir: str = f'{os.path.dirname(os.path.realpath(__file__))}/files/lib/i386-linux-gnu'
-x86_64_lib_dir: str = f'{os.path.dirname(os.path.realpath(__file__))}/files/lib/x86_64-linux-gnu'
+i386_lib_dir: str = (
+    f'{os.path.dirname(os.path.realpath(__file__))}/files/lib/i386-linux-gnu'
+)
+x86_64_lib_dir: str = (
+    f'{os.path.dirname(os.path.realpath(__file__))}/files/lib/x86_64-linux-gnu'
+)
 
 
 def check_conditions() -> bool:
@@ -43,7 +47,12 @@ def check_iscriptevaluator() -> bool:
     return len(sys.argv) >= 3 and 'iscriptevaluator.exe' in sys.argv[2]
 
 
-def setup(env: dict, bin_path_var: str, lib_path_var: str, func: Callable[[dict, str, str, str], None]) -> None:
+def setup(
+    env: dict,
+    bin_path_var: str,
+    lib_path_var: str,
+    func: Callable[[dict, str, str, str], None],
+) -> None:
     """Setup PATH and LD_LIBRARY_PATH to include protonfixes's binary and library paths"""
     func(env, bin_path_var, bin_dir, ':')
     func(env, lib_path_var, f'{x86_64_lib_dir}:{i386_lib_dir}', ':')
@@ -65,4 +74,4 @@ def execute() -> None:
             sys.stderr.flush()
 
 
-__all__ = ["setup", "execute"]
+__all__ = ['setup', 'execute']

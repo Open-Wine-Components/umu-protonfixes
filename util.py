@@ -553,6 +553,7 @@ def patch_libcuda() -> bool:
 
         log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
         from tempfile import mkdtemp
+
         patched_library = Path(mkdtemp()) / os.path.basename(libcuda_path)
         try:
             binary_data = Path(libcuda_path).read_bytes()
@@ -588,12 +589,17 @@ def patch_libcuda() -> bool:
         log.info(f'Patched libcuda.so saved to: {patched_library}')
 
         # Set LD_LIBRARY_PATH and LD_PRELOAD to include the directory (or absolute path) of the patched library
-        ld_paths = [str(patched_library.parent), protonmain.g_session.env.get("LD_LIBRARY_PATH")]  
-        protonmain.g_session.env["LD_LIBRARY_PATH"] = ":".join(filter(None, ld_paths))  
-        log.info(f'LD_LIBRARY_PATH updated to {protonmain.g_session.env.get("LD_LIBRARY_PATH")}')
+        ld_paths = [
+            str(patched_library.parent),
+            protonmain.g_session.env.get('LD_LIBRARY_PATH'),
+        ]
+        protonmain.g_session.env['LD_LIBRARY_PATH'] = ':'.join(filter(None, ld_paths))
+        log.info(
+            f'LD_LIBRARY_PATH updated to {protonmain.g_session.env.get("LD_LIBRARY_PATH")}'
+        )
 
-        ld_paths = [str(patched_library), protonmain.g_session.env.get("LD_PRELOAD")]  
-        protonmain.g_session.env["LD_PRELOAD"] = ":".join(filter(None, ld_paths))
+        ld_paths = [str(patched_library), protonmain.g_session.env.get('LD_PRELOAD')]
+        protonmain.g_session.env['LD_PRELOAD'] = ':'.join(filter(None, ld_paths))
         log.info(f'LD_PRELOAD updated to {protonmain.g_session.env.get("LD_PRELOAD")}')
         return True
 
