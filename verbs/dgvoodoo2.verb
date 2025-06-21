@@ -3,25 +3,29 @@ w_metadata dgvoodoo2 dlls \
     publisher="dege" \
     year="2023" \
     media="download" \
-    file1="dgVoodoo2_81_1.zip" \
+    file1="dgvoodoo2-v2.8.2.tar.xz" \
     installed_file1="${W_SYSTEM32_DLLS_WIN}/ddraw.dll" \
     installed_file2="${W_SYSTEM32_DLLS_WIN}/d3dimm.dll" \
-    installed_file3="${W_SYSTEM32_DLLS_WIN}/d3d9.dll" \
-    installed_file3="${W_SYSTEM32_DLLS_WIN}/dgd3d9.dll" \
+    installed_file3="${W_SYSTEM32_DLLS_WIN}/glide2x.dll" \
+    installed_file3="${W_SYSTEM32_DLLS_WIN}/glide3x.dll" \
+    installed_file3="${W_SYSTEM32_DLLS_WIN}/glide.dll" \
     installed_file4="${W_SYSTEM32_DLLS_WIN}/dgvoodoo.conf"
 
 load_dgvoodoo2()
 {
-    w_download https://github.com/dege-diosg/dgVoodoo2/releases/download/v2.81.1/dgVoodoo2_81_1.zip 13c84b6e3b19bb5e38afdb67f2d1ee3c1b6291284a0043a6a40061d2c6e7c18c ${file1}
-    w_try_unzip "${W_TMP}" "${W_CACHE}/${W_PACKAGE}/${file1}"
-    w_try_cp_dll "${W_TMP}/MS/x86/DDraw.dll" "${W_SYSTEM32_DLLS}/ddraw.dll"
-    w_try_cp_dll "${W_TMP}/MS/x86/D3DImm.dll" "${W_SYSTEM32_DLLS}/d3dimm.dll"
-    w_try_cp_dll "${W_TMP}/MS/x86/D3D9.dll" "${W_SYSTEM32_DLLS}/d3d9.dll"
-    w_try_cp_dll "${W_TMP}/MS/x86/D3D9.dll" "${W_SYSTEM32_DLLS}/dgd3d9.dll"
-    sed -i '/dgVoodooWatermark/s/true/false/' "${W_TMP}/dgVoodoo.conf"
-    sed -i '/[DirectX]/ {/Filtering/s/appdriven/16/ ; /KeepFilterIfPointSampled/s/false/true/ ; /Resolution/s/unforced/max/ ; /Antialiasing/s/appdriven/8x/}' "${W_TMP}/dgVoodoo.conf"
-    w_try_cp_dll "${W_TMP}/dgVoodoo.conf" "${W_SYSTEM32_DLLS}/dgvoodoo.conf"
-    w_override_dlls native ddraw
-    w_override_dlls native d3d9
-    w_override_dlls native d3dimm
+    w_download "https://lutris.nyc3.cdn.digitaloceanspaces.com/runtime/${file1}" fde26a6f783fdfc30b7ad3c95c3e606dfba4a4825c3f51694b4d48aed67f63d5
+    w_try tar -C "${W_TMP_EARLY}" -Jxf "${W_CACHE}/${W_PACKAGE}/${file1}"
+
+    _W_package_dir="${file1%.tar.xz}"
+    w_try_cp_dll "${W_TMP_EARLY}/${_W_package_dir}/x32/ddraw.dll" "${W_SYSTEM32_DLLS}/ddraw.dll"
+    w_try_cp_dll "${W_TMP_EARLY}/${_W_package_dir}/x32/d3dimm.dll" "${W_SYSTEM32_DLLS}/d3dimm.dll"
+    w_try_cp_dll "${W_TMP_EARLY}/${_W_package_dir}/x32/glide2x.dll" "${W_SYSTEM32_DLLS}/glide2x.dll"
+    w_try_cp_dll "${W_TMP_EARLY}/${_W_package_dir}/x32/glide3x.dll" "${W_SYSTEM32_DLLS}/glide3x.dll"
+    w_try_cp_dll "${W_TMP_EARLY}/${_W_package_dir}/x32/glide.dll" "${W_SYSTEM32_DLLS}/glide.dll"
+
+    sed -i '/dgVoodooWatermark/s/true/false/' "${W_TMP_EARLY}/${_W_package_dir}/dgVoodoo.conf"
+    sed -i '/[DirectX]/ {/Filtering/s/appdriven/16/ ; /KeepFilterIfPointSampled/s/false/true/ ; /Resolution/s/unforced/max/ ; /Antialiasing/s/appdriven/8x/}' "${W_TMP_EARLY}/${_W_package_dir}/dgVoodoo.conf"
+    w_try cp "${W_TMP_EARLY}/${_W_package_dir}/dgVoodoo.conf" "${W_SYSTEM32_DLLS}/dgvoodoo.conf"
+    
+    w_override_dlls native ddraw d3dimm glide2x glide3x glide
 }
