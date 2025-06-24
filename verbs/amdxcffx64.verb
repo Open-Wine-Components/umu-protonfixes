@@ -1,0 +1,16 @@
+w_metadata amdxcffx64 dlls \
+    title="amdxcffx64 (FSR4)" \
+    publisher="AMD" \
+    year="2025" \
+    media="download" \
+    file1="amdxcffx64.dll" \
+    installed_file1="${W_SYSTEM64_DLLS_WIN64}/amdxcffx64.dll"
+
+load_amdxcffx64()
+{
+    w_package_unsupported_win32
+
+    w_download "https://download.amd.com/dir/bin/amdxcffx64.dll/67D435F7d97000/amdxcffx64.dll" 2bc7a8f07723d057924467ee70c6fca9e611e53f65bf542ba0a4f58b65e1399e
+    w_try_cp_dll "${W_CACHE}/${W_PACKAGE}/amdxcffx64.dll" "${W_SYSTEM64_DLLS}/amdxcffx64.dll"
+    w_override_dlls native amdxcffx64
+}
