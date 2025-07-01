@@ -4,4 +4,4 @@ from protonfixes import util
 
 
 def main() -> None:
-    util.protontricks('vcrun2019')
+    util.protontricks('vcrun2022')
