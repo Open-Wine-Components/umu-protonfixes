@@ -12,3 +12,4 @@ def main() -> None:
     util.protontricks('sourcehansans')
     util.protontricks('fakechinese')
     util.protontricks('corefonts')
+    util.set_environment('SteamOS', '1')
