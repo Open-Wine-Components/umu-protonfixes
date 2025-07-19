@@ -26,3 +26,4 @@ def main() -> None:
         )
         with zipfile.ZipFile('CChromaEditorLibrary.zip', 'r') as zip_ref:
             zip_ref.extractall(installpath)
+    util.protontricks('mfc140')
