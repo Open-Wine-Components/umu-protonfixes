@@ -65,7 +65,8 @@ def setup(
 
 def winetricks(env: dict, wine_bin: str, wineserver_bin: str) -> None:
     """Handle winetricks"""
-    if (env.get('UMU_ID')
+    if (
+        env.get('UMU_ID')
         and env.get('EXE', '').endswith('winetricks')
         and env.get('PROTON_VERB') == 'waitforexitandrun'
     ):

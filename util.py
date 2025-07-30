@@ -747,7 +747,9 @@ def _get_config_full_path(cfile: StrPath, base_path: BasePath) -> Optional[str]:
     elif base_path == BasePath.GAME:
         cfg_path = os.path.join(get_game_install_path(), cfile)
     elif base_path == BasePath.APPDATA_LOCAL:
-        cfg_path = os.path.join(protonprefix(), 'drive_c/users/steamuser/AppData/Local', cfile)
+        cfg_path = os.path.join(
+            protonprefix(), 'drive_c/users/steamuser/AppData/Local', cfile
+        )
     else:
         cfg_path = cfile
     cfg_path = _get_case_insensitive_name(str(cfg_path))
