@@ -210,3 +210,51 @@ def setup_fsr4(compat_dir: str, prefix_dir: str) -> None:
         log.info('Automatic FSR4 upgrade enabled')
     else:
         log.warn('Failed to download amdxcffx64.dll')
+
+
+def setup_local_shader_cache(env: dict) -> None:
+    """Setup per-game shader cache if shader pre-caching is disabled
+
+    usage: setup_local_shader_cache(g_session.env)
+    """
+    path = os.environ.get("STEAM_COMPAT_SHADER_PATH", "")
+    if not path:
+        return
+    shader_cache_name = "steamapp_shader_cache"
+    shader_cache_vars = {
+        # Nvidia
+        "__GL_SHADER_DISK_CACHE_APP_NAME": shader_cache_name,
+        "__GL_SHADER_DISK_CACHE_PATH": os.path.join(path, "nvidiav1"),
+        "__GL_SHADER_DISK_CACHE_READ_ONLY_APP_NAME": "steam_shader_cache;steamapp_merged_shader_cache",
+        "__GL_SHADER_DISK_CACHE_SIZE": "5000000000",
+        "__GL_SHADER_DISK_CACHE_SKIP_CLEANUP": "1",
+        # Mesa
+        "MESA_DISK_CACHE_READ_ONLY_FOZ_DBS": "steam_cache,steam_precompiled",
+        "MESA_DISK_CACHE_SINGLE_FILE": "1",
+        "MESA_GLSL_CACHE_DIR": path,
+        "MESA_GLSL_CACHE_MAX_SIZE": "5G",
+        "MESA_SHADER_CACHE_DIR": path,
+        "MESA_SHADER_CACHE_MAX_SIZE": "5G",
+        # AMD VK
+        "AMD_VK_PIPELINE_CACHE_FILENAME": shader_cache_name,
+        "AMD_VK_PIPELINE_CACHE_PATH": os.path.join(path, "AMDv1"),
+        "AMD_VK_USE_PIPELINE_CACHE": "1",
+        # DXVK
+        "DXVK_STATE_CACHE_PATH": os.path.join(path, "DXVK_state_cache"),
+        # VKD3D
+        "VKD3D_SHADER_CACHE_PATH": os.path.join(path, "VKD3D_shader_cache")
+    }
+    for (var, val) in shader_cache_vars.items():
+        if var in os.environ:
+            continue
+        if var in {
+            "__GL_SHADER_DISK_CACHE_PATH",
+            "MESA_GLSL_CACHE_DIR",
+            "MESA_SHADER_CACHE_DIR",
+            "AMD_VK_PIPELINE_CACHE_PATH",
+            "DXVK_STATE_CACHE_PATH",
+            "VKD3D_SHADER_CACHE_PATH",
+        }:
+            os.makedirs(val, exist_ok=True)
+        env[var] = val
+
