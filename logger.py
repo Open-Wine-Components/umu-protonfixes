@@ -4,7 +4,7 @@ import os
 import sys
 
 from enum import Enum
-
+from pathlib import Path
 
 # Enums
 class LogLevel(Enum):
@@ -22,6 +22,15 @@ class Log:
 
     pfx = f'ProtonFixes[{os.getpid()}]'
     is_tty = os.isatty(sys.stderr.fileno())
+
+    _cache_root = Path(os.environ.get('XDG_CACHE_HOME', Path.home() / '.cache'))
+    _log_dir = _cache_root / 'umu-protonfixes'
+    try:
+        _log_dir.mkdir(parents=True, exist_ok=True)
+        logfile = _log_dir / 'protonfixes_test.log'
+    except Exception:
+        # Fallback if the cache dir can't be created for any reason
+        logfile = Path('/tmp/protonfixes_test.log')
 
     @classmethod
     def __colorize(cls, msg: str, level: LogLevel) -> str:
@@ -47,7 +56,7 @@ class Log:
         )
 
         # To log file
-        with open('/tmp/protonfixes_test.log', 'a', 1, encoding='utf-8') as testfile:
+        with open(cls.logfile, 'a', buffering=1, encoding='utf-8') as testfile:
             print(f'{cls.pfx} {level.name}: {msg}', file=testfile)
 
     @classmethod
