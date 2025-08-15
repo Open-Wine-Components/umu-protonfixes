@@ -1,4 +1,4 @@
-"""Game fix for Record of Sky: Children of the Light"""
+"""Game fix for Sky: Children of the Light"""
 
 from protonfixes import util
 

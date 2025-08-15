@@ -1,4 +1,4 @@
-"""Game fix for Record of Sky: Children of the Light"""
+"""Game fix for Akiba's Trip: Undead & Undressed"""
 
 from protonfixes import util
 
