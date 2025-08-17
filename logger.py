@@ -6,6 +6,7 @@ import sys
 from enum import Enum
 from pathlib import Path
 
+
 # Enums
 class LogLevel(Enum):
     """Enum and mapping (level -> color) for log levels"""

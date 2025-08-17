@@ -1,5 +1,4 @@
-"""Game fix for Devil May Cry HD Collection
-"""
+"""Game fix for Devil May Cry HD Collection"""
 
 from protonfixes import util
 
