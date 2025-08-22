@@ -250,6 +250,32 @@ def setup_fsr4(compat_dir: str, prefix_dir: str) -> None:
         log.warn('Failed to download amdxcffx64.dll')
 
 
+def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: str) -> None:
+    """Setup configured upscalers
+
+    usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
+    """
+    loaddll_replace = set()
+    if 'fsr4' in compat_config or 'fsr4rdna3' in compat_config:
+        setup_fsr4(compat_dir, prefix_dir)
+        if check_fsr4(compat_dir, prefix_dir):
+            loaddll_replace.add('fsr4')
+    if 'dlss' in compat_config:
+        setup_dlss(compat_dir, prefix_dir)
+        if check_dlss(compat_dir, prefix_dir):
+            loaddll_replace.add('dlss')
+    if "xess" in compat_config:
+        setup_xess(compat_dir, prefix_dir)
+        if check_xess(compat_dir, prefix_dir):
+            loaddll_replace.add("xess")
+    if "fsr3" in compat_config:
+        setup_fsr3(compat_dir, prefix_dir)
+        if check_fsr3(compat_dir, prefix_dir):
+            loaddll_replace.add("fsr3")
+    if loaddll_replace:
+        env["WINE_LOADDLL_REPLACE"] = ",".join(loaddll_replace)
+
+
 def setup_local_shader_cache(env: dict) -> None:
     """Setup per-game shader cache if shader pre-caching is disabled
 
