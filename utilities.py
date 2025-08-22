@@ -51,7 +51,7 @@ def setup_mount_drives(func: Callable[[str, str, str], None]) -> None:
                 func('gamedrive', drive_map[directory], directory)
 
 
-# DLSS and XeSS links taken from https://github.com/beeradmoore/dlss-swapper-manifest-builder/blob/main/manifest.json
+# DLSS, XeSS and FSR3 links taken from https://github.com/beeradmoore/dlss-swapper-manifest-builder/blob/main/manifest.json
 __dlss_version = '310.3.0.0'
 __dlss_version_file = 'dlss_version'
 __dlss_urls = {
@@ -65,6 +65,12 @@ __xess_urls = {
     'drive_c/windows/system32/libxess.dll': 'https://dlss-swapper-downloads.beeradmoore.com/xess/xess_v2.0.2.53_B6D2A108369FE3CD7FC82AF14DD8C60C.zip',
     'drive_c/windows/system32/libxell.dll': 'https://dlss-swapper-downloads.beeradmoore.com/xell/xell_v1.2.0.9_7371177F39EFBBB60A3F1274244C3ECA.zip',
     'drive_c/windows/system32/libxess_fg.dll': 'https://dlss-swapper-downloads.beeradmoore.com/xess_fg/xess_fg_v1.2.0.87_904116C83B5C6115CBE41FF3BE513997.zip',
+}
+__fsr3_version = '1.0.1.41314'
+__fsr3_version_file = 'fsr3_version'
+__fsr3_urls = {
+    'drive_c/windows/system32/amd_fidelityfx_vk.dll': 'https://dlss-swapper-downloads.beeradmoore.com/fsr_31_vk/fsr_31_vk_v1.0.1.41314_9718FD774C61BE1AF6AF411CF65394CD.zip',
+    'drive_c/windows/system32/amd_fidelityfx_dx12.dll': 'https://dlss-swapper-downloads.beeradmoore.com/fsr_31_dx12/fsr_31_dx12_v1.0.1.41314_49230AD94ED6169933CD0457501D9CB4.zip',
 }
 __fsr4_version = '67A4D2BC10ad000'
 __fsr4_version_file = 'fsr4_version'
@@ -111,6 +117,19 @@ def check_xess(compat_dir: str, prefix_dir: str) -> bool:
         __xess_urls,
         __xess_version,
         os.path.join(compat_dir, __xess_version_file),
+    )
+
+
+def check_fsr3(compat_dir: str, prefix_dir: str) -> bool:
+    """Setup if FSR3 dlls are present and up-to-date
+
+    usage: check_fsr3(g_compatdata.base_dir, g_compatdata.prefix_dir)
+    """
+    return __check_upscaler_files(
+        prefix_dir,
+        __fsr3_urls,
+        __fsr3_version,
+        os.path.join(compat_dir, __fsr3_version_file),
     )
 
 
@@ -183,6 +202,25 @@ def setup_xess(compat_dir: str, prefix_dir: str) -> None:
         __download_extract_zip,
         __xess_version,
         os.path.join(compat_dir, __xess_version_file),
+    ):
+        log.info('Automatic XeSS upgrade enabled')
+    else:
+        log.warn('Failed to download libxe*.dll')
+
+
+def setup_fsr3(compat_dir: str, prefix_dir: str) -> None:
+    """Setup FSR3
+
+    usage: setup_fsr3(g_compatdata.base_dir, g_compatdata.prefix_dir)
+    """
+    if check_fsr3(compat_dir, prefix_dir):
+        return
+    if __setup_upscaler_files(
+        prefix_dir,
+        __fsr3_urls,
+        __download_extract_zip,
+        __fsr3_version,
+        os.path.join(compat_dir, __fsr3_version_file),
     ):
         log.info('Automatic XeSS upgrade enabled')
     else:
