@@ -15,4 +15,3 @@ def main() -> None:
     """Wuchang Mod Enabler"""
     if os.path.exists(install_dir + '/Project_Plague/Binaries/Win64/bitfix'):
         util.winedll_override('dsound', util.OverrideOrder.NATIVE_BUILTIN)
-
