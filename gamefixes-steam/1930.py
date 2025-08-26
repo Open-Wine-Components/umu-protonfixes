@@ -7,3 +7,4 @@ from protonfixes import util
 
 def main() -> None:
     util.protontricks('xact')
+    util.protontricks('d3dx9')
