@@ -1,5 +1,4 @@
-"""Fable - The Lost Chapters
-"""
+"""Fable - The Lost Chapters"""
 
 from protonfixes import util
 
