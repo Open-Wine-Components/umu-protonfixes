@@ -23,3 +23,6 @@ def main() -> None:
 
     # RSI Launcher animation
     util.winedll_override('libglesv2', util.OverrideOrder.BUILTIN)
+
+    # SC's shipped EAC Installer fails with ntsync
+    util.disable_ntsync()
