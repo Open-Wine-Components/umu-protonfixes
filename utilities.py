@@ -52,12 +52,12 @@ def setup_mount_drives(func: Callable[[str, str, str], None]) -> None:
 
 
 # DLSS, XeSS and FSR3 links taken from https://github.com/beeradmoore/dlss-swapper-manifest-builder/blob/main/manifest.json
-__dlss_version = '310.3.0.0'
+__dlss_version = '310.4.0.0'
 __dlss_version_file = 'dlss_version'
 __dlss_urls = {
-    'drive_c/windows/system32/nvngx_dlss.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss/dlss_v310.3.0.0_436BD84602A538C63C4953F78B668204.zip',
-    'drive_c/windows/system32/nvngx_dlssd.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss_d/dlss_d_v310.3.0.0_FC7A45AFE0A8EFA3E9426C875F0CDF2B.zip',
-    'drive_c/windows/system32/nvngx_dlssg.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss_g/dlss_g_v310.3.0.0_ED5ACC14FFCBD33B0FAF2EAEFCC84F89.zip',
+    'drive_c/windows/system32/nvngx_dlss.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss/dlss_v310.4.0.0_F2956394EB8A8474C79B7DE83AF4D473.zip',
+    'drive_c/windows/system32/nvngx_dlssd.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss_d/dlss_d_v310.4.0.0_4D2D5AA25FEFDAFE119666AB33B38138.zip',
+    'drive_c/windows/system32/nvngx_dlssg.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss_g/dlss_g_v310.4.0.0_9FD3C2A5AF635D573CB313BDE86E7058.zip',
 }
 __xess_version = '2.1.0'
 __xess_version_file = 'xess_version'
@@ -79,7 +79,7 @@ __fsr4_urls = {
 }
 
 
-def __check_upscaler_files(prefix_dir: str, files: dict, version: str, version_file: str) -> bool:
+def __check_upscaler_files(prefix_dir: str, files: dict, version: str, version_file: str, ignore_version: bool) -> bool:
     for dst in files.keys():
         if not os.path.exists(prefix_dir + dst):
             return False
@@ -88,13 +88,13 @@ def __check_upscaler_files(prefix_dir: str, files: dict, version: str, version_f
         return False
     with open(version_file) as version_fd:
         old_version = version_fd.read()
-    if old_version == version:
+    if old_version == version or ignore_version:
         return True
 
     return False
 
 
-def check_dlss(compat_dir: str, prefix_dir: str) -> bool:
+def check_dlss(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
     """Setup if DLSS dlls are present and up-to-date
 
     usage: check_dlss(g_compatdata.base_dir, g_compatdata.prefix_dir)
@@ -104,10 +104,11 @@ def check_dlss(compat_dir: str, prefix_dir: str) -> bool:
         __dlss_urls,
         __dlss_version,
         os.path.join(compat_dir, __dlss_version_file),
+        ignore_version,
     )
 
 
-def check_xess(compat_dir: str, prefix_dir: str) -> bool:
+def check_xess(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
     """Setup if XeSS dlls are present and up-to-date
 
     usage: check_xess(g_compatdata.base_dir, g_compatdata.prefix_dir)
@@ -117,10 +118,11 @@ def check_xess(compat_dir: str, prefix_dir: str) -> bool:
         __xess_urls,
         __xess_version,
         os.path.join(compat_dir, __xess_version_file),
+        ignore_version,
     )
 
 
-def check_fsr3(compat_dir: str, prefix_dir: str) -> bool:
+def check_fsr3(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
     """Setup if FSR3 dlls are present and up-to-date
 
     usage: check_fsr3(g_compatdata.base_dir, g_compatdata.prefix_dir)
@@ -130,10 +132,11 @@ def check_fsr3(compat_dir: str, prefix_dir: str) -> bool:
         __fsr3_urls,
         __fsr3_version,
         os.path.join(compat_dir, __fsr3_version_file),
+        ignore_version,
     )
 
 
-def check_fsr4(compat_dir: str, prefix_dir: str) -> bool:
+def check_fsr4(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
     """Setup if FSR4 dlls are present and up-to-date
 
     usage: check_fsr4(g_compatdata.base_dir, g_compatdata.prefix_dir)
@@ -143,16 +146,25 @@ def check_fsr4(compat_dir: str, prefix_dir: str) -> bool:
         __fsr4_urls,
         __fsr4_version,
         os.path.join(compat_dir, __fsr4_version_file),
+        ignore_version,
     )
 
 
 def __setup_upscaler_files(prefix_dir: str, files: dict, dlfunc: Callable[[str, str], None], version: str, version_file: str) -> bool:
     for dst in files.keys():
+        file = prefix_dir + dst
+        temp = prefix_dir + dst + '.old'
         try:
-            dlfunc(files[dst], prefix_dir + dst)
+            if os.path.exists(file):
+                os.rename(file, temp)
+            dlfunc(files[dst], file)
+            if os.path.exists(temp):
+                os.unlink(temp)
         except Exception:
-            if os.path.exists(prefix_dir + dst):
-                os.unlink(prefix_dir + dst)
+            if os.path.exists(file):
+                os.unlink(file)
+            if os.path.exists(temp):
+                os.rename(temp, file)
             return False
     with open(version_file, 'w') as version_fd:
         version_fd.write(version)
@@ -258,19 +270,19 @@ def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: 
     loaddll_replace = set()
     if 'fsr4' in compat_config or 'fsr4rdna3' in compat_config:
         setup_fsr4(compat_dir, prefix_dir)
-        if check_fsr4(compat_dir, prefix_dir):
+        if check_fsr4(compat_dir, prefix_dir, ignore_version=True):
             loaddll_replace.add('fsr4')
     if 'dlss' in compat_config:
         setup_dlss(compat_dir, prefix_dir)
-        if check_dlss(compat_dir, prefix_dir):
+        if check_dlss(compat_dir, prefix_dir, ignore_version=True):
             loaddll_replace.add('dlss')
     if "xess" in compat_config:
         setup_xess(compat_dir, prefix_dir)
-        if check_xess(compat_dir, prefix_dir):
+        if check_xess(compat_dir, prefix_dir, ignore_version=True):
             loaddll_replace.add("xess")
     if "fsr3" in compat_config:
         setup_fsr3(compat_dir, prefix_dir)
-        if check_fsr3(compat_dir, prefix_dir):
+        if check_fsr3(compat_dir, prefix_dir, ignore_version=True):
             loaddll_replace.add("fsr3")
     if loaddll_replace:
         env["WINE_LOADDLL_REPLACE"] = ",".join(loaddll_replace)
