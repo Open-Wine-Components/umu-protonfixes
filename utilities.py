@@ -3,13 +3,16 @@
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import urllib.request
 import zipfile
+from pathlib import Path
 from typing import Callable, Union
 
 from .logger import log
+from .config import config
 
 
 def winetricks(env: dict, wine_bin: str, wineserver_bin: str) -> None:
@@ -66,7 +69,7 @@ def __get_manifest() -> dict:
     return __manifest_json  # pyright: ignore [reportReturnType]
 
 
-def __get_dll_download(upscaler: str, version: str = 'default') -> dict:
+def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
     dlls = __get_manifest()[upscaler]
     for dll in reversed(dlls):
         if version in dll['version']:
@@ -82,24 +85,24 @@ __fsr4_version_file = 'fsr4_version'
 
 def __get_dlss_dlls(version: str = 'default') -> dict:
     return {
-        'drive_c/windows/system32/nvngx_dlss.dll': __get_dll_download('dlss', version),
-        'drive_c/windows/system32/nvngx_dlssd.dll': __get_dll_download('dlss_d', version),
-        'drive_c/windows/system32/nvngx_dlssg.dll': __get_dll_download('dlss_g', version),
+        'drive_c/windows/system32/nvngx_dlss.dll': __get_dll_manifest('dlss', version),
+        'drive_c/windows/system32/nvngx_dlssd.dll': __get_dll_manifest('dlss_d', version),
+        'drive_c/windows/system32/nvngx_dlssg.dll': __get_dll_manifest('dlss_g', version),
     }
 
 
 def __get_xess_dlls(version: str = 'default') -> dict:
     return {
-        'drive_c/windows/system32/libxess.dll': __get_dll_download('xess', version),
-        'drive_c/windows/system32/libxell.dll': __get_dll_download('xell', version),
-        'drive_c/windows/system32/libxess_fg.dll': __get_dll_download('xess_fg', version),
+        'drive_c/windows/system32/libxess.dll': __get_dll_manifest('xess', version),
+        'drive_c/windows/system32/libxell.dll': __get_dll_manifest('xell', version),
+        'drive_c/windows/system32/libxess_fg.dll': __get_dll_manifest('xess_fg', version),
     }
 
 
 def __get_fsr3_dlls(version: str = 'default') -> dict:
     return {
-        'drive_c/windows/system32/amd_fidelityfx_vk.dll': __get_dll_download('fsr_31_vk', version),
-        'drive_c/windows/system32/amd_fidelityfx_dx12.dll': __get_dll_download('fsr_31_dx12', version),
+        'drive_c/windows/system32/amd_fidelityfx_vk.dll': __get_dll_manifest('fsr_31_vk', version),
+        'drive_c/windows/system32/amd_fidelityfx_dx12.dll': __get_dll_manifest('fsr_31_dx12', version),
     }
 
 
@@ -180,22 +183,27 @@ def check_upscaler(
 def __download_upscaler_files(
     prefix_dir: str, files: dict, dlfunc: Callable[[str, str], None], version_file: str
 ) -> bool:
+    cache_dir = config.path.cache_dir.joinpath('upscalers')
     version = dict()
     for dst in files.keys():
-        file = os.path.join(prefix_dir, dst)
-        temp = os.path.join(prefix_dir, dst + '.old')
+        file = Path(prefix_dir, dst)
+        temp = Path(prefix_dir, dst + '.old')
         try:
-            if os.path.exists(file):
-                os.rename(file, temp)
-            dlfunc(files[dst]['download_url'], file)
-            if os.path.exists(temp):
-                os.unlink(temp)
+            if file.exists():
+                file.rename(temp)
+            cached_file = cache_dir.joinpath(file.stem, files[dst]['version'], file.name)
+            if not cached_file.exists():
+                cached_file.parent.mkdir(parents=True, exist_ok=True)
+                dlfunc(files[dst]['download_url'], cached_file.as_posix())
+            shutil.copy(cached_file, file)
+            if temp.exists():
+                temp.unlink(missing_ok=True)
         except Exception as e:
             log.crit(str(e))
-            if os.path.exists(file):
-                os.unlink(file)
-            if os.path.exists(temp):
-                os.rename(temp, file)
+            if file.exists():
+                file.unlink(missing_ok=True)
+            if temp.exists():
+                temp.rename(file)
             return False
         version[dst] = files[dst]['version']
     with open(version_file, 'w') as version_fd:
@@ -228,24 +236,22 @@ def download_upscaler(
     name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4
     version: the version of the upscaler dll to download
     """
+    if check_upscaler(name, compat_dir, prefix_dir, version):
+        return
+
     upscalers = {
         'dlss': (__get_dlss_dlls, __download_extract_zip, __dlss_version_file),
         'xess': (__get_xess_dlls, __download_extract_zip, __xess_version_file),
         'fsr3': (__get_fsr3_dlls, __download_extract_zip, __fsr3_version_file),
         'fsr4': (__get_fsr4_dlls, __download_fsr4, __fsr4_version_file),
     }
-    if check_upscaler(name, compat_dir, prefix_dir, version):
-        return
-
     get_files, download_func, version_file = upscalers[name]
-    if __download_upscaler_files(
+    if not __download_upscaler_files(
         prefix_dir,
         get_files(version),
         download_func,
         os.path.join(compat_dir, version_file),
     ):
-        log.info(f'Automatic {name.upper()} upgrade enabled')
-    else:
         log.warn(f'Failed to download {name} dlls')
 
 
@@ -259,7 +265,10 @@ def __setup_upscaler(
 ) -> bool:
     version = env[key] if env.get(key, '0') not in {'0', '1'} else version
     download_upscaler(name, compat_dir, prefix_dir, version)
-    return check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=True)
+    enabled = check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=True)
+    if enabled:
+        log.info(f'Automatic {name.upper()} upgrade enabled')
+    return enabled
 
 
 def setup_upscalers(
@@ -280,13 +289,13 @@ def setup_upscalers(
     if 'fsr3' in compat_config:
         if __setup_upscaler(env, 'PROTON_XESS_UPGRADE', 'fsr3', compat_dir, prefix_dir):
             loaddll_replace.add('fsr3')
-    if 'fsr4' in compat_config:
-        if __setup_upscaler(env, 'PROTON_FSR4_UPGRADE', 'fsr4', compat_dir, prefix_dir):
-            loaddll_replace.add('fsr4')
     if 'fsr4rdna3' in compat_config:
         if __setup_upscaler(
             env, 'PROTON_FSR4_RDNA3_UPGRADE', 'fsr4', compat_dir, prefix_dir, '4.0.0'
         ):
+            loaddll_replace.add('fsr4')
+    elif 'fsr4' in compat_config:
+        if __setup_upscaler(env, 'PROTON_FSR4_UPGRADE', 'fsr4', compat_dir, prefix_dir):
             loaddll_replace.add('fsr4')
     if loaddll_replace:
         env['WINE_LOADDLL_REPLACE'] = ','.join(loaddll_replace)
