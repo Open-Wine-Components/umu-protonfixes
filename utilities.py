@@ -1,12 +1,13 @@
 """Various utility functions for use in the proton script"""
 
 import io
+import json
 import os
 import subprocess
 import sys
 import urllib.request
 import zipfile
-from typing import Callable
+from typing import Callable, Union
 
 from .logger import log
 
@@ -51,131 +52,154 @@ def setup_mount_drives(func: Callable[[str, str, str], None]) -> None:
                 func('gamedrive', drive_map[directory], directory)
 
 
-# DLSS, XeSS and FSR3 links taken from https://github.com/beeradmoore/dlss-swapper-manifest-builder/blob/main/manifest.json
-__dlss_version = '310.4.0.0'
+__manifest_url = 'https://raw.githubusercontent.com/beeradmoore/dlss-swapper-manifest-builder/refs/heads/main/manifest.json'
+__manifest_json: Union[dict, None] = None
+
+
+def __get_manifest() -> dict:
+    global __manifest_json
+    if __manifest_json is not None:
+        return __manifest_json
+
+    with urllib.request.urlopen(__manifest_url) as url_fd:
+        __manifest_json = json.loads(url_fd.read())
+    return __manifest_json  # pyright: ignore [reportReturnType]
+
+
+def __get_dll_download(upscaler: str, version: str = 'default') -> dict:
+    dlls = __get_manifest()[upscaler]
+    for dll in reversed(dlls):
+        if version in dll['version']:
+            return dll
+    return dlls[-1]
+
+
 __dlss_version_file = 'dlss_version'
-__dlss_urls = {
-    'drive_c/windows/system32/nvngx_dlss.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss/dlss_v310.4.0.0_F2956394EB8A8474C79B7DE83AF4D473.zip',
-    'drive_c/windows/system32/nvngx_dlssd.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss_d/dlss_d_v310.4.0.0_4D2D5AA25FEFDAFE119666AB33B38138.zip',
-    'drive_c/windows/system32/nvngx_dlssg.dll': 'https://dlss-swapper-downloads.beeradmoore.com/dlss_g/dlss_g_v310.4.0.0_9FD3C2A5AF635D573CB313BDE86E7058.zip',
-}
-__xess_version = '2.1.0'
 __xess_version_file = 'xess_version'
-__xess_urls = {
-    'drive_c/windows/system32/libxess.dll': 'https://dlss-swapper-downloads.beeradmoore.com/xess/xess_v2.0.2.53_B6D2A108369FE3CD7FC82AF14DD8C60C.zip',
-    'drive_c/windows/system32/libxell.dll': 'https://dlss-swapper-downloads.beeradmoore.com/xell/xell_v1.2.0.9_7371177F39EFBBB60A3F1274244C3ECA.zip',
-    'drive_c/windows/system32/libxess_fg.dll': 'https://dlss-swapper-downloads.beeradmoore.com/xess_fg/xess_fg_v1.2.0.87_904116C83B5C6115CBE41FF3BE513997.zip',
-}
-__fsr3_version = '1.0.1.41314'
 __fsr3_version_file = 'fsr3_version'
-__fsr3_urls = {
-    'drive_c/windows/system32/amd_fidelityfx_vk.dll': 'https://dlss-swapper-downloads.beeradmoore.com/fsr_31_vk/fsr_31_vk_v1.0.1.41314_9718FD774C61BE1AF6AF411CF65394CD.zip',
-    'drive_c/windows/system32/amd_fidelityfx_dx12.dll': 'https://dlss-swapper-downloads.beeradmoore.com/fsr_31_dx12/fsr_31_dx12_v1.0.1.41314_49230AD94ED6169933CD0457501D9CB4.zip',
-}
-__fsr4_version = '67A4D2BC10ad000'
 __fsr4_version_file = 'fsr4_version'
-__fsr4_urls = {
-    'drive_c/windows/system32/amdxcffx64.dll': f'https://download.amd.com/dir/bin/amdxcffx64.dll/{__fsr4_version}/amdxcffx64.dll',
-}
+
+
+def __get_dlss_dlls(version: str = 'default') -> dict:
+    return {
+        'drive_c/windows/system32/nvngx_dlss.dll': __get_dll_download('dlss', version),
+        'drive_c/windows/system32/nvngx_dlssd.dll': __get_dll_download('dlss_d', version),
+        'drive_c/windows/system32/nvngx_dlssg.dll': __get_dll_download('dlss_g', version),
+    }
+
+
+def __get_xess_dlls(version: str = 'default') -> dict:
+    return {
+        'drive_c/windows/system32/libxess.dll': __get_dll_download('xess', version),
+        'drive_c/windows/system32/libxell.dll': __get_dll_download('xell', version),
+        'drive_c/windows/system32/libxess_fg.dll': __get_dll_download('xess_fg', version),
+    }
+
+
+def __get_fsr3_dlls(version: str = 'default') -> dict:
+    return {
+        'drive_c/windows/system32/amd_fidelityfx_vk.dll': __get_dll_download('fsr_31_vk', version),
+        'drive_c/windows/system32/amd_fidelityfx_dx12.dll': __get_dll_download('fsr_31_dx12', version),
+    }
+
+
+def __get_fsr4_dlls(version: str = 'default') -> dict:
+    __fsr4_dlls = {
+        '4.0.0': {
+            'version': '67A4D2BC10ad000',
+            'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/67A4D2BC10ad000/amdxcffx64.dll',
+        },
+        '4.0.1': {
+            'version': '67D435F7d97000',
+            'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/67D435F7d97000/amdxcffx64.dll',
+        },
+        # "4.0.2": {
+        #     "version": '67A4D2BC10ad000',
+        #     "download_url": 'https://download.amd.com/dir/bin/amdxcffx64.dll/67A4D2BC10ad000/amdxcffx64.dll',
+        # }
+    }
+    # use the safe option here for now
+    if version == 'default' or version not in __fsr4_dlls.keys():
+        version = '4.0.0'
+    return {
+        'drive_c/windows/system32/amdxcffx64.dll': __fsr4_dlls[version],
+    }
 
 
 def __check_upscaler_files(
-    prefix_dir: str, files: dict, version: str, version_file: str, ignore_version: bool
+    prefix_dir: str, files: dict, version_file: str, ignore_version: bool
 ) -> bool:
-    for dst in files.keys():
-        if not os.path.exists(prefix_dir + dst):
-            return False
-
     if not os.path.isfile(version_file):
         return False
-    with open(version_file) as version_fd:
-        old_version = version_fd.read()
-    if old_version == version or ignore_version:
-        return True
+
+    try:
+        with open(version_file) as version_fd:
+            version = version_fd.read()
+        version = json.loads(version)
+    except Exception as e:
+        log.crit(str(e))
+        return False
+
+    for dst in files.keys():
+        if not os.path.exists(os.path.join(prefix_dir, dst)):
+            return False
+        if version[dst] == files[dst]['version'] or ignore_version:
+            return True
 
     return False
 
 
-def check_dlss(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
-    """Setup if DLSS dlls are present and up-to-date
-
-    usage: check_dlss(g_compatdata.base_dir, g_compatdata.prefix_dir)
-    """
-    return __check_upscaler_files(
-        prefix_dir,
-        __dlss_urls,
-        __dlss_version,
-        os.path.join(compat_dir, __dlss_version_file),
-        ignore_version,
-    )
-
-
-def check_xess(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
-    """Setup if XeSS dlls are present and up-to-date
-
-    usage: check_xess(g_compatdata.base_dir, g_compatdata.prefix_dir)
-    """
-    return __check_upscaler_files(
-        prefix_dir,
-        __xess_urls,
-        __xess_version,
-        os.path.join(compat_dir, __xess_version_file),
-        ignore_version,
-    )
-
-
-def check_fsr3(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
-    """Setup if FSR3 dlls are present and up-to-date
-
-    usage: check_fsr3(g_compatdata.base_dir, g_compatdata.prefix_dir)
-    """
-    return __check_upscaler_files(
-        prefix_dir,
-        __fsr3_urls,
-        __fsr3_version,
-        os.path.join(compat_dir, __fsr3_version_file),
-        ignore_version,
-    )
-
-
-def check_fsr4(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -> bool:
-    """Setup if FSR4 dlls are present and up-to-date
-
-    usage: check_fsr4(g_compatdata.base_dir, g_compatdata.prefix_dir)
-    """
-    return __check_upscaler_files(
-        prefix_dir,
-        __fsr4_urls,
-        __fsr4_version,
-        os.path.join(compat_dir, __fsr4_version_file),
-        ignore_version,
-    )
-
-
-def __setup_upscaler_files(
+def check_upscaler(
+    name: str,
+    compat_dir: str,
     prefix_dir: str,
-    files: dict,
-    dlfunc: Callable[[str, str], None],
-    version: str,
-    version_file: str,
+    version: str = 'default',
+    ignore_version: bool = False,
 ) -> bool:
+    """Check for upscaler files and their versions
+
+    name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4
+    version: the version of the upscaler dll to download
+    ignore_version: ignore version mismatch but still check if the dlls are present
+    """
+    upscalers = {
+        'dlss': (__get_dlss_dlls, __dlss_version_file),
+        'xess': (__get_xess_dlls, __xess_version_file),
+        'fsr3': (__get_fsr3_dlls, __fsr3_version_file),
+        'fsr4': (__get_fsr4_dlls, __fsr4_version_file),
+    }
+    get_files, version_file = upscalers[name]
+    return __check_upscaler_files(
+        prefix_dir,
+        get_files(version),
+        os.path.join(compat_dir, version_file),
+        ignore_version,
+    )
+
+
+def __download_upscaler_files(
+    prefix_dir: str, files: dict, dlfunc: Callable[[str, str], None], version_file: str
+) -> bool:
+    version = dict()
     for dst in files.keys():
-        file = prefix_dir + dst
-        temp = prefix_dir + dst + '.old'
+        file = os.path.join(prefix_dir, dst)
+        temp = os.path.join(prefix_dir, dst + '.old')
         try:
             if os.path.exists(file):
                 os.rename(file, temp)
-            dlfunc(files[dst], file)
+            dlfunc(files[dst]['download_url'], file)
             if os.path.exists(temp):
                 os.unlink(temp)
-        except Exception:
+        except Exception as e:
+            log.crit(str(e))
             if os.path.exists(file):
                 os.unlink(file)
             if os.path.exists(temp):
                 os.rename(temp, file)
             return False
+        version[dst] = files[dst]['version']
     with open(version_file, 'w') as version_fd:
-        version_fd.write(version)
+        version_fd.write(json.dumps(version))
     return True
 
 
@@ -186,116 +210,87 @@ def __download_extract_zip(url: str, dst: str) -> None:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0'
         },
     )
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
     with zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(request).read())) as zip_fd:
         zip_fd.extractall(os.path.dirname(dst))
 
 
-def setup_dlss(compat_dir: str, prefix_dir: str) -> None:
-    """Setup DLSS
+def __download_fsr4(url: str, dst: str) -> None:
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    urllib.request.urlretrieve(url, dst)
 
-    usage: setup_dlss(g_compatdata.base_dir, g_compatdata.prefix_dir)
+
+def download_upscaler(
+    name: str, compat_dir: str, prefix_dir: str, version: str = 'default'
+) -> None:
+    """Check for upscaler files and their versions
+
+    name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4
+    version: the version of the upscaler dll to download
     """
-    if check_dlss(compat_dir, prefix_dir):
-        return
-    if __setup_upscaler_files(
-        prefix_dir,
-        __dlss_urls,
-        __download_extract_zip,
-        __dlss_version,
-        os.path.join(compat_dir, __dlss_version_file),
-    ):
-        log.info('Automatic DLSS upgrade enabled')
-    else:
-        log.warn('Failed to download nvngx_dlss*.dll')
-
-
-def setup_xess(compat_dir: str, prefix_dir: str) -> None:
-    """Setup XeSS
-
-    usage: setup_xess(g_compatdata.base_dir, g_compatdata.prefix_dir)
-    """
-    if check_xess(compat_dir, prefix_dir):
-        return
-    if __setup_upscaler_files(
-        prefix_dir,
-        __xess_urls,
-        __download_extract_zip,
-        __xess_version,
-        os.path.join(compat_dir, __xess_version_file),
-    ):
-        log.info('Automatic XeSS upgrade enabled')
-    else:
-        log.warn('Failed to download libxe*.dll')
-
-
-def setup_fsr3(compat_dir: str, prefix_dir: str) -> None:
-    """Setup FSR3
-
-    usage: setup_fsr3(g_compatdata.base_dir, g_compatdata.prefix_dir)
-    """
-    if check_fsr3(compat_dir, prefix_dir):
-        return
-    if __setup_upscaler_files(
-        prefix_dir,
-        __fsr3_urls,
-        __download_extract_zip,
-        __fsr3_version,
-        os.path.join(compat_dir, __fsr3_version_file),
-    ):
-        log.info('Automatic XeSS upgrade enabled')
-    else:
-        log.warn('Failed to download libxe*.dll')
-
-
-def setup_fsr4(compat_dir: str, prefix_dir: str) -> None:
-    """Setup FSR4
-
-    usage: setup_fsr4(g_compatdata.base_dir, g_compatdata.prefix_dir)
-    """
-    if check_fsr4(compat_dir, prefix_dir):
+    upscalers = {
+        'dlss': (__get_dlss_dlls, __download_extract_zip, __dlss_version_file),
+        'xess': (__get_xess_dlls, __download_extract_zip, __xess_version_file),
+        'fsr3': (__get_fsr3_dlls, __download_extract_zip, __fsr3_version_file),
+        'fsr4': (__get_fsr4_dlls, __download_fsr4, __fsr4_version_file),
+    }
+    if check_upscaler(name, compat_dir, prefix_dir, version):
         return
 
-    def __download_fsr4(url: str, dst: str) -> None:
-        urllib.request.urlretrieve(url, dst)
-
-    if __setup_upscaler_files(
+    get_files, download_func, version_file = upscalers[name]
+    if __download_upscaler_files(
         prefix_dir,
-        __fsr4_urls,
-        __download_fsr4,
-        __fsr4_version,
-        os.path.join(compat_dir, __fsr4_version_file),
+        get_files(version),
+        download_func,
+        os.path.join(compat_dir, version_file),
     ):
-        log.info('Automatic FSR4 upgrade enabled')
+        log.info(f'Automatic {name.upper()} upgrade enabled')
     else:
-        log.warn('Failed to download amdxcffx64.dll')
+        log.warn(f'Failed to download {name} dlls')
+
+
+def __setup_upscaler(
+    env: dict,
+    key: str,
+    name: str,
+    compat_dir: str,
+    prefix_dir: str,
+    version: str = 'default',
+) -> bool:
+    version = env[key] if env.get(key, '0') not in {'0', '1'} else version
+    download_upscaler(name, compat_dir, prefix_dir, version)
+    return check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=True)
 
 
 def setup_upscalers(
     compat_config: set, env: dict, compat_dir: str, prefix_dir: str
-) -> None:
+) -> set:
     """Setup configured upscalers
 
     usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
+    return: a set of the upscalers that have been successfully enabled
     """
     loaddll_replace = set()
-    if 'fsr4' in compat_config or 'fsr4rdna3' in compat_config:
-        setup_fsr4(compat_dir, prefix_dir)
-        if check_fsr4(compat_dir, prefix_dir, ignore_version=True):
-            loaddll_replace.add('fsr4')
     if 'dlss' in compat_config:
-        setup_dlss(compat_dir, prefix_dir)
-        if check_dlss(compat_dir, prefix_dir, ignore_version=True):
+        if __setup_upscaler(env, 'PROTON_DLSS_UPGRADE', 'dlss', compat_dir, prefix_dir):
             loaddll_replace.add('dlss')
     if 'xess' in compat_config:
-        setup_xess(compat_dir, prefix_dir)
-        if check_xess(compat_dir, prefix_dir, ignore_version=True):
+        if __setup_upscaler(env, 'PROTON_XESS_UPGRADE', 'xess', compat_dir, prefix_dir):
             loaddll_replace.add('xess')
     if 'fsr3' in compat_config:
-        setup_fsr3(compat_dir, prefix_dir)
-        if check_fsr3(compat_dir, prefix_dir, ignore_version=True):
+        if __setup_upscaler(env, 'PROTON_XESS_UPGRADE', 'fsr3', compat_dir, prefix_dir):
             loaddll_replace.add('fsr3')
+    if 'fsr4' in compat_config:
+        if __setup_upscaler(env, 'PROTON_FSR4_UPGRADE', 'fsr4', compat_dir, prefix_dir):
+            loaddll_replace.add('fsr4')
+    if 'fsr4rdna3' in compat_config:
+        if __setup_upscaler(
+            env, 'PROTON_FSR4_RDNA3_UPGRADE', 'fsr4', compat_dir, prefix_dir, '4.0.0'
+        ):
+            loaddll_replace.add('fsr4')
     if loaddll_replace:
         env['WINE_LOADDLL_REPLACE'] = ','.join(loaddll_replace)
+    return loaddll_replace
 
 
 def setup_local_shader_cache(env: dict) -> None:
