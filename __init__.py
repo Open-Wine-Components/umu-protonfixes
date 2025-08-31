@@ -9,13 +9,8 @@ from . import fix
 from .logger import log
 from .utilities import (
     setup_mount_drives,
+    setup_upscalers,
     winetricks,
-    setup_dlss,
-    setup_fsr4,
-    setup_xess,
-    check_dlss,
-    check_fsr4,
-    check_xess,
 )
 
 sys.path.insert(
@@ -95,11 +90,6 @@ __all__ = [
     'setup',
     'execute',
     'setup_mount_drives',
+    'setup_upscalers',
     'winetricks',
-    'setup_dlss',
-    'setup_fsr4',
-    'setup_xess',
-    'check_dlss',
-    'check_fsr4',
-    'check_xess',
 ]
