@@ -79,7 +79,9 @@ __fsr4_urls = {
 }
 
 
-def __check_upscaler_files(prefix_dir: str, files: dict, version: str, version_file: str, ignore_version: bool) -> bool:
+def __check_upscaler_files(
+    prefix_dir: str, files: dict, version: str, version_file: str, ignore_version: bool
+) -> bool:
     for dst in files.keys():
         if not os.path.exists(prefix_dir + dst):
             return False
@@ -150,7 +152,13 @@ def check_fsr4(compat_dir: str, prefix_dir: str, ignore_version: bool = False) -
     )
 
 
-def __setup_upscaler_files(prefix_dir: str, files: dict, dlfunc: Callable[[str, str], None], version: str, version_file: str) -> bool:
+def __setup_upscaler_files(
+    prefix_dir: str,
+    files: dict,
+    dlfunc: Callable[[str, str], None],
+    version: str,
+    version_file: str,
+) -> bool:
     for dst in files.keys():
         file = prefix_dir + dst
         temp = prefix_dir + dst + '.old'
@@ -262,7 +270,9 @@ def setup_fsr4(compat_dir: str, prefix_dir: str) -> None:
         log.warn('Failed to download amdxcffx64.dll')
 
 
-def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: str) -> None:
+def setup_upscalers(
+    compat_config: set, env: dict, compat_dir: str, prefix_dir: str
+) -> None:
     """Setup configured upscalers
 
     usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
@@ -276,16 +286,16 @@ def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: 
         setup_dlss(compat_dir, prefix_dir)
         if check_dlss(compat_dir, prefix_dir, ignore_version=True):
             loaddll_replace.add('dlss')
-    if "xess" in compat_config:
+    if 'xess' in compat_config:
         setup_xess(compat_dir, prefix_dir)
         if check_xess(compat_dir, prefix_dir, ignore_version=True):
-            loaddll_replace.add("xess")
-    if "fsr3" in compat_config:
+            loaddll_replace.add('xess')
+    if 'fsr3' in compat_config:
         setup_fsr3(compat_dir, prefix_dir)
         if check_fsr3(compat_dir, prefix_dir, ignore_version=True):
-            loaddll_replace.add("fsr3")
+            loaddll_replace.add('fsr3')
     if loaddll_replace:
-        env["WINE_LOADDLL_REPLACE"] = ",".join(loaddll_replace)
+        env['WINE_LOADDLL_REPLACE'] = ','.join(loaddll_replace)
 
 
 def setup_local_shader_cache(env: dict) -> None:
@@ -293,44 +303,43 @@ def setup_local_shader_cache(env: dict) -> None:
 
     usage: setup_local_shader_cache(g_session.env)
     """
-    path = os.environ.get("STEAM_COMPAT_SHADER_PATH", "")
+    path = os.environ.get('STEAM_COMPAT_SHADER_PATH', '')
     if not path:
         return
-    shader_cache_name = "steamapp_shader_cache"
+    shader_cache_name = 'steamapp_shader_cache'
     shader_cache_vars = {
         # Nvidia
-        "__GL_SHADER_DISK_CACHE_APP_NAME": shader_cache_name,
-        "__GL_SHADER_DISK_CACHE_PATH": os.path.join(path, "nvidiav1"),
-        "__GL_SHADER_DISK_CACHE_READ_ONLY_APP_NAME": "steam_shader_cache;steamapp_merged_shader_cache",
+        '__GL_SHADER_DISK_CACHE_APP_NAME': shader_cache_name,
+        '__GL_SHADER_DISK_CACHE_PATH': os.path.join(path, 'nvidiav1'),
+        '__GL_SHADER_DISK_CACHE_READ_ONLY_APP_NAME': 'steam_shader_cache;steamapp_merged_shader_cache',
         # "__GL_SHADER_DISK_CACHE_SIZE": "5000000000",
-        "__GL_SHADER_DISK_CACHE_SKIP_CLEANUP": "1",
+        '__GL_SHADER_DISK_CACHE_SKIP_CLEANUP': '1',
         # Mesa
-        "MESA_DISK_CACHE_READ_ONLY_FOZ_DBS": "steam_cache,steam_precompiled",
-        "MESA_DISK_CACHE_SINGLE_FILE": "1",
-        "MESA_GLSL_CACHE_DIR": path,
-        "MESA_GLSL_CACHE_MAX_SIZE": "5G",
-        "MESA_SHADER_CACHE_DIR": path,
-        "MESA_SHADER_CACHE_MAX_SIZE": "5G",
+        'MESA_DISK_CACHE_READ_ONLY_FOZ_DBS': 'steam_cache,steam_precompiled',
+        'MESA_DISK_CACHE_SINGLE_FILE': '1',
+        'MESA_GLSL_CACHE_DIR': path,
+        'MESA_GLSL_CACHE_MAX_SIZE': '5G',
+        'MESA_SHADER_CACHE_DIR': path,
+        'MESA_SHADER_CACHE_MAX_SIZE': '5G',
         # AMD VK
-        "AMD_VK_PIPELINE_CACHE_FILENAME": shader_cache_name,
-        "AMD_VK_PIPELINE_CACHE_PATH": os.path.join(path, "AMDv1"),
-        "AMD_VK_USE_PIPELINE_CACHE": "1",
+        'AMD_VK_PIPELINE_CACHE_FILENAME': shader_cache_name,
+        'AMD_VK_PIPELINE_CACHE_PATH': os.path.join(path, 'AMDv1'),
+        'AMD_VK_USE_PIPELINE_CACHE': '1',
         # DXVK
-        "DXVK_STATE_CACHE_PATH": os.path.join(path, "DXVK_state_cache"),
+        'DXVK_STATE_CACHE_PATH': os.path.join(path, 'DXVK_state_cache'),
         # VKD3D
-        "VKD3D_SHADER_CACHE_PATH": os.path.join(path, "VKD3D_shader_cache")
+        'VKD3D_SHADER_CACHE_PATH': os.path.join(path, 'VKD3D_shader_cache'),
     }
-    for (var, val) in shader_cache_vars.items():
+    for var, val in shader_cache_vars.items():
         if var in os.environ:
             continue
         if var in {
-            "__GL_SHADER_DISK_CACHE_PATH",
-            "MESA_GLSL_CACHE_DIR",
-            "MESA_SHADER_CACHE_DIR",
-            "AMD_VK_PIPELINE_CACHE_PATH",
-            "DXVK_STATE_CACHE_PATH",
-            "VKD3D_SHADER_CACHE_PATH",
+            '__GL_SHADER_DISK_CACHE_PATH',
+            'MESA_GLSL_CACHE_DIR',
+            'MESA_SHADER_CACHE_DIR',
+            'AMD_VK_PIPELINE_CACHE_PATH',
+            'DXVK_STATE_CACHE_PATH',
+            'VKD3D_SHADER_CACHE_PATH',
         }:
             os.makedirs(val, exist_ok=True)
         env[var] = val
-
