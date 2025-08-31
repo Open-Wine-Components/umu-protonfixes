@@ -64,8 +64,19 @@ def __get_manifest() -> dict:
     if __manifest_json is not None:
         return __manifest_json
 
-    with urllib.request.urlopen(__manifest_url) as url_fd:
-        __manifest_json = json.loads(url_fd.read())
+    cache_dir = config.path.cache_dir.joinpath('upscalers')
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cached_manifest = cache_dir.joinpath('manifest.json')
+    try:
+        with urllib.request.urlopen(__manifest_url) as url_fd:
+            __manifest_json = json.loads(url_fd.read())
+        with cached_manifest.open('w') as manifest_fd:
+            manifest_fd.write(json.dumps(__manifest_json))
+    except Exception:
+        if cached_manifest.exists():
+            with cached_manifest.open() as manifest_fd:
+                __manifest_json = json.loads(manifest_fd.read())
+
     return __manifest_json  # pyright: ignore [reportReturnType]
 
 
@@ -146,7 +157,7 @@ def __check_upscaler_files(
     for dst in files.keys():
         if not os.path.exists(os.path.join(prefix_dir, dst)):
             return False
-        if version[dst] == files[dst]['version'] or ignore_version:
+        if ignore_version or version[dst] == files[dst]['version']:
             return True
 
     return False
@@ -172,11 +183,12 @@ def check_upscaler(
         'fsr4': (__get_fsr4_dlls, __fsr4_version_file),
     }
     get_files, version_file = upscalers[name]
+    try:
+        files = get_files(version)
+    except Exception:
+        return False
     return __check_upscaler_files(
-        prefix_dir,
-        get_files(version),
-        os.path.join(compat_dir, version_file),
-        ignore_version,
+        prefix_dir, files, os.path.join(compat_dir, version_file), ignore_version,
     )
 
 
@@ -246,13 +258,14 @@ def download_upscaler(
         'fsr4': (__get_fsr4_dlls, __download_fsr4, __fsr4_version_file),
     }
     get_files, download_func, version_file = upscalers[name]
-    if not __download_upscaler_files(
-        prefix_dir,
-        get_files(version),
-        download_func,
-        os.path.join(compat_dir, version_file),
-    ):
-        log.warn(f'Failed to download {name} dlls')
+    try:
+        files = get_files(version)
+        if not __download_upscaler_files(
+            prefix_dir, files, download_func, os.path.join(compat_dir, version_file),
+        ):
+            raise RuntimeError
+    except Exception:
+        log.warn(f'Failed to download {name.upper()} dlls.')
 
 
 def __setup_upscaler(
@@ -267,7 +280,7 @@ def __setup_upscaler(
     download_upscaler(name, compat_dir, prefix_dir, version)
     enabled = check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=True)
     if enabled:
-        log.info(f'Automatic {name.upper()} upgrade enabled')
+        log.info(f'Automatic {name.upper()} upgrade enabled.')
     return enabled
 
 
