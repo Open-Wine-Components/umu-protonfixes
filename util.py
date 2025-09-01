@@ -631,10 +631,12 @@ def disable_fsync() -> None:
     log.info('Disabling FSync')
     set_environment('WINEFSYNC', '')
 
+
 def disable_ntsync() -> None:
     """Disabling NTSync"""
     log.info('Disabling NTSync')
     set_environment('WINENTSYNC', '')
+
 
 def disable_protonmediaconverter() -> None:
     """Disabling Proton Media Converter"""
