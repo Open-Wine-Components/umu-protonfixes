@@ -127,14 +127,14 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
             'version': '67D435F7d97000',
             'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/67D435F7d97000/amdxcffx64.dll',
         },
-        # "4.0.2": {
-        #     "version": '67A4D2BC10ad000',
-        #     "download_url": 'https://download.amd.com/dir/bin/amdxcffx64.dll/67A4D2BC10ad000/amdxcffx64.dll',
-        # }
+        "4.0.2": {
+            "version": '68840348eb8000',
+            "download_url": 'https://download.amd.com/dir/bin/amdxcffx64.dll/68840348eb8000/amdxcffx64.dll',
+        }
     }
     # use the safe option here for now
     if version == 'default' or version not in __fsr4_dlls.keys():
-        version = '4.0.0'
+        version = '4.0.2'
     return {
         'drive_c/windows/system32/amdxcffx64.dll': __fsr4_dlls[version],
     }
