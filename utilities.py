@@ -1,5 +1,6 @@
 """Various utility functions for use in the proton script"""
 
+import hashlib
 import io
 import json
 import os
@@ -82,6 +83,7 @@ def __get_manifest() -> dict:
 
 def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
     dlls = __get_manifest()[upscaler]
+    dlls = tuple(filter(lambda dll: not dll['is_dev_file'], dlls))
     for dll in reversed(dlls):
         if version in dll['version']:
             return dll
@@ -122,14 +124,17 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
         '4.0.0': {
             'version': '67A4D2BC10ad000',
             'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/67A4D2BC10ad000/amdxcffx64.dll',
+            'md5_hash': None,
         },
         '4.0.1': {
             'version': '67D435F7d97000',
             'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/67D435F7d97000/amdxcffx64.dll',
+            'md5_hash': None,
         },
         "4.0.2": {
-            "version": '68840348eb8000',
-            "download_url": 'https://download.amd.com/dir/bin/amdxcffx64.dll/68840348eb8000/amdxcffx64.dll',
+            'version': '68840348eb8000',
+            'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/68840348eb8000/amdxcffx64.dll',
+            'md5_hash': None,
         }
     }
     # use the safe option here for now
@@ -157,6 +162,12 @@ def __check_upscaler_files(
     for dst in files.keys():
         if not os.path.exists(os.path.join(prefix_dir, dst)):
             return False
+        with open(os.path.join(prefix_dir, dst), 'rb') as dst_fd:
+            dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
+        file_md5 = files[dst].get('md5_hash', None)
+        if file_md5 is not None and dst_md5 != file_md5.lower():
+            log.crit(f'MD5 checksum mismatch between prefix "{os.path.basename(dst)}" and manifest')
+            return ignore_version
         if ignore_version or version[dst] == files[dst]['version']:
             return True
 
@@ -204,6 +215,12 @@ def __download_upscaler_files(
             if file.exists():
                 file.rename(temp)
             cached_file = cache_dir.joinpath(file.stem, files[dst]['version'], file.name)
+            if cached_file.exists():
+                cached_md5 = hashlib.md5(cached_file.open('rb').read()).hexdigest().lower()
+                file_md5 = files[dst].get('md5_hash', None)
+                if file_md5 is not None and cached_md5 != file_md5.lower():
+                    log.crit(f'MD5 checksum mismatch between cached "{os.path.basename(dst)}" and manifest')
+                    cached_file.unlink(missing_ok=True)
             if not cached_file.exists():
                 cached_file.parent.mkdir(parents=True, exist_ok=True)
                 dlfunc(files[dst]['download_url'], cached_file.as_posix())
