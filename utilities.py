@@ -1,7 +1,6 @@
 """Various utility functions for use in the proton script"""
 
 import hashlib
-import io
 import json
 import os
 import shutil
@@ -11,6 +10,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 from typing import Callable, Union
+from urllib.parse import unquote, urlparse
 
 from .logger import log
 from .config import config
@@ -122,19 +122,22 @@ def __get_fsr3_dlls(version: str = 'default') -> dict:
 def __get_fsr4_dlls(version: str = 'default') -> dict:
     __fsr4_dlls = {
         '4.0.0': {
-            'version': '67A4D2BC10ad000',
+            'version': '4.0.0_67A4D2BC10ad000',
             'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/67A4D2BC10ad000/amdxcffx64.dll',
             'md5_hash': None,
+            'zip_md5_hash': None,
         },
         '4.0.1': {
-            'version': '67D435F7d97000',
+            'version': '4.0.1_67D435F7d97000',
             'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/67D435F7d97000/amdxcffx64.dll',
             'md5_hash': None,
+            'zip_md5_hash': None,
         },
-        "4.0.2": {
-            'version': '68840348eb8000',
+        '4.0.2': {
+            'version': '4.0.2_68840348eb8000',
             'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/68840348eb8000/amdxcffx64.dll',
             'md5_hash': None,
+            'zip_md5_hash': None,
         }
     }
     # use the safe option here for now
@@ -166,7 +169,7 @@ def __check_upscaler_files(
             dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
         file_md5 = files[dst].get('md5_hash', None)
         if file_md5 is not None and dst_md5 != file_md5.lower():
-            log.crit(f'MD5 checksum mismatch between prefix "{os.path.basename(dst)}" and manifest')
+            log.crit(f'MD5 checksum mismatch between manifest and prefix "{os.path.basename(dst)}"')
             return ignore_version
         if ignore_version or version[dst] == files[dst]['version']:
             return True
@@ -204,7 +207,7 @@ def check_upscaler(
 
 
 def __download_upscaler_files(
-    prefix_dir: str, files: dict, dlfunc: Callable[[str, str], None], version_file: str
+    prefix_dir: str, files: dict, dlfunc: Callable[[dict, Path, Path], None], version_file: str
 ) -> bool:
     cache_dir = config.path.cache_dir.joinpath('upscalers')
     version = dict()
@@ -214,17 +217,7 @@ def __download_upscaler_files(
         try:
             if file.exists():
                 file.rename(temp)
-            cached_file = cache_dir.joinpath(file.stem, files[dst]['version'], file.name)
-            if cached_file.exists():
-                cached_md5 = hashlib.md5(cached_file.open('rb').read()).hexdigest().lower()
-                file_md5 = files[dst].get('md5_hash', None)
-                if file_md5 is not None and cached_md5 != file_md5.lower():
-                    log.crit(f'MD5 checksum mismatch between cached "{os.path.basename(dst)}" and manifest')
-                    cached_file.unlink(missing_ok=True)
-            if not cached_file.exists():
-                cached_file.parent.mkdir(parents=True, exist_ok=True)
-                dlfunc(files[dst]['download_url'], cached_file.as_posix())
-            shutil.copy(cached_file, file)
+            dlfunc(files[dst], cache_dir, file)
             if temp.exists():
                 temp.unlink(missing_ok=True)
         except Exception as e:
@@ -240,21 +233,41 @@ def __download_upscaler_files(
     return True
 
 
-def __download_extract_zip(url: str, dst: str) -> None:
+def __download_file(url: str, dst: Path) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
     request = urllib.request.Request(
         url,
         headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0'
         },
     )
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
-    with zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(request).read())) as zip_fd:
-        zip_fd.extractall(os.path.dirname(dst))
+    with dst.open('wb') as dst_fd:
+        dst_fd.write(urllib.request.urlopen(request).read())
 
 
-def __download_fsr4(url: str, dst: str) -> None:
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
-    urllib.request.urlretrieve(url, dst)
+def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
+    url_path = Path(unquote(urlparse(file['download_url']).path))
+    cached_file = cache.joinpath(url_path.name)
+    if cached_file.exists():
+        cached_md5 = hashlib.md5(cached_file.open('rb').read()).hexdigest().lower()
+        file_md5 = file.get('zip_md5_hash', None)
+        if file_md5 is not None and cached_md5 != file_md5.lower():
+            log.crit(f'MD5 checksum mismatch between manifest and cached "{cached_file.name}"')
+            cached_file.unlink(missing_ok=True)
+    if not cached_file.exists():
+        __download_file(file['download_url'], cached_file)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(cached_file) as zip_fd:
+        zip_fd.extractall(dst.parent)
+
+
+def __download_fsr4(file: dict, cache: Path, dst: Path) -> None:
+    url_path = Path(unquote(urlparse(file['download_url']).path))
+    cached_file = cache.joinpath(url_path.stem + f'_v{file["version"]}' + url_path.suffix)
+    if not cached_file.exists():
+        __download_file(file['download_url'], cached_file)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(cached_file, dst)
 
 
 def download_upscaler(
@@ -347,7 +360,7 @@ def setup_local_shader_cache(env: dict) -> None:
         '__GL_SHADER_DISK_CACHE_PATH': os.path.join(path, 'nvidiav1'),
         '__GL_SHADER_DISK_CACHE_READ_ONLY_APP_NAME': 'steam_shader_cache;steamapp_merged_shader_cache',
         '__GL_SHADER_DISK_CACHE_SIZE': '10737418240',  # 10GiB
-        '__GL_SHADER_DISK_CACHE_SKIP_CLEANUP': '1',
+        #'__GL_SHADER_DISK_CACHE_SKIP_CLEANUP': '1',
         # Mesa
         'MESA_DISK_CACHE_READ_ONLY_FOZ_DBS': 'steam_cache,steam_precompiled',
         'MESA_DISK_CACHE_SINGLE_FILE': '1',
