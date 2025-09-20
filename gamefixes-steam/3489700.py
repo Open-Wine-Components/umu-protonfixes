@@ -1,6 +1,4 @@
-"""Mod support for Stellar Blade
-
-"""
+"""Mod support for Stellar Blade"""
 
 import os
 import glob
