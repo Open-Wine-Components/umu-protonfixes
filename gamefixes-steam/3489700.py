@@ -9,7 +9,6 @@ from protonfixes import util
 
 def main() -> None:
     """Enable modding and fixes"""
-
     install_dir = glob.escape(util.get_game_install_path())
 
     # UE4SS
