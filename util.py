@@ -310,8 +310,7 @@ def protontricks(verb: str) -> bool:
             # Proceed with your function logic here
             pass
         else:
-            log.info('No internet connection. Winetricks will be skipped.')
-            return False
+            log.info('No internet connection. Winetricks will not be able to download anything.')
 
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
