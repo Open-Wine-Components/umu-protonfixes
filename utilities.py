@@ -365,9 +365,9 @@ def setup_local_shader_cache(env: dict) -> None:
         'MESA_DISK_CACHE_READ_ONLY_FOZ_DBS': 'steam_cache,steam_precompiled',
         'MESA_DISK_CACHE_SINGLE_FILE': '1',
         'MESA_GLSL_CACHE_DIR': path,
-        'MESA_GLSL_CACHE_MAX_SIZE': '5G',
+        'MESA_GLSL_CACHE_MAX_SIZE': '10G',
         'MESA_SHADER_CACHE_DIR': path,
-        'MESA_SHADER_CACHE_MAX_SIZE': '5G',
+        'MESA_SHADER_CACHE_MAX_SIZE': '10G',
         # AMD VK
         'AMD_VK_PIPELINE_CACHE_FILENAME': shader_cache_name,
         'AMD_VK_PIPELINE_CACHE_PATH': os.path.join(path, 'AMDv1'),
