@@ -5,4 +5,4 @@ from protonfixes import util
 
 def main() -> None:
     # C++ runtime is not provided in the manifest
-    util.protontricks('vcrun2022')
+    util.protontricks('vcrun2019')
