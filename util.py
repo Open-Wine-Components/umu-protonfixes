@@ -313,6 +313,11 @@ def protontricks(verb: str) -> bool:
             log.info('No internet connection. Winetricks will be skipped.')
             return False
 
+        # Cheeky hack to also reset windows version when 'vcrun2019' is used
+        # DX12 only works with win10 and some games check OS version.
+        if 'vcrun2019' in verb:
+            verb = f'{verb} win10'
+
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
         env['WINEPREFIX'] = str(protonprefix())
