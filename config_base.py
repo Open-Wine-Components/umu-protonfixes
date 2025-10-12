@@ -21,7 +21,7 @@ class ConfigBase:
     """
 
     __CAMEL_CASE_PATTERN: re.Pattern = re.compile(
-        '((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))'
+        "((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))"
     )
 
     @classmethod
@@ -35,11 +35,11 @@ class ConfigBase:
             str: The converted string.
 
         """
-        return cls.__CAMEL_CASE_PATTERN.sub(r'_\1', input).lower()
+        return cls.__CAMEL_CASE_PATTERN.sub(r"_\1", input).lower()
 
     @staticmethod
     def __log(message: str, level: LogLevel = LogLevel.INFO) -> None:
-        log.log(f'[CONFIG]: {message}', level)
+        log.log(f"[CONFIG]: {message}", level)
 
     def __init__(self, path: Path) -> None:
         """Initialize the instance from a given config file.
@@ -77,13 +77,13 @@ class ConfigBase:
         """
         for member_name, member in self.__class__.__dict__.items():
             # Find non private section definitions
-            if not member_name.endswith('Section') or member_name.startswith('_'):
+            if not member_name.endswith("Section") or member_name.startswith("_"):
                 continue
             if not is_dataclass(member):
                 continue
 
             # Convert section definition class name to variable name (MyCfgSection -> my_cfg)
-            section_name = member_name.removesuffix('Section')
+            section_name = member_name.removesuffix("Section")
             section_name = self.snake_case(section_name)
 
             # Do not override existing members by default
@@ -127,12 +127,12 @@ class ConfigBase:
                 def _get_parse_function(type_name: str) -> Callable[[str], Any]:
                     # Mapping of type_name to according value get function
                     value = {
-                        'int': parser_items.getint,
-                        'float': parser_items.getfloat,
-                        'bool': parser_items.getboolean,
-                        'Path': lambda option: Path(parser_items.get(option, '')),
-                        'PosixPath': lambda option: Path(parser_items.get(option, '')),
-                        'str': parser_items.get,
+                        "int": parser_items.getint,
+                        "float": parser_items.getfloat,
+                        "bool": parser_items.getboolean,
+                        "Path": lambda option: Path(parser_items.get(option, "")),
+                        "PosixPath": lambda option: Path(parser_items.get(option, "")),
+                        "str": parser_items.get,
                     }.get(type_name, None)
                     if not value:
                         value = parser_items.get
@@ -167,13 +167,21 @@ class ConfigBase:
             bool: True, if the file was successfully written.
 
         """
-        # Only precede if the parent directory exists
+        # Create parent directory if it doesn't exist
         if not file.parent.is_dir():
-            self.__log(
-                f'Parent directory "{file.parent}" does not exist. Abort.',
-                LogLevel.WARN,
-            )
-            return False
+            try:
+                file.parent.mkdir(parents=True, exist_ok=True)
+                self.__log(
+                    f'Created parent directory "{file.parent}"',
+                    LogLevel.INFO,
+                )
+            except Exception as e:
+                self.__log(
+                    f'Failed to create parent directory "{file.parent}": {str(e)}',
+                    LogLevel.ERROR,
+                )
+                return False
+        return True
 
         # Create and populate ConfigParser
         try:
@@ -187,7 +195,7 @@ class ConfigBase:
                     parser.set(section_name, option_name, str(option_item))
 
             # Write config file
-            with file.open(mode='w') as stream:
+            with file.open(mode="w") as stream:
                 parser.write(stream)
         except Exception as ex:
             self.__log(
