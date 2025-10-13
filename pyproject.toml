@@ -1,9 +1,10 @@
 [project]
 name = "umu-protonfixes"
+dynamic = ["version"]
 description = "Stop gap solution to fix issues in games that run under Wine."
 keywords = ["proton", "protontricks", "wine", "winetricks", "linux", "gaming"]
 license = {file = "LICENSE"}
-requires-python = "3.9"
+requires-python = ">=3.9,<3.10"
 
 
 [project.urls]
