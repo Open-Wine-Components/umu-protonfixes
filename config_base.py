@@ -167,21 +167,8 @@ class ConfigBase:
             bool: True, if the file was successfully written.
 
         """
-        # Create parent directory if it doesn't exist
         if not file.parent.is_dir():
-            try:
-                file.parent.mkdir(parents=True, exist_ok=True)
-                self.__log(
-                    f'Created parent directory "{file.parent}"',
-                    LogLevel.INFO,
-                )
-            except Exception as e:
-                self.__log(
-                    f'Failed to create parent directory "{file.parent}": {str(e)}',
-                    LogLevel.ERROR,
-                )
-                return False
-        return True
+            return False
 
         # Create and populate ConfigParser
         try:
