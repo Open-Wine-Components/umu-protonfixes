@@ -1,4 +1,4 @@
-# UMU-Protonfixes
+# umu-protonfixes
 
 This project acts as a stopgap for fixing games that don't work out of the box on Proton. It implements game-specific patches, such as installing Winetricks verbs.
 
