@@ -5,6 +5,7 @@ from protonfixes import util
 
 def main() -> None:
     util.protontricks('xaudio29')
+    util.protontricks('dotnet48')
 
     base_attibutte = '<runtime>'
     game_opts = """
