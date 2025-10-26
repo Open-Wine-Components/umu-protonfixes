@@ -1,11 +1,4 @@
-"""Persona 5 Strikers
-Missing voices/sounds in cutscenes
-Requires disabling the gstreamer protonaudioconverterbin plugin to get full audio in cutscenes.
-fixed by Swish in Protondb
-
-Also, on Intel Alder Lake and newer CPUs, the game may crash on startup due to a conflict with Denuvo.
-This can be fixed by limiting the game to only use Performance cores (P-cores).
-"""
+from typing import Optional, Tuple  # add this
 
 from protonfixes import util
 import os
@@ -17,7 +10,7 @@ def main() -> None:
     if p_cores is not None:
         util.set_environment("taskset", f"-c {p_cores[0]}-{p_cores[1]}")
 
-def get_intel_p_cores():
+def get_intel_p_cores() -> Optional[Tuple[int, int]]:  # ← add the return type
     # Maps Intel CPU generation numbers to their respective names
     INTEL_GEN_MODEL_CODES = (
         151, # 12th Gen (Alder Lake)
@@ -51,7 +44,7 @@ def get_intel_p_cores():
             if is_intel:
                 break
 
-        # Return None CPU is not in supported generations
+        # Return None if CPU is not in supported generations
         if not is_intel:
             return None
 
