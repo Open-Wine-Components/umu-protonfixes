@@ -1,1 +1,1 @@
-gamefixes-steam/283310.py
+../gamefixes-steam/283310.py
