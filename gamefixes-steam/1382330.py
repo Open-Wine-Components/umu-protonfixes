@@ -1,7 +1,8 @@
-from typing import Optional, Tuple  # add this
+"""Pin the game to Intel P-cores on hybrid Intel CPUs via taskset."""
 
-from protonfixes import util
 import os
+from protonfixes import util
+from typing import Optional  # keep Optional; drop deprecated Tuple
 
 def main() -> None:
     util.disable_protonmediaconverter()
@@ -10,13 +11,13 @@ def main() -> None:
     if p_cores is not None:
         util.set_environment("taskset", f"-c {p_cores[0]}-{p_cores[1]}")
 
-def get_intel_p_cores() -> Optional[Tuple[int, int]]:  # ← add the return type
+def get_intel_p_cores() -> Optional[tuple[int, int]]:
     # Maps Intel CPU generation numbers to their respective names
     INTEL_GEN_MODEL_CODES = (
-        151, # 12th Gen (Alder Lake)
-        183, # 13th Gen (Raptor Lake)
-        190, # 14th Gen (Raptor Lake Refresh)
-        201, # 15th Gen (Arrow Lake, early)
+        151,  # 12th Gen (Alder Lake)
+        183,  # 13th Gen (Raptor Lake)
+        190,  # 14th Gen (Raptor Lake Refresh)
+        201,  # 15th Gen (Arrow Lake, early)
     )
 
     # Check if the CPU is Intel and is an appropriate generation
@@ -54,7 +55,7 @@ def get_intel_p_cores() -> Optional[Tuple[int, int]]:  # ← add the return type
         if cpu_count is None:
             return None
 
-        p_cores = []
+        p_cores: list[int] = []
         for core in range(1, cpu_count, 2):
             try:
                 with open(f"/sys/devices/system/cpu/cpu{core}/topology/core_cpus_list") as core_file:
@@ -67,4 +68,8 @@ def get_intel_p_cores() -> Optional[Tuple[int, int]]:  # ← add the return type
                 # If the core_type file doesn't exist, we can't determine core type
                 return None
 
+        if not p_cores:
+            return None
+
         return (p_cores[0], p_cores[-1])
+
