@@ -4,12 +4,14 @@ import os
 from protonfixes import util
 from typing import Optional  # keep Optional; drop deprecated Tuple
 
+
 def main() -> None:
     util.disable_protonmediaconverter()
 
     p_cores = get_intel_p_cores()
     if p_cores is not None:
-        util.set_environment("taskset", f"-c {p_cores[0]}-{p_cores[1]}")
+        util.set_environment('taskset', f'-c {p_cores[0]}-{p_cores[1]}')
+
 
 def get_intel_p_cores() -> Optional[tuple[int, int]]:
     # Maps Intel CPU generation numbers to their respective names
@@ -21,12 +23,12 @@ def get_intel_p_cores() -> Optional[tuple[int, int]]:
     )
 
     # Check if the CPU is Intel and is an appropriate generation
-    with open("/proc/cpuinfo") as f:
+    with open('/proc/cpuinfo') as f:
         cpu_info = f.readlines()
         is_intel = False
 
         for line in cpu_info:
-            if line.startswith("vendor_id") and "GenuineIntel" in line:
+            if line.startswith('vendor_id') and 'GenuineIntel' in line:
                 is_intel = True
                 break
 
@@ -37,9 +39,9 @@ def get_intel_p_cores() -> Optional[tuple[int, int]]:
         # Set is_intel back to false in case the generation test fails
         is_intel = False
         for line in cpu_info:
-            if line.startswith("model"):
+            if line.startswith('model'):
                 for code in INTEL_GEN_MODEL_CODES:
-                    if f": {code}" in line:
+                    if f': {code}' in line:
                         is_intel = True
                         break
             if is_intel:
@@ -58,9 +60,11 @@ def get_intel_p_cores() -> Optional[tuple[int, int]]:
         p_cores: list[int] = []
         for core in range(1, cpu_count, 2):
             try:
-                with open(f"/sys/devices/system/cpu/cpu{core}/topology/core_cpus_list") as core_file:
+                with open(
+                    f'/sys/devices/system/cpu/cpu{core}/topology/core_cpus_list'
+                ) as core_file:
                     core_type = core_file.read().strip()
-                    thread_list = core_type.split("-")
+                    thread_list = core_type.split('-')
 
                     if len(thread_list) == 2:
                         p_cores.extend([int(thread_list[0]), int(thread_list[1])])
@@ -72,4 +76,3 @@ def get_intel_p_cores() -> Optional[tuple[int, int]]:
             return None
 
         return (p_cores[0], p_cores[-1])
-
