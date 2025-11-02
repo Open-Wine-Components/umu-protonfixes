@@ -1203,13 +1203,14 @@ def get_steam_account_id() -> Optional[str]:
 
 
 def create_dos_device(
-    letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM
+    letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM, path: str = '/tmp'
 ) -> bool:
-    """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
+    """Create a symlink to <path> in the dosdevices folder of the prefix and register it
 
     Args:
         letter (str, optional): Letter that the device gets assigned to, must be len = 1
         dev_type (DosDevice, optional): The device's type which will be registered to wine
+        path (str, optional): The link target path, defaults to `/tmp`
 
     Returns:
         bool: True, if device was created
@@ -1222,7 +1223,7 @@ def create_dos_device(
         return False
 
     # Create a symlink in dosdevices
-    dosdevice.symlink_to('/tmp', True)
+    dosdevice.symlink_to(path, True)
 
     # designate device as CD-ROM, requires 64-bit access
     regedit_add(
