@@ -1,5 +1,4 @@
-"""Resident Evil Village
-"""
+"""Resident Evil Village"""
 
 from protonfixes import util
 

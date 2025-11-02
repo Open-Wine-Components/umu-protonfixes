@@ -1,4 +1,4 @@
-"""Game fix for FFXIV"""
+"""Game fix for FFXIV Demo"""
 
 import os
 import re
@@ -39,7 +39,7 @@ def main() -> None:
             return
 
         # If the file exists: set WebView2RuntimeInvalid to 1 (idempotent)
-        with open(configgame, "r", encoding="utf-8", errors="ignore") as f:
+        with open(configgame, encoding="utf-8", errors="ignore") as f:
             content = f.read()
 
         new_content = re.sub(
