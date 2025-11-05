@@ -19,7 +19,5 @@ load_webview2()
     # Seeing a crash that looked like corefonts, but arial didn't help
     # w_call arial
 
-    # The full installer is stil ltrying to cehck for updates, so probably need some flag here
-    # Also quiet options
-    w_try "${WINE}" "${W_CACHE}/${W_PACKAGE}/${_W_installer}"
+    w_try "${WINE}" "${W_CACHE}/${W_PACKAGE}/${_W_installer}" ${W_OPT_UNATTENDED:+/silent} /install
 }
