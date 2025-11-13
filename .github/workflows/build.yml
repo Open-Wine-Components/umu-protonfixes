@@ -21,6 +21,17 @@ jobs:
         run: |
           make
 
+  steamrt4:
+    runs-on: ubuntu-latest
+    container: registry.gitlab.steamos.cloud/steamrt/steamrt4/sdk:beta
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: Build umu-protonfixes
+        run: |
+          make
+
   umu:
     runs-on: ubuntu-latest
     container: ghcr.io/open-wine-components/umu-sdk:latest
