@@ -380,8 +380,6 @@ def setup_local_shader_cache(env: dict) -> None:
         'VKD3D_SHADER_CACHE_PATH': os.path.join(path, 'VKD3D_shader_cache'),
     }
     for var, val in shader_cache_vars.items():
-        if var in os.environ:
-            continue
         if var in {
             '__GL_SHADER_DISK_CACHE_PATH',
             'MESA_GLSL_CACHE_DIR',
@@ -391,4 +389,4 @@ def setup_local_shader_cache(env: dict) -> None:
             'VKD3D_SHADER_CACHE_PATH',
         }:
             os.makedirs(val, exist_ok=True)
-        env[var] = val
+        env.setdefault(var, val)
