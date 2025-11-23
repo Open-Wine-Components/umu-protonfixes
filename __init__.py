@@ -8,6 +8,7 @@ from typing import Callable
 from . import fix
 from .logger import log
 from .utilities import (
+    setup_frame_rate,
     setup_mount_drives,
     setup_upscalers,
     winetricks,
@@ -89,6 +90,7 @@ def execute() -> None:
 __all__ = [
     'setup',
     'execute',
+    'setup_frame_rate',
     'setup_mount_drives',
     'setup_upscalers',
     'winetricks',
