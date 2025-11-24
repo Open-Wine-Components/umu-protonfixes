@@ -21,6 +21,9 @@ i386_lib_dir: str = (
 x86_64_lib_dir: str = (
     f'{os.path.dirname(os.path.realpath(__file__))}/files/lib/x86_64-linux-gnu'
 )
+aarch64_lib_dir: str = (
+    f'{os.path.dirname(os.path.realpath(__file__))}/files/lib/aarch64-linux-gnu'
+)
 
 
 # This is needed for protonfixes
@@ -60,7 +63,7 @@ def setup(
 ) -> None:
     """Setup PATH and LD_LIBRARY_PATH to include protonfixes's binary and library paths"""
     func(env, bin_path_var, bin_dir, ':')
-    func(env, lib_path_var, f'{x86_64_lib_dir}:{i386_lib_dir}', ':')
+    func(env, lib_path_var, f'{x86_64_lib_dir}:{aarch64_lib_dir}:{i386_lib_dir}', ':')
 
 
 def winetricks(env: dict, wine_bin: str, wineserver_bin: str) -> None:

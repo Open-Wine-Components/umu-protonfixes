@@ -6,8 +6,12 @@ DSTDIR := $(shell realpath $(DIST))
 TARGET_DIR := $(DSTDIR)
 
 BASEDIR       := /files
-i386_LIBDIR    = $(BASEDIR)/lib/i386-linux-gnu
-x86_64_LIBDIR  = $(BASEDIR)/lib/x86_64-linux-gnu
+
+TARGET_ARCH ?= x86_64
+LIBDIR := $(BASEDIR)/lib/x86_64-linux-gnu
+ifeq ($(TARGET_ARCH),arm64)
+	LIBDIR := $(BASEDIR)/lib/aarch64-linux-gnu
+endif
 
 .PHONY: all
 
@@ -51,7 +55,7 @@ $(OBJDIR)/.build-cabextract-dist: | $(OBJDIR)/libmspack
 	$(info :: Building cabextract )
 	cd $(OBJDIR)/libmspack/cabextract && \
 	autoreconf -fiv -I /usr/share/gettext/m4/ && \
-	./configure --prefix=$(BASEDIR) --libdir=$(x86_64_LIBDIR) && \
+	./configure --prefix=$(BASEDIR) --libdir=$(LIBDIR) && \
 	make
 	touch $(@)
 
@@ -73,7 +77,7 @@ $(OBJDIR)/.build-libmspack-dist: | $(OBJDIR)/libmspack
 	$(info :: Building libmspack )
 	cd $(OBJDIR)/libmspack/libmspack && \
 	autoreconf -vfi && \
-	./configure --prefix=$(BASEDIR) --libdir=$(x86_64_LIBDIR) --disable-static && \
+	./configure --prefix=$(BASEDIR) --libdir=$(LIBDIR) --disable-static && \
 	sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool && \
 	make
 	touch $(@)
@@ -87,8 +91,8 @@ libmspack-install: libmspack-dist
 	cd $(OBJDIR)/libmspack/libmspack && \
 	make DESTDIR=$(TARGET_DIR) install
 	rm -r $(TARGET_DIR)$(BASEDIR)/include
-	rm -r $(TARGET_DIR)$(BASEDIR)/lib/x86_64-linux-gnu/pkgconfig
-	rm    $(TARGET_DIR)$(BASEDIR)/lib/x86_64-linux-gnu/libmspack.la
+	rm -r $(TARGET_DIR)$(LIBDIR)/pkgconfig
+	rm    $(TARGET_DIR)$(LIBDIR)/libmspack.la
 
 #
 # unzip
