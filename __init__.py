@@ -7,10 +7,10 @@ from typing import Callable
 
 from . import fix
 from .logger import log
+from .upscalers import setup_upscalers
 from .utilities import (
     setup_frame_rate,
     setup_mount_drives,
-    setup_upscalers,
     winetricks,
 )
 
