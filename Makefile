@@ -7,9 +7,14 @@ TARGET_DIR := $(DSTDIR)
 
 BASEDIR       := /files
 
+# Default flags are from Proton, CFLAGS/LDFLAGS are expected to tbe overriden by Proton's makefile
 TARGET_ARCH ?= x86_64
 LIBDIR := $(BASEDIR)/lib/x86_64-linux-gnu
+CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
+LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
 ifeq ($(TARGET_ARCH),arm64)
+	CFLAGS ?= -march=armv8.2-a -mtune=cortex-x3
+	LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
 	LIBDIR := $(BASEDIR)/lib/aarch64-linux-gnu
 endif
 
@@ -98,9 +103,6 @@ libmspack-install: libmspack-dist
 # unzip
 #
 
-# Flags are from Proton
-CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
-LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
 DEFINES = -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT \
  -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD \
  -DDATE_FORMAT=DF_YMD -DUSE_BZIP2 -DIZ_HAVE_UXUIDGID -DNOMEMCPY \
