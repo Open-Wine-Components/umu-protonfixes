@@ -108,7 +108,7 @@ def execute() -> None:
     if check_iscriptevaluator():
         log.debug('Skipping fix execution. We are running "iscriptevaluator.exe".')
     elif not check_conditions():
-        log.warn('Skipping fix execution. We are probably running an unit test.')
+        log.warn('Skipping fix execution. We are probably running a unit test.')
     else:
         try:
             fix.main()
