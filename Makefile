@@ -6,8 +6,17 @@ DSTDIR := $(shell realpath $(DIST))
 TARGET_DIR := $(DSTDIR)
 
 BASEDIR       := /files
-i386_LIBDIR    = $(BASEDIR)/lib/i386-linux-gnu
-x86_64_LIBDIR  = $(BASEDIR)/lib/x86_64-linux-gnu
+
+# Default flags are from Proton, CFLAGS/LDFLAGS are expected to tbe overriden by Proton's makefile
+TARGET_ARCH ?= x86_64
+LIBDIR := $(BASEDIR)/lib/x86_64-linux-gnu
+CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
+LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
+ifeq ($(TARGET_ARCH),arm64)
+	CFLAGS ?= -march=armv8.2-a -mtune=cortex-x3
+	LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
+	LIBDIR := $(BASEDIR)/lib/aarch64-linux-gnu
+endif
 
 .PHONY: all
 
@@ -51,7 +60,7 @@ $(OBJDIR)/.build-cabextract-dist: | $(OBJDIR)/libmspack
 	$(info :: Building cabextract )
 	cd $(OBJDIR)/libmspack/cabextract && \
 	autoreconf -fiv -I /usr/share/gettext/m4/ && \
-	./configure --prefix=$(BASEDIR) --libdir=$(x86_64_LIBDIR) && \
+	./configure --prefix=$(BASEDIR) --libdir=$(LIBDIR) && \
 	make
 	touch $(@)
 
@@ -73,7 +82,7 @@ $(OBJDIR)/.build-libmspack-dist: | $(OBJDIR)/libmspack
 	$(info :: Building libmspack )
 	cd $(OBJDIR)/libmspack/libmspack && \
 	autoreconf -vfi && \
-	./configure --prefix=$(BASEDIR) --libdir=$(x86_64_LIBDIR) --disable-static && \
+	./configure --prefix=$(BASEDIR) --libdir=$(LIBDIR) --disable-static && \
 	sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool && \
 	make
 	touch $(@)
@@ -87,16 +96,13 @@ libmspack-install: libmspack-dist
 	cd $(OBJDIR)/libmspack/libmspack && \
 	make DESTDIR=$(TARGET_DIR) install
 	rm -r $(TARGET_DIR)$(BASEDIR)/include
-	rm -r $(TARGET_DIR)$(BASEDIR)/lib/x86_64-linux-gnu/pkgconfig
-	rm    $(TARGET_DIR)$(BASEDIR)/lib/x86_64-linux-gnu/libmspack.la
+	rm -r $(TARGET_DIR)$(LIBDIR)/pkgconfig
+	rm    $(TARGET_DIR)$(LIBDIR)/libmspack.la
 
 #
 # unzip
 #
 
-# Flags are from Proton
-CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
-LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
 DEFINES = -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT \
  -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD \
  -DDATE_FORMAT=DF_YMD -DUSE_BZIP2 -DIZ_HAVE_UXUIDGID -DNOMEMCPY \
