@@ -99,7 +99,7 @@ def setup_mount_drives(func: Callable[[str, str, str], None]) -> None:
         }
 
         for directory in drive_map.keys():
-            if os.path.exists(directory) and not _is_directory_empty(directory):
+            if os.access(directory, os.R_OK) and not _is_directory_empty(directory):
                 func('gamedrive', drive_map[directory], directory)
 
 
