@@ -10,6 +10,7 @@ from .logger import log
 from .upscalers import setup_upscalers
 from .utilities import (
     setup_frame_rate,
+    setup_local_shader_cache,
     setup_mount_drives,
     winetricks,
 )
@@ -91,6 +92,7 @@ __all__ = [
     'setup',
     'execute',
     'setup_frame_rate',
+    'setup_local_shader_cache',
     'setup_mount_drives',
     'setup_upscalers',
     'winetricks',
