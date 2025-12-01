@@ -274,13 +274,10 @@ def __setup_upscaler(
     return enabled
 
 
-def setup_upscalers(
-    compat_config: set, env: dict, compat_dir: str, prefix_dir: str
-) -> set:
+def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: str) -> None:
     """Setup configured upscalers
 
     usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
-    return: a set of the upscalers that have been successfully enabled
     """
     loaddll_replace = set()
     if 'dlss' in compat_config:
@@ -300,6 +297,31 @@ def setup_upscalers(
     elif 'fsr4' in compat_config:
         if __setup_upscaler(env, 'PROTON_FSR4_UPGRADE', 'fsr4', compat_dir, prefix_dir):
             loaddll_replace.add('fsr4')
+
+    if 'fsr4' in loaddll_replace:
+        force_enable_anti_lag = env.get('ENABLE_LAYER_MESA_ANTI_LAG', '0') != '1'
+        env.setdefault('DISABLE_LAYER_MESA_ANTI_LAG', str(int(force_enable_anti_lag)))
+        env['FSR4_UPGRADE'] = '1'
+        if 'fsr4rdna3' in compat_config:
+            env['DXIL_SPIRV_CONFIG'] = 'wmma_rdna3_workaround'
+
+    if 'dlss' in loaddll_replace:
+        env.setdefault(
+            'DXVK_NVAPI_DRS_SETTINGS',
+            str(
+                'ngx_dlss_sr_override=on,'
+                'ngx_dlss_rr_override=on,'
+                'ngx_dlss_fg_override=on,'
+                'ngx_dlss_sr_override_render_preset_selection=render_preset_latest,'
+                'ngx_dlss_rr_override_render_preset_selection=render_preset_latest,'
+            ),
+        )
+
+    if 'xess' in loaddll_replace:
+        pass
+
+    if 'fsr3' in loaddll_replace:
+        pass
+
     if loaddll_replace:
         env['WINE_LOADDLL_REPLACE'] = ','.join(loaddll_replace)
-    return loaddll_replace

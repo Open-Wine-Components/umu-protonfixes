@@ -59,11 +59,13 @@ def setup_frame_rate(env: dict, func: Callable[[dict, str, str, str], None]) -> 
         func(env, 'DXVK_CONFIG', f'd3d9.maxFrameRate={frame_rate}', ';')
 
 
-def setup_local_shader_cache(env: dict) -> None:
+def setup_local_shader_cache(compat_config: set, env: dict) -> None:
     """Setup per-game shader cache if shader pre-caching is disabled
 
     usage: setup_local_shader_cache(g_session.env)
     """
+    if 'localshadercache' not in compat_config:
+        return
     path = os.environ.get('STEAM_COMPAT_SHADER_PATH', '')
     if not path:
         return
