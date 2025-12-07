@@ -1,6 +1,5 @@
 """Game fix for SOMA"""
 
-import os
 from protonfixes import util
 
 
