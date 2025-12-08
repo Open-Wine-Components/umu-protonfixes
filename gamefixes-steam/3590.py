@@ -7,7 +7,9 @@ YT Tutorial for slowdown fix: https://www.youtube.com/watch?v=EK1HyVGlHvY
 Source of previous changedir fix: https://github.com/JamesHealdUK/protonfixes/blob/master/fixes/3590.sh
 """
 
+import os
 import shutil
+import signal
 import time
 import threading
 from pathlib import Path
@@ -33,7 +35,9 @@ def _fix_executable() -> None:
             try:
                 shutil.copy2(dst, backup)
                 shutil.copy2(src, dst)
-                log.info('PvZ executable fix applied successfully')
+                log.info('PvZ executable fix applied - restarting game')
+                # Kill the current game process so Steam restarts it with correct exe
+                os.kill(os.getpid(), signal.SIGTERM)
             except Exception as e:
                 log.error(f'Failed to apply PvZ fix: {e}')
             return
