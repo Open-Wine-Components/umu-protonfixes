@@ -52,6 +52,7 @@ __dlss_version_file = 'dlss_version'
 __xess_version_file = 'xess_version'
 __fsr3_version_file = 'fsr3_version'
 __fsr4_version_file = 'fsr4_version'
+__fsr4_int8_version_file = 'fsr4_int8_version'
 
 
 def __get_dlss_dlls(version: str = 'default') -> dict:
@@ -106,6 +107,30 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
     }
 
 
+def __get_fsr4_int8_dlls(version: str = 'default') -> dict:
+    """Get FSR4 INT8 (unofficial) dll info for RDNA2/RDNA3
+
+    This uses the community INT8 compiled version of FSR4 which works on
+    RDNA2 and RDNA3 GPUs that lack the official FSR4 ML hardware support. Generally notably faster than the FP8 path on these GPUs, especially RDNA2, but with some quality tradeoffs.
+    """
+    __fsr4_int8_dlls = {
+        '4.0.2': {
+            'version': '4.0.2',
+            'download_url': 'https://github.com/xXJSONDeruloXx/OptiScaler-Bleeding-Edge/releases/download/amd-fsr-r-int8/amd_fidelityfx_upscaler_dx12.dll',
+            'md5_hash': "0ca99991ce3669d1d5320eb011aadb25",
+            'zip_md5_hash': None,
+        },
+    }
+
+    # its not actually 4.0.2 but when compiled that was the version set in code. The ML2Code shaders actually predate 4.0.0, Just mirroring the other DL here.
+    if version == 'default' or version not in __fsr4_int8_dlls:
+        version = '4.0.2'
+
+    return {
+        'drive_c/windows/system32/amd_fidelityfx_upscaler_dx12.dll': __fsr4_int8_dlls[version],
+    }
+
+
 def __check_upscaler_files(
     prefix_dir: str, files: dict, version_file: str, ignore_version: bool
 ) -> bool:
@@ -145,7 +170,7 @@ def check_upscaler(
 ) -> bool:
     """Check for upscaler files and their versions
 
-    name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4
+    name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4, fsr4int8
     version: the version of the upscaler dll to download
     ignore_version: ignore version mismatch but still check if the dlls are present
     """
@@ -154,6 +179,7 @@ def check_upscaler(
         'xess': (__get_xess_dlls, __xess_version_file),
         'fsr3': (__get_fsr3_dlls, __fsr3_version_file),
         'fsr4': (__get_fsr4_dlls, __fsr4_version_file),
+        'fsr4int8': (__get_fsr4_int8_dlls, __fsr4_int8_version_file),
     }
     get_files, version_file = upscalers[name]
     try:
@@ -235,7 +261,7 @@ def download_upscaler(
 ) -> None:
     """Check for upscaler files and their versions
 
-    name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4
+    name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4, fsr4int8
     version: the version of the upscaler dll to download
     """
     if check_upscaler(name, compat_dir, prefix_dir, version):
@@ -246,6 +272,7 @@ def download_upscaler(
         'xess': (__get_xess_dlls, __download_extract_zip, __xess_version_file),
         'fsr3': (__get_fsr3_dlls, __download_extract_zip, __fsr3_version_file),
         'fsr4': (__get_fsr4_dlls, __download_fsr4, __fsr4_version_file),
+        'fsr4int8': (__get_fsr4_int8_dlls, __download_fsr4, __fsr4_int8_version_file),
     }
     get_files, download_func, version_file = upscalers[name]
     try:
@@ -289,7 +316,10 @@ def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: 
     if 'fsr3' in compat_config:
         if __setup_upscaler(env, 'PROTON_FSR3_UPGRADE', 'fsr3', compat_dir, prefix_dir):
             loaddll_replace.add('fsr3')
-    if 'fsr4rdna3' in compat_config:
+    if 'fsr4int8' in compat_config:
+        if __setup_upscaler(env, 'PROTON_FSR4_INT8', 'fsr4int8', compat_dir, prefix_dir):
+            loaddll_replace.add('fsr4int8')
+    elif 'fsr4rdna3' in compat_config:
         if __setup_upscaler(
             env, 'PROTON_FSR4_RDNA3_UPGRADE', 'fsr4', compat_dir, prefix_dir, '4.0.0'
         ):
@@ -304,6 +334,15 @@ def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: 
         env['FSR4_UPGRADE'] = '1'
         if 'fsr4rdna3' in compat_config:
             env['DXIL_SPIRV_CONFIG'] = 'wmma_rdna3_workaround'
+
+    if 'fsr4int8' in loaddll_replace:
+        # Match the anti-lag behaviour of the FP8 path
+        force_enable_anti_lag = env.get('ENABLE_LAYER_MESA_ANTI_LAG', '0') != '1'
+        env.setdefault('DISABLE_LAYER_MESA_ANTI_LAG', str(int(force_enable_anti_lag)))
+
+        # same flag tooling expects for "FSR4 is in play".
+        # This does NOT mean we're using the FP8/amdxcffx64.dll path.
+        env['FSR4_UPGRADE'] = '1'
 
     if 'dlss' in loaddll_replace:
         env.setdefault(
