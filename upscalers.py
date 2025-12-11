@@ -113,9 +113,13 @@ def __check_upscaler_file(
 ) -> bool:
     target = os.path.join(prefix_dir, dst)
 
-    # Before everything, check if target is a symlink and remove it
+    # Before everything, check if target is a symlink
+    # or the file size is unreasonably small and remove it
     if os.path.islink(target):
         log.debug(f'Removing stale symlink "{dst}"')
+        os.unlink(target)
+    if os.path.exists(target) and os.stat(target).st_size < 1024:
+        log.debug(f'Removing stale file "{dst}"')
         os.unlink(target)
 
     # First check if the file exists
@@ -218,20 +222,18 @@ def __download_upscaler_files(
     cache_dir = config.path.cache_dir.joinpath('upscalers')
     version = {}
     for dst in files.keys():
-        log.debug(f'Downloading upscaler file "{os.path.basename(dst)}"')
+        log.info(f'Downloading upscaler file "{os.path.basename(dst)}"')
         file = Path(prefix_dir, dst)
         temp = Path(prefix_dir, dst + '.old')
         try:
             if file.exists() or file.is_symlink():
                 file.rename(temp)
             dlfunc(files[dst], cache_dir, file)
-            if temp.exists() or temp.is_symlink():
-                temp.unlink(missing_ok=True)
+            temp.unlink(missing_ok=True)
         except Exception as e:
             log.crit(f'Error while downloading file "{file.name}"')
             log.crit(str(e))
-            if file.exists():
-                file.unlink(missing_ok=True)
+            file.unlink(missing_ok=True)
             if temp.exists() or temp.is_symlink():
                 temp.rename(file)
             return False
@@ -256,9 +258,12 @@ def __download_file(url: str, dst: Path, *, checksum: Union[str, None] = None) -
     )
     try:
         with dst.open('wb') as dst_fd:
-            dst_fd.write(urllib.request.urlopen(request, timeout=10).read())
+            with urllib.request.urlopen(request, timeout=10) as url_fd:
+                dst_fd.write(url_fd.read())
         dst_md5 = hashlib.md5(dst.open('rb').read()).hexdigest().lower()
-        if checksum is not None and dst_md5 != checksum.lower():
+        dst_size = dst.stat().st_size if dst.exists() else 0
+        # Size check is arbitrary, but nothing should be below 1K
+        if (checksum is not None and dst_md5 != checksum.lower()) or dst_size < 1024:
             raise RuntimeError(f'Malformed download {str(dst)}')
     except Exception as e:
         dst.unlink(missing_ok=True)
@@ -285,6 +290,9 @@ def __download_fsr4(file: dict, cache: Path, dst: Path) -> None:
     url_path = Path(unquote(urlparse(file['download_url']).path))
     cached_file = cache.joinpath(url_path.stem + f'_v{file["version"]}' + url_path.suffix)
     file_md5 = file.get('zip_md5_hash', None)
+    if cached_file.exists():
+        if cached_file.stat().st_size < 1024:
+            cached_file.unlink()
     if not cached_file.exists():
         __download_file(file['download_url'], cached_file, checksum=file_md5)
     dst.parent.mkdir(parents=True, exist_ok=True)
