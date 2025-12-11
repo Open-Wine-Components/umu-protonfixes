@@ -352,8 +352,6 @@ def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: 
             loaddll_replace.add('fsr4')
 
     if 'fsr4' in loaddll_replace:
-        force_enable_anti_lag = env.get('ENABLE_LAYER_MESA_ANTI_LAG', '0') != '1'
-        env.setdefault('DISABLE_LAYER_MESA_ANTI_LAG', str(int(force_enable_anti_lag)))
         env['FSR4_UPGRADE'] = '1'
         if 'fsr4rdna3' in compat_config:
             env['DXIL_SPIRV_CONFIG'] = 'wmma_rdna3_workaround'
