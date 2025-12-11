@@ -44,7 +44,9 @@ def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
     dlls = tuple(filter(lambda dll: not dll['is_dev_file'], dlls))
     for dll in reversed(dlls):
         if version in dll['version']:
+            log.debug(f'Found "{upscaler.upper()}" dll version "{version}"')
             return dll
+    log.debug(f'Version "{version}" for "{upscaler.upper()}" not found, using {dlls[-1]["version"]}')
     return dlls[-1]
 
 
@@ -110,30 +112,46 @@ def __check_upscaler_files(
     prefix_dir: str, files: dict, version_file: str, ignore_version: bool
 ) -> bool:
     if not os.path.isfile(version_file):
+        log.warn(f'Missing version file "{version_file}"')
         return False
 
     try:
         with open(version_file) as version_fd:
             version = version_fd.read()
         version = json.loads(version)
+        # test if new attributes as exist in the config
+        _ = version[tuple(version.keys())[0]].get('md5_hash')
     except Exception as e:
-        log.crit(f'Error while reading version file "{version_file}"')
-        log.crit(str(e))
+        log.warn(f'Error while reading version file "{version_file}"')
+        log.warn(str(e))
         return False
 
     for dst in files.keys():
+        # First check if the file exists
         if not os.path.exists(os.path.join(prefix_dir, dst)):
+            log.warn(f'Missing file from prefix "{dst}"')
             return False
+
         with open(os.path.join(prefix_dir, dst), 'rb') as dst_fd:
             dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
-        file_md5 = files[dst].get('md5_hash', None)
-        if file_md5 is not None and dst_md5 != file_md5.lower():
-            log.crit(f'MD5 checksum mismatch between manifest and prefix "{os.path.basename(dst)}"')
-            return ignore_version
-        if ignore_version or version[dst] == files[dst]['version']:
-            return True
 
-    return False
+        # Then check if the file matches the one recorded in the version file
+        version_md5 = version[dst]['md5_hash']
+        if version_md5 is not None and dst_md5 != version_md5.lower():
+            log.warn(f'MD5 checksum mismatch between version and prefix "{dst}"')
+            return False
+
+        if not ignore_version:
+            if version[dst]['version'] != files[dst]['version']:
+                log.warn(f'Version mismatch between configuration and prefix "{dst}"')
+                return False
+            file_md5 = files[dst].get('md5_hash', None)
+            if file_md5 is not None and dst_md5 != file_md5.lower():
+                log.warn(f'MD5 checksum mismatch between manifest and prefix "{dst}"')
+                return False
+            log.debug(f'Found matching file in prefix "{dst}"')
+
+    return True
 
 
 def check_upscaler(
@@ -141,6 +159,7 @@ def check_upscaler(
     compat_dir: str,
     prefix_dir: str,
     version: str = 'default',
+    *,
     ignore_version: bool = False,
 ) -> bool:
     """Check for upscaler files and their versions
@@ -168,9 +187,19 @@ def check_upscaler(
 def __download_upscaler_files(
     prefix_dir: str, files: dict, dlfunc: Callable[[dict, Path, Path], None], version_file: str
 ) -> bool:
+    """Download and install the required dlls.
+
+    This function takes care of backing up, downloading, and installing the required dlls
+    If the download fails, it will uses the backups to revert to the previous files, otherwise
+    the backups are removed.
+
+    The downloading, caching and installation of the dlls is facilitated in the callable passed through
+    the `dlfunc` argument.
+    """
     cache_dir = config.path.cache_dir.joinpath('upscalers')
     version = dict()
     for dst in files.keys():
+        log.debug(f'Downloading upscaler file "{os.path.basename(dst)}"')
         file = Path(prefix_dir, dst)
         temp = Path(prefix_dir, dst + '.old')
         try:
@@ -187,13 +216,18 @@ def __download_upscaler_files(
             if temp.exists():
                 temp.rename(file)
             return False
-        version[dst] = files[dst]['version']
+        version[dst] = {'version': files[dst]['version'], 'md5_hash': files[dst]['md5_hash']}
     with open(version_file, 'w') as version_fd:
         version_fd.write(json.dumps(version))
     return True
 
 
-def __download_file(url: str, dst: Path) -> None:
+def __download_file(url: str, dst: Path, *, checksum: Union[str, None] = None) -> None:
+    """Downloads a file and checks against a checksum.
+
+    If the download fails or the checksums do not match, the file is removed and the exception is
+    propagated to the caller.
+    """
     dst.parent.mkdir(parents=True, exist_ok=True)
     request = urllib.request.Request(
         url,
@@ -201,21 +235,28 @@ def __download_file(url: str, dst: Path) -> None:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0'
         },
     )
-    with dst.open('wb') as dst_fd:
-        dst_fd.write(urllib.request.urlopen(request).read())
+    try:
+        with dst.open('wb') as dst_fd:
+            dst_fd.write(urllib.request.urlopen(request, timeout=10).read())
+        dst_md5 = hashlib.md5(dst.open('rb').read()).hexdigest().lower()
+        if checksum is not None and dst_md5 != checksum.lower():
+            raise RuntimeError(f'Malformed download {str(dst)}')
+    except Exception as e:
+        dst.unlink(missing_ok=True)
+        raise e
 
 
 def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
     url_path = Path(unquote(urlparse(file['download_url']).path))
     cached_file = cache.joinpath(url_path.name)
+    file_md5 = file.get('zip_md5_hash', None)
     if cached_file.exists():
         cached_md5 = hashlib.md5(cached_file.open('rb').read()).hexdigest().lower()
-        file_md5 = file.get('zip_md5_hash', None)
         if file_md5 is not None and cached_md5 != file_md5.lower():
             log.crit(f'MD5 checksum mismatch between manifest and cached "{cached_file.name}"')
             cached_file.unlink(missing_ok=True)
     if not cached_file.exists():
-        __download_file(file['download_url'], cached_file)
+        __download_file(file['download_url'], cached_file, checksum=file_md5)
     dst.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(cached_file) as zip_fd:
         zip_fd.extractall(dst.parent)
@@ -224,8 +265,9 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
 def __download_fsr4(file: dict, cache: Path, dst: Path) -> None:
     url_path = Path(unquote(urlparse(file['download_url']).path))
     cached_file = cache.joinpath(url_path.stem + f'_v{file["version"]}' + url_path.suffix)
+    file_md5 = file.get('zip_md5_hash', None)
     if not cached_file.exists():
-        __download_file(file['download_url'], cached_file)
+        __download_file(file['download_url'], cached_file, checksum=file_md5)
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(cached_file, dst)
 
@@ -238,8 +280,10 @@ def download_upscaler(
     name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4
     version: the version of the upscaler dll to download
     """
-    if check_upscaler(name, compat_dir, prefix_dir, version):
+    if check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=False):
         return
+    else:
+        log.info(f'Failed to validate "{name.upper()}" files.')
 
     upscalers = {
         'dlss': (__get_dlss_dlls, __download_extract_zip, __dlss_version_file),
