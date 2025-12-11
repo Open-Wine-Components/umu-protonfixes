@@ -127,12 +127,19 @@ def __check_upscaler_files(
         return False
 
     for dst in files.keys():
+        target = os.path.join(prefix_dir, dst)
+
+        # Before everything, check if target is a symlink and remove it
+        if os.path.islink(target):
+            log.debug(f'Removing stale symlink "{dst}"')
+            os.unlink(target)
+
         # First check if the file exists
-        if not os.path.exists(os.path.join(prefix_dir, dst)):
+        if not os.path.exists(target):
             log.warn(f'Missing file from prefix "{dst}"')
             return False
 
-        with open(os.path.join(prefix_dir, dst), 'rb') as dst_fd:
+        with open(target, 'rb') as dst_fd:
             dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
 
         # Then check if the file matches the one recorded in the version file
@@ -141,6 +148,8 @@ def __check_upscaler_files(
             log.warn(f'MD5 checksum mismatch between version and prefix "{dst}"')
             return False
 
+        # If we don't want to ignore the update
+        # We ignore updates in the validation check after the downloads
         if not ignore_version:
             if version[dst]['version'] != files[dst]['version']:
                 log.warn(f'Version mismatch between configuration and prefix "{dst}"')
