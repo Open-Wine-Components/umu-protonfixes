@@ -212,17 +212,17 @@ def __download_upscaler_files(
         file = Path(prefix_dir, dst)
         temp = Path(prefix_dir, dst + '.old')
         try:
-            if file.exists():
+            if file.exists(follow_symlinks=False):
                 file.rename(temp)
             dlfunc(files[dst], cache_dir, file)
-            if temp.exists():
+            if temp.exists(follow_symlinks=False):
                 temp.unlink(missing_ok=True)
         except Exception as e:
             log.crit(f'Error while downloading file "{file.name}"')
             log.crit(str(e))
-            if file.exists():
+            if file.exists(follow_symlinks=False):
                 file.unlink(missing_ok=True)
-            if temp.exists():
+            if temp.exists(follow_symlinks=False):
                 temp.rename(file)
             return False
         version[dst] = {'version': files[dst]['version'], 'md5_hash': files[dst]['md5_hash']}
