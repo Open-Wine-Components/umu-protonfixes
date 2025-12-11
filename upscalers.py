@@ -108,6 +108,45 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
     }
 
 
+def __check_upscaler_file(
+    prefix_dir: str, dst: str, file: dict, version: dict, ignore_version: bool
+) -> bool:
+    target = os.path.join(prefix_dir, dst)
+
+    # Before everything, check if target is a symlink and remove it
+    if os.path.islink(target):
+        log.debug(f'Removing stale symlink "{dst}"')
+        os.unlink(target)
+
+    # First check if the file exists
+    if not os.path.exists(target):
+        log.warn(f'Missing file from prefix "{dst}"')
+        return False
+
+    with open(target, 'rb') as dst_fd:
+        dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
+
+    # Then check if the file matches the one recorded in the version file
+    version_md5 = version['md5_hash']
+    if version_md5 is not None and dst_md5 != version_md5.lower():
+        log.warn(f'MD5 checksum mismatch between version and prefix "{dst}"')
+        return False
+
+    # If we don't want to ignore the update
+    # We ignore updates in the validation check after the downloads
+    if not ignore_version:
+        if version['version'] != file['version']:
+            log.warn(f'Version mismatch between configuration and prefix "{dst}"')
+            return False
+        file_md5 = file.get('md5_hash', None)
+        if file_md5 is not None and dst_md5 != file_md5.lower():
+            log.warn(f'MD5 checksum mismatch between manifest and prefix "{dst}"')
+            return False
+        log.debug(f'Found matching file in prefix "{dst}"')
+
+    return True
+
+
 def __check_upscaler_files(
     prefix_dir: str, files: dict, version_file: str, ignore_version: bool
 ) -> bool:
@@ -116,7 +155,7 @@ def __check_upscaler_files(
         return False
 
     try:
-        with open(version_file) as version_fd:
+        with open(version_file, encoding='utf-8') as version_fd:
             version = version_fd.read()
         version = json.loads(version)
         # test if new attributes as exist in the config
@@ -126,41 +165,12 @@ def __check_upscaler_files(
         log.warn(str(e))
         return False
 
-    for dst in files.keys():
-        target = os.path.join(prefix_dir, dst)
+    valid_files = tuple(
+        __check_upscaler_file(prefix_dir, dst, files[dst], version[dst], ignore_version)
+        for dst in files.keys()
+    )
 
-        # Before everything, check if target is a symlink and remove it
-        if os.path.islink(target):
-            log.debug(f'Removing stale symlink "{dst}"')
-            os.unlink(target)
-
-        # First check if the file exists
-        if not os.path.exists(target):
-            log.warn(f'Missing file from prefix "{dst}"')
-            return False
-
-        with open(target, 'rb') as dst_fd:
-            dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
-
-        # Then check if the file matches the one recorded in the version file
-        version_md5 = version[dst]['md5_hash']
-        if version_md5 is not None and dst_md5 != version_md5.lower():
-            log.warn(f'MD5 checksum mismatch between version and prefix "{dst}"')
-            return False
-
-        # If we don't want to ignore the update
-        # We ignore updates in the validation check after the downloads
-        if not ignore_version:
-            if version[dst]['version'] != files[dst]['version']:
-                log.warn(f'Version mismatch between configuration and prefix "{dst}"')
-                return False
-            file_md5 = files[dst].get('md5_hash', None)
-            if file_md5 is not None and dst_md5 != file_md5.lower():
-                log.warn(f'MD5 checksum mismatch between manifest and prefix "{dst}"')
-                return False
-            log.debug(f'Found matching file in prefix "{dst}"')
-
-    return True
+    return all(valid_files)
 
 
 def check_upscaler(
@@ -206,27 +216,27 @@ def __download_upscaler_files(
     the `dlfunc` argument.
     """
     cache_dir = config.path.cache_dir.joinpath('upscalers')
-    version = dict()
+    version = {}
     for dst in files.keys():
         log.debug(f'Downloading upscaler file "{os.path.basename(dst)}"')
         file = Path(prefix_dir, dst)
         temp = Path(prefix_dir, dst + '.old')
         try:
-            if file.exists(follow_symlinks=False):
+            if file.exists() or file.is_symlink():
                 file.rename(temp)
             dlfunc(files[dst], cache_dir, file)
-            if temp.exists(follow_symlinks=False):
+            if temp.exists() or temp.is_symlink():
                 temp.unlink(missing_ok=True)
         except Exception as e:
             log.crit(f'Error while downloading file "{file.name}"')
             log.crit(str(e))
-            if file.exists(follow_symlinks=False):
+            if file.exists():
                 file.unlink(missing_ok=True)
-            if temp.exists(follow_symlinks=False):
+            if temp.exists() or temp.is_symlink():
                 temp.rename(file)
             return False
         version[dst] = {'version': files[dst]['version'], 'md5_hash': files[dst]['md5_hash']}
-    with open(version_file, 'w') as version_fd:
+    with open(version_file, 'w', encoding='utf-8') as version_fd:
         version_fd.write(json.dumps(version))
     return True
 
@@ -291,8 +301,7 @@ def download_upscaler(
     """
     if check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=False):
         return
-    else:
-        log.info(f'Failed to validate "{name.upper()}" files.')
+    log.info(f'Failed to validate "{name.upper()}" files.')
 
     upscalers = {
         'dlss': (__get_dlss_dlls, __download_extract_zip, __dlss_version_file),
@@ -307,8 +316,9 @@ def download_upscaler(
             prefix_dir, files, download_func, os.path.join(compat_dir, version_file),
         ):
             raise RuntimeError
-    except Exception:
-        log.warn(f'Failed to download {name.upper()} dlls.')
+    except Exception as e:
+        log.crit(f'Failed to download {name.upper()} dlls.')
+        log.crit(str(e))
 
 
 def __setup_upscaler(
