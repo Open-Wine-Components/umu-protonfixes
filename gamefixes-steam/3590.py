@@ -39,7 +39,7 @@ def _fix_executable() -> None:
                 # Kill the current game process so Steam restarts it with correct exe
                 os.kill(os.getpid(), signal.SIGTERM)
             except Exception as e:
-                log.error(f'Failed to apply PvZ fix: {e}')
+                log.warn(f'Failed to apply PvZ fix: {e}')
             return
         time.sleep(0.5)
 
