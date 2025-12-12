@@ -26,15 +26,25 @@ def __get_manifest() -> dict:
     cache_dir = config.path.cache_dir.joinpath('upscalers')
     cache_dir.mkdir(parents=True, exist_ok=True)
     cached_manifest = cache_dir.joinpath('manifest.json')
+    __manifest_json = {}
+
     try:
-        with urllib.request.urlopen(__manifest_url) as url_fd:
+        with urllib.request.urlopen(__manifest_url, timeout=10) as url_fd:
             __manifest_json = json.loads(url_fd.read())
-        with cached_manifest.open('w') as manifest_fd:
+    except Exception as e:
+        log.crit(f'Failed to download "{__manifest_url}"')
+        log.crit(repr(e))
+    else:
+        with cached_manifest.open('w', encoding='utf-8') as manifest_fd:
             manifest_fd.write(json.dumps(__manifest_json))
-    except Exception:
-        if cached_manifest.exists():
-            with cached_manifest.open() as manifest_fd:
+
+    try:
+        if not __manifest_json and cached_manifest.exists():
+            with cached_manifest.open(encoding='utf-8') as manifest_fd:
                 __manifest_json = json.loads(manifest_fd.read())
+    except Exception as e:
+        log.crit(f'Failed to read cached manifest "{str(cached_manifest)}"')
+        log.crit(repr(e))
 
     return __manifest_json  # pyright: ignore [reportReturnType]
 
@@ -166,7 +176,7 @@ def __check_upscaler_files(
         _ = version[tuple(version.keys())[0]].get('md5_hash')
     except Exception as e:
         log.warn(f'Error while reading version file "{version_file}"')
-        log.warn(str(e))
+        log.warn(repr(e))
         return False
 
     valid_files = tuple(
@@ -200,7 +210,9 @@ def check_upscaler(
     get_files, version_file = upscalers[name]
     try:
         files = get_files(version)
-    except Exception:
+    except Exception as e:
+        log.crit('Failed to get file versions from manifest')
+        log.crit(repr(e))
         return False
     return __check_upscaler_files(
         prefix_dir, files, os.path.join(compat_dir, version_file), ignore_version,
@@ -232,7 +244,7 @@ def __download_upscaler_files(
             temp.unlink(missing_ok=True)
         except Exception as e:
             log.crit(f'Error while downloading file "{file.name}"')
-            log.crit(str(e))
+            log.crit(repr(e))
             file.unlink(missing_ok=True)
             if temp.exists() or temp.is_symlink():
                 temp.rename(file)
@@ -326,7 +338,7 @@ def download_upscaler(
             raise RuntimeError
     except Exception as e:
         log.crit(f'Failed to download {name.upper()} dlls.')
-        log.crit(str(e))
+        log.crit(repr(e))
 
 
 def __setup_upscaler(
