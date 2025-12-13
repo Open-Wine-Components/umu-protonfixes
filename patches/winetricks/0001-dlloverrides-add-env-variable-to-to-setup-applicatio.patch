@@ -1,0 +1,39 @@
+From 87d1fb1ba38e934d01dd47f664a3942633664e88 Mon Sep 17 00:00:00 2001
+From: Stelios Tsampas <loathingkernel@gmail.com>
+Date: Sun, 14 Dec 2025 00:06:28 +0200
+Subject: [PATCH] dlloverrides: add env variable to to setup application
+ specific dll overrides
+
+To use set `WINETRICKS_DLLOVERRIDES_EXE=<App>.exe`
+---
+ src/winetricks | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/winetricks b/src/winetricks
+index f2d11b6..9ed333b 100755
+--- a/src/winetricks
++++ b/src/winetricks
+@@ -1912,11 +1912,20 @@ Usage: 'w_override_dlls mode[,mode] dll ...'." ;;
+     shift
+ 
+     echo "Using ${_W_mode} override for following DLLs: $*"
++    if [ -n "${WINETRICKS_DLLOVERRIDES_EXE}" ]
++    then
++    cat > "${W_TMP}"/override-dll.reg <<_EOF_
++REGEDIT4
++
++[HKEY_CURRENT_USER\\Software\\Wine\\AppDefaults\\${WINETRICKS_DLLOVERRIDES_EXE}\\DllOverrides]
++_EOF_
++    else
+     cat > "${W_TMP}"/override-dll.reg <<_EOF_
+ REGEDIT4
+ 
+ [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
+ _EOF_
++    fi
+     while test "$1" != ""; do
+         w_common_override_dll "${_W_mode}" "$1"
+         shift
+-- 
+2.52.0
+
