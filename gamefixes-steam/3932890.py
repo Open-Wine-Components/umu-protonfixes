@@ -8,6 +8,7 @@ import shutil
 from protonfixes import util
 
 def main() -> None:
+    util.install_battleye_runtime()
     util.set_environment('PROTON_USE_XALIA', '0')
     util.protontricks('dotnet48')
     util.protontricks('vcrun2022')
