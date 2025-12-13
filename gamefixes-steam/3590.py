@@ -18,14 +18,13 @@ from protonfixes.logger import log
 
 
 def _fix_executable() -> None:
-    """Wait for correct exe in prefix, then backup and replace game exe"""
+    """Wait for correct exe in prefix, then copy it as PlantsVsZombies_good.exe"""
     prefix = util.protonprefix()
     src = prefix / 'drive_c/ProgramData/PopCap Games/PlantsVsZombies/popcapgame1.exe'
     game_dir = Path(util.get_game_install_path())
-    dst = game_dir / 'PlantsVsZombies.exe'
-    backup = game_dir / 'PlantsVsZombies.exe.bak'
+    good_exe = game_dir / 'PlantsVsZombies_good.exe'
     
-    if backup.exists():
+    if good_exe.exists():
         return
     
     # Poll for up to 60 seconds
@@ -33,8 +32,7 @@ def _fix_executable() -> None:
         if src.exists():
             time.sleep(0.5)
             try:
-                shutil.copy2(dst, backup)
-                shutil.copy2(src, dst)
+                shutil.copy2(src, good_exe)
                 log.info('PvZ executable fix applied - restarting game')
                 # Kill the current game process so Steam restarts it with correct exe
                 os.kill(os.getpid(), signal.SIGTERM)
@@ -48,4 +46,9 @@ def main() -> None:
     """Changes the proton argument from the launcher to the game"""
     # Game expects this to be set
     util.append_argument('-changedir')
-    threading.Thread(target=_fix_executable, daemon=True).start()
+    
+    game_dir = Path(util.get_game_install_path())
+    if game_dir.joinpath("PlantsVsZombies_good.exe").exists():
+        util.replace_command('PlantsVsZombies.exe', 'PlantsVsZombies_good.exe')
+    else:
+        threading.Thread(target=_fix_executable, daemon=True).start()
