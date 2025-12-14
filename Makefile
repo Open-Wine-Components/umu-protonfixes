@@ -1,3 +1,4 @@
+
 BUILD ?= build
 DIST  ?= dist
 
@@ -20,12 +21,12 @@ endif
 
 .PHONY: all
 
-all: cabextract-dist libmspack-dist unzip-dist
+all: winetricks-dist cabextract-dist libmspack-dist unzip-dist
 
 .PHONY: install
 
 # Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
-install: protonfixes-install cabextract-install libmspack-install unzip-install
+install: protonfixes-install winetricks-install cabextract-install libmspack-install unzip-install
 
 #
 # protonfixes
@@ -40,10 +41,29 @@ protonfixes-install: protonfixes
 	cp      -r verbs        $(TARGET_DIR)
 	cp         *.py         $(TARGET_DIR)
 	mkdir   -p              $(TARGET_DIR)$(BASEDIR)/bin
-	cp         winetricks   $(TARGET_DIR)$(BASEDIR)/bin
-	cp         winetricks   $(TARGET_DIR)
 	cp         umu-database.csv   $(TARGET_DIR)
 	rm $(TARGET_DIR)/protonfixes_test.py
+
+#
+# winetricks
+#
+
+$(OBJDIR)/winetricks: | $(OBJDIR)
+	rsync -arx --delete subprojects/winetricks $(OBJDIR)
+
+
+$(OBJDIR)/.build-winetricks-dist: | $(OBJDIR)/winetricks
+	$(info :: Building winetricks )
+	find $(CURDIR)/patches/winetricks/ -name "*.patch" | sort | xargs -n1 patch -d $(OBJDIR)/winetricks -Np1 -i
+	touch $(@)
+
+.PHONY: winetricks-dist winetricks-install
+
+winetricks-dist: $(OBJDIR)/.build-winetricks-dist
+
+winetricks-install: winetricks-dist
+	install -Dm755 $(OBJDIR)/winetricks/src/winetricks $(TARGET_DIR)$(BASEDIR)/bin
+	install -Dm755 $(OBJDIR)/winetricks/src/winetricks $(TARGET_DIR)
 
 #
 # libmspack and cabextract
