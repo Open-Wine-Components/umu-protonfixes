@@ -67,7 +67,7 @@ def _get_steam_libraries_path() -> list:
                 os.path.expanduser(steampath), 'steamapps', 'libraryfolders.vdf'
             )
             if os.path.exists(libfile):
-                libpaths.append(_find_regex_groups(libfile, REGEX_LIB, 'path'))
+                libpaths.extend(_find_regex_groups(libfile, REGEX_LIB, 'path'))
                 break
     return libpaths
 
