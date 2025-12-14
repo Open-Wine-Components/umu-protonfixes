@@ -303,7 +303,7 @@ def check_internet() -> bool:
         return False
 
 
-def protontricks(verb: str) -> bool:
+def protontricks(verb: str, *, exe: Union[str, None] = None) -> bool:
     """Runs winetricks if available"""
     if not checkinstalled(verb):
         if check_internet():
@@ -321,6 +321,8 @@ def protontricks(verb: str) -> bool:
         env['WINESERVER'] = protonmain.g_proton.wineserver_bin
         env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
         env['LD_PRELOAD'] = ''
+        if exe:
+            env['WINETRICKS_DLLOVERRIDES_EXE'] = exe
 
         winetricks_bin = 'winetricks'
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
