@@ -1,0 +1,12 @@
+diff --git a/src/winetricks b/src/winetricks
+index 3beed60..6e30732 100755
+--- a/src/winetricks
++++ b/src/winetricks
+@@ -1551,6 +1551,7 @@ w_download_to()
+                 --header "Accept: */*" \
+                 ${_W_cookiejar:+--load-cookies "${_W_cookiejar}"} \
+                 ${_W_agent:+--user-agent="${_W_agent}"} \
++                --secure-protocol tlsv1 \
+                 "${_W_url}"
+         elif [ "${WINETRICKS_DOWNLOADER}" = "curl" ] ; then
+             # Note: curl does not accept '=' when passing options

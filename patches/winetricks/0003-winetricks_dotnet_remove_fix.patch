@@ -1,0 +1,13 @@
+diff --git a/src/winetricks b/src/winetricks
+index d005455..1ce5a60 100755
+--- a/src/winetricks
++++ b/src/winetricks
+@@ -18665,6 +18666,8 @@ load_remove_mono()
+     if [ "${mono_install_found}" -eq 1 ]; then
+         "${WINE_ARCH}" reg delete "HKLM\\Software\\Microsoft\\NET Framework Setup\\NDP\\v3.5" /f || true
+         "${WINE_ARCH}" reg delete "HKLM\\Software\\Microsoft\\NET Framework Setup\\NDP\\v4" /f || true
++        "${WINE_ARCH}" reg delete "HKLM\\Software\\Wow6432Node\\Microsoft\\NET Framework Setup\\NDP\\v3.5" /f || true
++        "${WINE_ARCH}" reg delete "HKLM\\Software\\Wow6432Node\\Microsoft\\NET Framework Setup\\NDP\\v4" /f || true
+ 
+         for mscoree_dll in "${W_SYSTEM32_DLLS}/mscoree.dll" "${W_SYSTEM64_DLLS}/mscoree.dll"; do
+             if [ -f "${mscoree_dll}" ] && grep --quiet --text "WINE_MONO_OVERRIDES" "${mscoree_dll}"; then
