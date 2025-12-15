@@ -1,0 +1,1025 @@
+{
+  "dotnet472": {
+    "mscoree": "native"
+  },
+  "dbghelp": {
+    "dbghelp": "native"
+  },
+  "msdelta": {
+    "msdelta": "native,builtin"
+  },
+  "xact_x64": {
+    "xaudio2_0": "native,builtin",
+    "xaudio2_1": "native,builtin",
+    "xaudio2_2": "native,builtin",
+    "xaudio2_3": "native,builtin",
+    "xaudio2_4": "native,builtin",
+    "xaudio2_5": "native,builtin",
+    "xaudio2_6": "native,builtin",
+    "xaudio2_7": "native,builtin",
+    "x3daudio1_0": "native,builtin",
+    "x3daudio1_1": "native,builtin",
+    "x3daudio1_2": "native,builtin",
+    "x3daudio1_3": "native,builtin",
+    "x3daudio1_4": "native,builtin",
+    "x3daudio1_5": "native,builtin",
+    "x3daudio1_6": "native,builtin",
+    "x3daudio1_7": "native,builtin",
+    "xapofx1_1": "native,builtin",
+    "xapofx1_2": "native,builtin",
+    "xapofx1_3": "native,builtin",
+    "xapofx1_4": "native,builtin",
+    "xapofx1_5": "native,builtin",
+    "xactengine2_0": "native,builtin",
+    "xactengine2_10": "native,builtin",
+    "xactengine2_1": "native,builtin",
+    "xactengine2_2": "native,builtin",
+    "xactengine2_3": "native,builtin",
+    "xactengine2_4": "native,builtin",
+    "xactengine2_5": "native,builtin",
+    "xactengine2_6": "native,builtin",
+    "xactengine2_7": "native,builtin",
+    "xactengine2_8": "native,builtin",
+    "xactengine2_9": "native,builtin",
+    "xactengine3_0": "native,builtin",
+    "xactengine3_1": "native,builtin",
+    "xactengine3_2": "native,builtin",
+    "xactengine3_3": "native,builtin",
+    "xactengine3_4": "native,builtin",
+    "xactengine3_5": "native,builtin",
+    "xactengine3_6": "native,builtin",
+    "xactengine3_7": "native,builtin"
+  },
+  "d3dx9_27": {
+    "d3dx9_27": "native"
+  },
+  "dxdiagn": {
+    "dxdiagn": "native,builtin"
+  },
+  "msaa": {
+    "oleacc": "native,builtin",
+    "oleaccrc": "native,builtin",
+    "msaatext": "native,builtin"
+  },
+  "d3dx9_42": {
+    "d3dx9_42": "native"
+  },
+  "dxvk1001": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "riched30": {
+    "riched20": "native,builtin"
+  },
+  "qdvd": {
+    "qdvd": "native,builtin"
+  },
+  "binkw32": {
+    "binkw32": "native"
+  },
+  "vcrun2022": {
+    "concrt140": "native,builtin",
+    "msvcp140": "native,builtin",
+    "msvcp140_1": "native,builtin",
+    "msvcp140_2": "native,builtin",
+    "msvcp140_atomic_wait": "native,builtin",
+    "msvcp140_codecvt_ids": "native,builtin",
+    "vcamp140": "native,builtin",
+    "vccorlib140": "native,builtin",
+    "vcomp140": "native,builtin",
+    "vcruntime140": "native,builtin",
+    "vcruntime140_1": "native,builtin"
+  },
+  "dswave": {
+    "dswave": "native"
+  },
+  "dotnet11": {
+    "mscorwks": "native",
+    "fusion": "native"
+  },
+  "dxvk1051": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "esent": {
+    "esent": "native,builtin"
+  },
+  "ole32": {
+    "ole32": "native,builtin"
+  },
+  "dotnet461": {
+    "mscoree": "native"
+  },
+  "usp10": {
+    "usp10": "native,builtin"
+  },
+  "dmscript": {
+    "dmscript": "native"
+  },
+  "prntvpt": {
+    "prntvpt": "native,builtin"
+  },
+  "dx8vb": {
+    "dx8vb": "native"
+  },
+  "d3dxof": {
+    "d3dxof": "native"
+  },
+  "dxvk1032": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dinput8": {
+    "dinput8": "native"
+  },
+  "vcrun2015": {
+    "api-ms-win-crt-private-l1-1-0": "native,builtin",
+    "api-ms-win-crt-conio-l1-1-0": "native,builtin",
+    "api-ms-win-crt-convert-l1-1-0": "native,builtin",
+    "api-ms-win-crt-environment-l1-1-0": "native,builtin",
+    "api-ms-win-crt-filesystem-l1-1-0": "native,builtin",
+    "api-ms-win-crt-heap-l1-1-0": "native,builtin",
+    "api-ms-win-crt-locale-l1-1-0": "native,builtin",
+    "api-ms-win-crt-math-l1-1-0": "native,builtin",
+    "api-ms-win-crt-multibyte-l1-1-0": "native,builtin",
+    "api-ms-win-crt-process-l1-1-0": "native,builtin",
+    "api-ms-win-crt-runtime-l1-1-0": "native,builtin",
+    "api-ms-win-crt-stdio-l1-1-0": "native,builtin",
+    "api-ms-win-crt-string-l1-1-0": "native,builtin",
+    "api-ms-win-crt-utility-l1-1-0": "native,builtin",
+    "api-ms-win-crt-time-l1-1-0": "native,builtin",
+    "atl140": "native,builtin",
+    "concrt140": "native,builtin",
+    "msvcp140": "native,builtin",
+    "msvcp140_1": "native,builtin",
+    "msvcp140_atomic_wait": "native,builtin",
+    "ucrtbase": "native,builtin",
+    "vcomp140": "native,builtin",
+    "vccorlib140": "native,builtin",
+    "vcruntime140": "native,builtin",
+    "vcruntime140_1": "native,builtin"
+  },
+  "dxvk1030": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "msvcrt40": {
+    "msvcrt40": "native,builtin"
+  },
+  "dsoal": {
+    "dsoal-aldrv": "native",
+    "dsound": "native"
+  },
+  "dotnet35": {
+    "mscoree": "native",
+    "mscorwks": "native"
+  },
+  "dxvk1000": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "icodecs": {
+    "ir50_32": "native,builtin"
+  },
+  "dxvk1050": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "cnc_ddraw": {
+    "ddraw": "native,builtin"
+  },
+  "ucrtbase2019": {
+    "ucrtbase": "native,builtin"
+  },
+  "dxvk1091": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dpvoice": {
+    "dpvoice": "native",
+    "dpvvox": "native",
+    "dpvacm": "native"
+  },
+  "iertutil": {
+    "iertutil": "native,builtin"
+  },
+  "d3dcompiler_43": {
+    "d3dcompiler_43": "native"
+  },
+  "pdh_nt4": {
+    "pdh": "native,builtin"
+  },
+  "dxvk2040": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk2051": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dinputto8": {
+    "dinput": "native"
+  },
+  "riched20": {
+    "riched20": "native,builtin"
+  },
+  "dotnet20": {
+    "mscorwks": "native"
+  },
+  "dmsynth": {
+    "dmsynth": "native"
+  },
+  "avifil32": {
+    "avifil32": "native"
+  },
+  "dxvk1100": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dinput": {
+    "dinput": "native"
+  },
+  "dxvk1071": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1003": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1061": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dx9_28": {
+    "d3dx9_28": "native"
+  },
+  "dotnet40": {
+    "mscoree": "native"
+  },
+  "dxvk1045": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "wmi": {
+    "wbemprox": "native,builtin",
+    "wmiutils": "native,builtin"
+  },
+  "d3dx9_41": {
+    "d3dx9_41": "native"
+  },
+  "dxvk1072": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dotnet30": {
+    "mscorwks": "native"
+  },
+  "d3dx9_40": {
+    "d3dx9_40": "native"
+  },
+  "speechsdk": {
+    "sapi": "native"
+  },
+  "dxvk1054": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dx11_43": {
+    "d3dx11_43": "native"
+  },
+  "msxml3": {
+    "msxml3": "native"
+  },
+  "dxvk_nvapi009": {
+    "nvapi": "native",
+    "nvapi64": "native"
+  },
+  "dxvk2061": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk2060": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "ie6": {
+    "inseng": "native"
+  },
+  "dmband": {
+    "dmband": "native"
+  },
+  "vcrun2008": {
+    "atl90": "native,builtin",
+    "msvcm90": "native,builtin",
+    "msvcp90": "native,builtin",
+    "msvcr90": "native,builtin",
+    "vcomp90": "native,builtin"
+  },
+  "d3dx9_31": {
+    "d3dx9_31": "native"
+  },
+  "dotnet45": {
+    "mscoree": "native"
+  },
+  "quartz": {
+    "quartz": "native,builtin"
+  },
+  "d3dcompiler_42": {
+    "d3dcompiler_42": "native"
+  },
+  "xaudio29": {
+    "xaudio2_9": "native,builtin"
+  },
+  "dxvk1033": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1093": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk2050": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1081": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dcompiler_46": {
+    "d3dcompiler_46": "native"
+  },
+  "msacm32": {
+    "msacm32": "native,builtin"
+  },
+  "crypt32_winxp": {
+    "crypt32": "native"
+  },
+  "webio": {
+    "webio": "native,builtin"
+  },
+  "dxvk2062": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "vcrun2013": {
+    "atl120": "native,builtin",
+    "msvcp120": "native,builtin",
+    "msvcr120": "native,builtin",
+    "vcomp120": "native,builtin"
+  },
+  "dxvk1002": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dotnet35sp1": {
+    "mscoree": "native",
+    "mscorwks": "native"
+  },
+  "dxvk1041": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1101": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1034": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "ie8": {
+    "ieframe": "native,builtin",
+    "ieproxy": "native,builtin",
+    "iertutil": "native,builtin",
+    "itircl": "native,builtin",
+    "itss": "native,builtin",
+    "jscript": "native,builtin",
+    "msctf": "native,builtin",
+    "mshtml": "native,builtin",
+    "shdoclc": "native,builtin",
+    "shdocvw": "native,builtin",
+    "shlwapi": "native,builtin",
+    "urlmon": "native,builtin",
+    "wininet": "native,builtin",
+    "xmllite": "native,builtin",
+    "updspapi": "builtin"
+  },
+  "gdiplus": {
+    "gdiplus": "native"
+  },
+  "dxvk1090": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dx9": {
+    "d3dx9_24": "native",
+    "d3dx9_25": "native",
+    "d3dx9_26": "native",
+    "d3dx9_27": "native",
+    "d3dx9_28": "native",
+    "d3dx9_29": "native",
+    "d3dx9_30": "native",
+    "d3dx9_31": "native",
+    "d3dx9_32": "native",
+    "d3dx9_33": "native",
+    "d3dx9_34": "native",
+    "d3dx9_35": "native",
+    "d3dx9_36": "native",
+    "d3dx9_37": "native",
+    "d3dx9_38": "native",
+    "d3dx9_39": "native",
+    "d3dx9_40": "native",
+    "d3dx9_41": "native",
+    "d3dx9_42": "native",
+    "d3dx9_43": "native"
+  },
+  "windowscodecs": {
+    "windowscodecs": "native",
+    "windowscodecsext": "native"
+  },
+  "vcrun2010": {
+    "msvcp100": "native,builtin",
+    "msvcr100": "native,builtin",
+    "vcomp100": "native,builtin",
+    "atl100": "native,builtin"
+  },
+  "d3dx9_38": {
+    "d3dx9_38": "native"
+  },
+  "setupapi": {
+    "setupapi": "native,builtin"
+  },
+  "pdh": {
+    "pdh": "native,builtin"
+  },
+  "uiribbon": {
+    "uiribbon": "native,builtin"
+  },
+  "xmllite": {
+    "xmllite": "native,builtin"
+  },
+  "dxvk1031": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dotnet30sp1": {
+    "mscorwks": "native"
+  },
+  "dxvk1103": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dotnet20sp1": {
+    "mscorwks": "native"
+  },
+  "comctl32": {
+    "comctl32": "native,builtin"
+  },
+  "dxvk1102": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "vcrun2019": {
+    "api-ms-win-crt-private-l1-1-0": "native,builtin",
+    "api-ms-win-crt-conio-l1-1-0": "native,builtin",
+    "api-ms-win-crt-heap-l1-1-0": "native,builtin",
+    "api-ms-win-crt-locale-l1-1-0": "native,builtin",
+    "api-ms-win-crt-math-l1-1-0": "native,builtin",
+    "api-ms-win-crt-runtime-l1-1-0": "native,builtin",
+    "api-ms-win-crt-stdio-l1-1-0": "native,builtin",
+    "api-ms-win-crt-time-l1-1-0": "native,builtin",
+    "atl140": "native,builtin",
+    "concrt140": "native,builtin",
+    "msvcp140": "native,builtin",
+    "msvcp140_1": "native,builtin",
+    "msvcp140_2": "native,builtin",
+    "msvcp140_atomic_wait": "native,builtin",
+    "msvcp140_codecvt_ids": "native,builtin",
+    "vcamp140": "native,builtin",
+    "vccorlib140": "native,builtin",
+    "vcomp140": "native,builtin",
+    "vcruntime140": "native,builtin",
+    "vcruntime140_1": "native,builtin"
+  },
+  "dxvk1080": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1011": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dmstyle": {
+    "dmstyle": "native"
+  },
+  "dotnet471": {
+    "mscoree": "native"
+  },
+  "dxvk2041": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1070": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "updspapi": {
+    "updspapi": "native,builtin"
+  },
+  "crypt32": {
+    "crypt32": "native"
+  },
+  "dxvk1094": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "xact": {
+    "xaudio2_0": "native,builtin",
+    "xaudio2_1": "native,builtin",
+    "xaudio2_2": "native,builtin",
+    "xaudio2_3": "native,builtin",
+    "xaudio2_4": "native,builtin",
+    "xaudio2_5": "native,builtin",
+    "xaudio2_6": "native,builtin",
+    "xaudio2_7": "native,builtin",
+    "x3daudio1_0": "native,builtin",
+    "x3daudio1_1": "native,builtin",
+    "x3daudio1_2": "native,builtin",
+    "x3daudio1_3": "native,builtin",
+    "x3daudio1_4": "native,builtin",
+    "x3daudio1_5": "native,builtin",
+    "x3daudio1_6": "native,builtin",
+    "x3daudio1_7": "native,builtin",
+    "xapofx1_1": "native,builtin",
+    "xapofx1_2": "native,builtin",
+    "xapofx1_3": "native,builtin",
+    "xapofx1_4": "native,builtin",
+    "xapofx1_5": "native,builtin",
+    "xactengine2_0": "native,builtin",
+    "xactengine2_10": "native,builtin",
+    "xactengine2_1": "native,builtin",
+    "xactengine2_2": "native,builtin",
+    "xactengine2_3": "native,builtin",
+    "xactengine2_4": "native,builtin",
+    "xactengine2_5": "native,builtin",
+    "xactengine2_6": "native,builtin",
+    "xactengine2_7": "native,builtin",
+    "xactengine2_8": "native,builtin",
+    "xactengine2_9": "native,builtin",
+    "xactengine3_0": "native,builtin",
+    "xactengine3_1": "native,builtin",
+    "xactengine3_2": "native,builtin",
+    "xactengine3_3": "native,builtin",
+    "xactengine3_4": "native,builtin",
+    "xactengine3_5": "native,builtin",
+    "xactengine3_6": "native,builtin",
+    "xactengine3_7": "native,builtin"
+  },
+  "dmloader": {
+    "dmloader": "native"
+  },
+  "dxvk2070": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "itss": {
+    "itss": "native"
+  },
+  "wininet": {
+    "wininet": "native,builtin"
+  },
+  "qcap": {
+    "qcap": "native,builtin"
+  },
+  "secur32": {
+    "secur32": "native,builtin"
+  },
+  "dxvk1092": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "sapi": {
+    "sapi": "native"
+  },
+  "d3dx9_33": {
+    "d3dx9_33": "native"
+  },
+  "d3dx9_29": {
+    "d3dx9_29": "native"
+  },
+  "dotnet20sp2": {
+    "mscorwks": "native"
+  },
+  "dxvk2053": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1046": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "directmusic": {
+    "streamci": "native"
+  },
+  "dxvk1060": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk2020": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk2052": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "mspatcha": {
+    "mspatcha": "native,builtin"
+  },
+  "d3dcompiler_47": {
+    "d3dcompiler_47": "native"
+  },
+  "d3dx10": {
+    "d3dx10_33": "native",
+    "d3dx10_34": "native",
+    "d3dx10_35": "native",
+    "d3dx10_36": "native",
+    "d3dx10_37": "native",
+    "d3dx10_38": "native",
+    "d3dx10_39": "native",
+    "d3dx10_40": "native",
+    "d3dx10_41": "native",
+    "d3dx10_42": "native",
+    "d3dx10_43": "native"
+  },
+  "dsound": {
+    "dsound": "native,builtin"
+  },
+  "dotnet46": {
+    "mscoree": "native"
+  },
+  "devenum": {
+    "devenum": "native"
+  },
+  "dxvk2071": {
+    "dxgi": "native",
+    "d3d8": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dx9_24": {
+    "d3dx9_24": "native"
+  },
+  "d3dx9_34": {
+    "d3dx9_34": "native"
+  },
+  "qasf": {
+    "qasf": "native,builtin"
+  },
+  "itircl": {
+    "itircl": "native"
+  },
+  "msxml6": {
+    "msxml6": "native,builtin"
+  },
+  "dotnet452": {
+    "mscoree": "native"
+  },
+  "dxvk_nvapi0061": {
+    "nvapi": "native",
+    "nvapi64": "native"
+  },
+  "d3dx9_32": {
+    "d3dx9_32": "native"
+  },
+  "dxvk1023": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "vcrun2012": {
+    "atl110": "native,builtin",
+    "msvcp110": "native,builtin",
+    "msvcr110": "native,builtin",
+    "vcomp110": "native,builtin"
+  },
+  "dmime": {
+    "dmime": "native"
+  },
+  "dxvk1042": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "hid": {
+    "hid": "native"
+  },
+  "dxvk1073": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dx10_43": {
+    "d3dx10_43": "native"
+  },
+  "d3dx11_42": {
+    "d3dx11_42": "native"
+  },
+  "dmusic32": {
+    "dmusic32": "native"
+  },
+  "amstream": {
+    "amstream": "native,builtin"
+  },
+  "dxvk2030": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dx9_39": {
+    "d3dx9_39": "native"
+  },
+  "dmusic": {
+    "dmusic": "native"
+  },
+  "dxvk1040": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "vcrun2005": {
+    "atl80": "native,builtin",
+    "msvcm80": "native,builtin",
+    "msvcp80": "native,builtin",
+    "msvcr80": "native,builtin",
+    "vcomp": "native,builtin"
+  },
+  "dxdiagn_feb2010": {
+    "dxdiagn": "native"
+  },
+  "dotnet462": {
+    "mscoree": "native"
+  },
+  "d3dx9_35": {
+    "d3dx9_35": "native"
+  },
+  "dxvk2010": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "msctf": {
+    "msctf": "native,builtin"
+  },
+  "gdiplus_winxp": {
+    "gdiplus": "native"
+  },
+  "dxvk1022": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "mf": {
+    "mf": "native,builtin"
+  },
+  "urlmon": {
+    "urlmon": "native,builtin"
+  },
+  "d3dx9_43": {
+    "d3dx9_43": "native"
+  },
+  "d3drm": {
+    "d3drm": "native"
+  },
+  "msftedit": {
+    "msftedit": "native,builtin"
+  },
+  "cabinet": {
+    "cabinet": "native,builtin"
+  },
+  "dxvk1052": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "oleaut32": {
+    "oleaut32": "native,builtin"
+  },
+  "qedit": {
+    "qedit": "native,builtin"
+  },
+  "dxvk1021": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "msxml4": {
+    "msxml4": "native,builtin"
+  },
+  "dxvk1043": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk1053": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "wininet_win2k": {
+    "wininet": "native,builtin"
+  },
+  "xinput": {
+    "xinput1_1": "native",
+    "xinput1_2": "native",
+    "xinput1_3": "native",
+    "xinput9_1_0": "native"
+  },
+  "dxvk1055": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "dxvk2000": {
+    "dxgi": "native",
+    "d3d9": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "d3dx9_37": {
+    "d3dx9_37": "native"
+  },
+  "dotnet48": {
+    "mscoree": "native"
+  },
+  "d3dx9_30": {
+    "d3dx9_30": "native"
+  },
+  "quartz_feb2010": {
+    "quartz": "native,builtin"
+  },
+  "ie7": {
+    "ieproxy": "native,builtin",
+    "ieframe": "native,builtin",
+    "itircl": "native,builtin",
+    "itss": "native,builtin",
+    "jscript": "native,builtin",
+    "mshtml": "native,builtin",
+    "msimtf": "native,builtin",
+    "shdoclc": "native,builtin",
+    "shdocvw": "native,builtin",
+    "shlwapi": "native,builtin",
+    "urlmon": "native,builtin",
+    "wininet": "native,builtin",
+    "xmllite": "native,builtin",
+    "updspapi": "builtin"
+  },
+  "d3dx9_36": {
+    "d3dx9_36": "native"
+  },
+  "d3dx9_25": {
+    "d3dx9_25": "native"
+  },
+  "d3dx9_26": {
+    "d3dx9_26": "native"
+  },
+  "dmcompos": {
+    "dmcompos": "native"
+  },
+  "dotnet11sp1": {
+    "mscorwks": "native"
+  },
+  "dxvk1044": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "vcrun2017": {
+    "api-ms-win-crt-private-l1-1-0": "native,builtin",
+    "api-ms-win-crt-conio-l1-1-0": "native,builtin",
+    "api-ms-win-crt-heap-l1-1-0": "native,builtin",
+    "api-ms-win-crt-locale-l1-1-0": "native,builtin",
+    "api-ms-win-crt-math-l1-1-0": "native,builtin",
+    "api-ms-win-crt-runtime-l1-1-0": "native,builtin",
+    "api-ms-win-crt-stdio-l1-1-0": "native,builtin",
+    "api-ms-win-crt-time-l1-1-0": "native,builtin",
+    "atl140": "native,builtin",
+    "concrt140": "native,builtin",
+    "msvcp140": "native,builtin",
+    "msvcp140_1": "native,builtin",
+    "msvcp140_2": "native,builtin",
+    "msvcp140_atomic_wait": "native,builtin",
+    "ucrtbase": "native,builtin",
+    "vcamp140": "native,builtin",
+    "vcomp140": "native,builtin",
+    "vccorlib140": "native,builtin",
+    "vcruntime140": "native,builtin",
+    "vcruntime140_1": "native,builtin"
+  },
+  "dxvk1020": {
+    "dxgi": "native",
+    "d3d10core": "native",
+    "d3d11": "native"
+  },
+  "winhttp": {
+    "winhttp": "native,builtin"
+  },
+  "dxtrans": {
+    "dxtrans": "native,builtin"
+  },
+  "cinepak": {
+    "iccvid": "native"
+  }
+}
