@@ -326,6 +326,8 @@ def protontricks(verb: str) -> bool:
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
         if verb == 'gui':
             winetricks_cmd = [winetricks_bin, '--unattended']
+        if 'dotnet' in verb:
+            env['PROTON_USE_XALIA'] = '0'
 
         # check is verb a custom winetricks verb
         custom_verb = is_custom_verb(verb)
@@ -363,6 +365,9 @@ def protontricks(verb: str) -> bool:
 
             log.info('Winetricks complete')
             return True
+
+        if 'dotnet' in verb:
+            env['PROTON_USE_XALIA'] = '1'
 
     return False
 
