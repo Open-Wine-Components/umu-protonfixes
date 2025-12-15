@@ -1,0 +1,78 @@
+# winetricks verb: eossdk
+# Downloads the EOS SDK archive via /api/sdk/download (C selection),
+# extracts it, and runs SDK/Tools/EpicOnlineServicesInstaller.exe in the prefix.
+
+w_metadata eossdk apps \
+    title="Epic Online Services SDK (C) - run EpicOnlineServicesInstaller.exe" \
+    publisher="Epic Games" \
+    year="2025" \
+    media="download"
+
+load_eossdk()
+{
+    # You can override these without editing the verb:
+    #   EOS_SDK_ARCHIVE_ID=793 EOS_SDK_ARCHIVE_TYPE=sdk winetricks ./eossdk.verb
+    : "${EOS_SDK_ARCHIVE_ID:=793}"
+    : "${EOS_SDK_ARCHIVE_TYPE:=sdk}"
+
+    EOS_DL_URL="https://onlineservices.epicgames.com/api/sdk/download?archive_id=${EOS_SDK_ARCHIVE_ID}&archive_type=${EOS_SDK_ARCHIVE_TYPE}"
+
+    : "${W_CACHE:=${XDG_CACHE_HOME:-$HOME/.cache}/winetricks}"
+    : "${W_TMP:=${TMPDIR:-/tmp}/winetricks}"
+
+    w_try_mkdir "${W_CACHE}/${W_PACKAGE}"
+    _zip="${W_CACHE}/${W_PACKAGE}/eossdk_${EOS_SDK_ARCHIVE_ID}.zip"
+    _tmp="${W_TMP}/${W_PACKAGE}.${EOS_SDK_ARCHIVE_ID}.$$"
+    w_try_mkdir "${_tmp}"
+
+    # Downloader (Proton environments usually have at least one of these)
+    if command -v curl >/dev/null 2>&1; then
+        w_info "Downloading EOS SDK from: ${EOS_DL_URL}"
+        # Use a browser-ish UA; some CDNs behave better with it.
+        w_try curl -fL --retry 3 --retry-delay 2 \
+            -A "Mozilla/5.0 (X11; Linux) Winetricks" \
+            -o "${_zip}" "${EOS_DL_URL}"
+    elif command -v wget >/dev/null 2>&1; then
+        w_info "Downloading EOS SDK from: ${EOS_DL_URL}"
+        w_try wget -O "${_zip}" --tries=3 --waitretry=2 \
+            --user-agent="Mozilla/5.0 (X11; Linux) Winetricks" \
+            "${EOS_DL_URL}"
+    else
+        w_die "Need curl or wget available to download the EOS SDK."
+    fi
+
+    # Extract
+    if command -v unzip >/dev/null 2>&1; then
+        w_try unzip -q -o "${_zip}" -d "${_tmp}"
+    elif command -v 7z >/dev/null 2>&1; then
+        w_try 7z x -y -o"${_tmp}" "${_zip}" >/dev/null
+    else
+        w_die "Need unzip or 7z to extract the EOS SDK archive."
+    fi
+
+    # Locate installer (path is typically */SDK/Tools/EpicOnlineServicesInstaller.exe)
+    _installer="$(
+        find "${_tmp}" -type f -name 'EpicOnlineServicesInstaller.exe' -path '*/SDK/Tools/*' 2>/dev/null | head -n 1
+    )"
+    if [ -z "${_installer}" ]; then
+        _installer="$(
+            find "${_tmp}" -type f -name 'EpicOnlineServicesInstaller.exe' 2>/dev/null | head -n 1
+        )"
+    fi
+    if [ -z "${_installer}" ]; then
+        w_die "Could not find SDK/Tools/EpicOnlineServicesInstaller.exe after extraction."
+    fi
+
+    w_info "Running EOS installer in prefix: ${WINEPREFIX:-$HOME/.wine}"
+    w_info "Installer: ${_installer}"
+
+    # Run (best-effort unattended)
+    if [ -n "${W_OPT_UNATTENDED}" ]; then
+        "${WINE}" "${_installer}" /quiet || "${WINE}" "${_installer}"
+    else
+        "${WINE}" "${_installer}"
+    fi
+
+    # Cleanup temp extraction (keep cached zip)
+    rm -rf "${_tmp}" >/dev/null 2>&1 || true
+}
