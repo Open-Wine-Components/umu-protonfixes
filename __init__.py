@@ -1,7 +1,6 @@
 """Starts the protonfix module and runs fixes after pre-flight-checks"""
 
 import os
-import signal
 import subprocess
 import sys
 import tempfile
@@ -9,7 +8,7 @@ import threading
 import time
 import traceback
 from pathlib import Path
-from typing import Callable, Optional, Dict
+from typing import Callable, Optional
 
 from . import fix
 from .logger import log
@@ -43,7 +42,7 @@ os.environ['PROTON_DLL_COPY'] = '*'
 
 
 class _ZenityWaitDialog:
-    def __init__(self, text: str, title: str = "ProtonFixes"):
+    def __init__(self, text: str, title: str = "ProtonFixes") -> None:
         self._text = text
         self._title = title
         self._proc = None  # type: Optional[subprocess.Popen]
@@ -51,7 +50,7 @@ class _ZenityWaitDialog:
         self._thread = None  # type: Optional[threading.Thread]
         self._tmp_cfg = None  # type: Optional[tempfile.TemporaryDirectory]
 
-    def _make_env(self) -> Optional[Dict[str, str]]:
+    def _make_env(self) -> Optional[dict[str, str]]:
         env = os.environ.copy()
         env["GTK_CSD"] = "1"
 
