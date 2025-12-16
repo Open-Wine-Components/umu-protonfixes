@@ -21,8 +21,6 @@ def main() -> None:
     # RSI Launcher depends on powershell
     util.protontricks('powershell')
 
-    # RSI Launcher animation
-    util.winedll_override('libglesv2', util.OverrideOrder.BUILTIN)
-
-    # SC's shipped EAC Installer fails with ntsync
-    util.disable_ntsync()
+    # Prevent RSI Launcher install and update from hanging indefinitely
+    util.winedll_override('dxwebsetup.exe', util.OverrideOrder.DISABLED)
+    util.winedll_override('dotNetFx45_Full_setup.exe', util.OverrideOrder.DISABLED)
