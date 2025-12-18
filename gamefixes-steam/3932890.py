@@ -3,9 +3,12 @@ Install BattlEye Service - does not permit online play
 """
 
 import os
-import glob
 import shutil
+from pathlib import Path
 from protonfixes import util
+from protonfixes.logger import log
+
+SERVICE_FLAG = "service_configured"
 
 def main() -> None:
     util.install_battleye_runtime()
@@ -14,22 +17,18 @@ def main() -> None:
     util.protontricks('dotnetdesktop6')
     util.protontricks('dotnetdesktop8')
 
-    game_dir = glob.escape(util.get_game_install_path())
+    install_battleye_service()
 
-    battleye_source = os.path.join(
-        game_dir,
-        'build/BattlEye/',
-    )
 
+def install_battleye_service() -> None:
     battleye_install = os.path.join(
         util.protonprefix(),
         'drive_c/Program Files (x86)/Common Files/BattlEye/',
     )
+    os.makedirs(battleye_install, exist_ok=True)
 
-    if not os.path.exists(battleye_install):
-        # Setup BattlEye Service for the game to run
-        # This is only to get past the launcher and does not enable online play
-
+    log.info("Checking if BattlEye Service is installed")
+    if not os.path.exists(os.path.join(battleye_install, SERVICE_FLAG)):
         util.regedit_add(
             'HKLM\\System\\CurrentControlSet\\Services\\BEService',
             'DisplayName',
@@ -66,14 +65,12 @@ def main() -> None:
             'REG_DWORD',
             '2',
         )
-
         util.regedit_add(
             'HKLM\\System\\CurrentControlSet\\Services\\BEService',
             'Type',
             'REG_DWORD',
             '16',
         )
-
         util.regedit_add(
             'HKLM\\System\\CurrentControlSet\\Services\\BEService',
             'WOW64',
@@ -81,4 +78,25 @@ def main() -> None:
             '1',
         )
 
+        Path(os.path.join(battleye_install, SERVICE_FLAG)).touch()
+
+    if not os.path.exists(os.path.join(battleye_install, "BEService_x64.exe")):
+        log.info("Installing BattlEye Service")
+
+        sources = [
+            os.path.join(util.get_game_install_path(), 'build/BattlEye/'), # Steam
+            os.path.join(util.protonprefix() , 'drive_c/Battlestate Games/Escape from Tarkov/BattlEye/'), # BsgLauncher
+        ]
+        battleye_source = None
+
+        for source in sources:
+            if os.path.exists(source):
+                battleye_source = source
+                break
+
+        if battleye_source is None:
+            return
+
         shutil.copytree(battleye_source, battleye_install, dirs_exist_ok=True)
+
+        log.info("Installed BattlEye Service")
