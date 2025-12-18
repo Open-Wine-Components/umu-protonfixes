@@ -10,6 +10,7 @@ from protonfixes import util
 def main() -> None:
     util.install_battleye_runtime()
     util.protontricks('dotnet48')
+    util.append_argument("--disable-software-rasterizer")
 
     game_dir = glob.escape(util.get_game_install_path())
 
