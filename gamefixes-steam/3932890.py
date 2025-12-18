@@ -10,9 +10,6 @@ from protonfixes import util
 def main() -> None:
     util.install_battleye_runtime()
     util.protontricks('dotnet48')
-    util.protontricks('vcrun2022')
-    util.protontricks('dotnetdesktop6')
-    util.protontricks('dotnetdesktop8')
 
     game_dir = glob.escape(util.get_game_install_path())
 
