@@ -42,7 +42,7 @@ os.environ['PROTON_DLL_COPY'] = '*'
 
 
 class _ZenityWaitDialog:
-    def __init__(self, text: str, title: str = "ProtonFixes") -> None:
+    def __init__(self, text: str, title: str = 'ProtonFixes') -> None:
         self._text = text
         self._title = title
         self._proc = None  # type: Optional[subprocess.Popen]
@@ -52,17 +52,17 @@ class _ZenityWaitDialog:
 
     def _make_env(self) -> Optional[dict[str, str]]:
         env = os.environ.copy()
-        env["GTK_CSD"] = "1"
+        env['GTK_CSD'] = '1'
 
         # Only try GUI if we actually have a display
-        if not env.get("DISPLAY") and not env.get("WAYLAND_DISPLAY"):
+        if not env.get('DISPLAY') and not env.get('WAYLAND_DISPLAY'):
             return None
 
         # Create a temporary GTK config so zenity uses our colors.
         # GTK3 reads: $XDG_CONFIG_HOME/gtk-3.0/gtk.css
-        self._tmp_cfg = tempfile.TemporaryDirectory(prefix="protonfixes-gtk-")
+        self._tmp_cfg = tempfile.TemporaryDirectory(prefix='protonfixes-gtk-')
         cfg_root = Path(self._tmp_cfg.name)
-        gtk_dir = cfg_root / "gtk-3.0"
+        gtk_dir = cfg_root / 'gtk-3.0'
         gtk_dir.mkdir(parents=True, exist_ok=True)
 
         # Window bg: #171d25
@@ -138,9 +138,9 @@ class _ZenityWaitDialog:
             color: #ffffff;
         }
         """
-        (gtk_dir / "gtk.css").write_text(css, encoding="utf-8")
+        (gtk_dir / 'gtk.css').write_text(css, encoding='utf-8')
 
-        env["XDG_CONFIG_HOME"] = str(cfg_root)
+        env['XDG_CONFIG_HOME'] = str(cfg_root)
         return env
 
     def _start_one(self) -> Optional[subprocess.Popen]:
@@ -149,14 +149,14 @@ class _ZenityWaitDialog:
             return None  # no display; skip
 
         cmd = [
-            "zenity",
-            "--progress",
-            "--pulsate",
-            "--no-cancel",
-            "--auto-close",
-            "--title=" + self._title,
-            "--text=" + self._text,
-            "--width=420",
+            'zenity',
+            '--progress',
+            '--pulsate',
+            '--no-cancel',
+            '--auto-close',
+            '--title=' + self._title,
+            '--text=' + self._text,
+            '--width=420',
         ]
 
         proc = subprocess.Popen(
@@ -175,25 +175,25 @@ class _ZenityWaitDialog:
     def _try_remove_decorations(self) -> None:
         # Only works on X11/XWayland
         env = os.environ
-        if not env.get("DISPLAY"):
+        if not env.get('DISPLAY'):
             return
 
-        if subprocess.call(["sh", "-lc", "command -v xprop >/dev/null 2>&1"]) != 0:
+        if subprocess.call(['sh', '-lc', 'command -v xprop >/dev/null 2>&1']) != 0:
             return
-        if subprocess.call(["sh", "-lc", "command -v xwininfo >/dev/null 2>&1"]) != 0:
+        if subprocess.call(['sh', '-lc', 'command -v xwininfo >/dev/null 2>&1']) != 0:
             return
 
         for _ in range(50):
             try:
                 out = subprocess.check_output(
-                    ["xwininfo", "-name", self._title],
+                    ['xwininfo', '-name', self._title],
                     stderr=subprocess.DEVNULL,
-                ).decode("utf-8", "ignore")
+                ).decode('utf-8', 'ignore')
 
                 wid = None
                 for line in out.splitlines():
                     line = line.strip()
-                    if line.lower().startswith("window id:"):
+                    if line.lower().startswith('window id:'):
                         wid = line.split()[2]
                         break
                 if not wid:
@@ -202,29 +202,51 @@ class _ZenityWaitDialog:
 
                 # 1) Tell WM "no decorations" (Motif hints)
                 subprocess.call(
-                    ["xprop", "-id", wid, "-f", "_MOTIF_WM_HINTS", "32c",
-                    "-set", "_MOTIF_WM_HINTS", "2, 0, 0, 0, 0"],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    [
+                        'xprop',
+                        '-id',
+                        wid,
+                        '-f',
+                        '_MOTIF_WM_HINTS',
+                        '32c',
+                        '-set',
+                        '_MOTIF_WM_HINTS',
+                        '2, 0, 0, 0, 0',
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                 )
 
                 # 2) Mark as SPLASH (many WMs won’t decorate splash windows)
                 subprocess.call(
-                    ["xprop", "-id", wid,
-                    "-set", "_NET_WM_WINDOW_TYPE", "_NET_WM_WINDOW_TYPE_SPLASH"],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    [
+                        'xprop',
+                        '-id',
+                        wid,
+                        '-set',
+                        '_NET_WM_WINDOW_TYPE',
+                        '_NET_WM_WINDOW_TYPE_SPLASH',
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                 )
 
                 # 3) Optional: keep it out of taskbar/pager and above (cosmetic)
                 subprocess.call(
-                    ["xprop", "-id", wid,
-                    "-set", "_NET_WM_STATE",
-                    "_NET_WM_STATE_ABOVE,_NET_WM_STATE_SKIP_TASKBAR,_NET_WM_STATE_SKIP_PAGER"],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    [
+                        'xprop',
+                        '-id',
+                        wid,
+                        '-set',
+                        '_NET_WM_STATE',
+                        '_NET_WM_STATE_ABOVE,_NET_WM_STATE_SKIP_TASKBAR,_NET_WM_STATE_SKIP_PAGER',
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
                 )
                 return
             except Exception:
                 time.sleep(0.1)
-
 
     def start(self) -> None:
         try:
@@ -256,7 +278,7 @@ class _ZenityWaitDialog:
             # Ask zenity to finish (so it auto-closes without showing OK)
             try:
                 if self._proc.stdin:
-                    self._proc.stdin.write(b"100\n")
+                    self._proc.stdin.write(b'100\n')
                     self._proc.stdin.flush()
                     self._proc.stdin.close()
             except Exception:
@@ -278,7 +300,6 @@ class _ZenityWaitDialog:
         if self._tmp_cfg:
             self._tmp_cfg.cleanup()
             self._tmp_cfg = None
-
 
 
 def check_conditions() -> bool:
@@ -324,7 +345,7 @@ def execute() -> None:
     elif not check_conditions():
         log.warn('Skipping fix execution. We are probably running a unit test.')
     else:
-        dialog = _ZenityWaitDialog("Installing Game-Specific fixes, please wait...")
+        dialog = _ZenityWaitDialog('Installing Game-Specific fixes, please wait...')
         try:
             dialog.start()
             fix.main()

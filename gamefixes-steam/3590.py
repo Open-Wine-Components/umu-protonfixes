@@ -23,10 +23,10 @@ def _fix_executable() -> None:
     src = prefix / 'drive_c/ProgramData/PopCap Games/PlantsVsZombies/popcapgame1.exe'
     game_dir = Path(util.get_game_install_path())
     good_exe = game_dir / 'PlantsVsZombies_good.exe'
-    
+
     if good_exe.exists():
         return
-    
+
     # Poll for up to 60 seconds
     for _ in range(120):
         if src.exists():
@@ -46,9 +46,9 @@ def main() -> None:
     """Changes the proton argument from the launcher to the game"""
     # Game expects this to be set
     util.append_argument('-changedir')
-    
+
     game_dir = Path(util.get_game_install_path())
-    if game_dir.joinpath("PlantsVsZombies_good.exe").exists():
+    if game_dir.joinpath('PlantsVsZombies_good.exe').exists():
         util.replace_command('PlantsVsZombies.exe', 'PlantsVsZombies_good.exe')
     else:
         threading.Thread(target=_fix_executable, daemon=True).start()

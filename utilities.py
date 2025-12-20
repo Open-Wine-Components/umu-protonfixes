@@ -53,7 +53,10 @@ def setup_frame_rate(env: dict, func: Callable[[dict, str, str, str], None]) -> 
 
     usage: setup_frame_rate(g_session,env. prepend_to_env_str)
     """
-    frame_rate = env.pop('DXVK_FRAME_RATE', env.pop('VKD3D_FRAME_RATE', env.pop('PROTON_FRAME_RATE', None)))
+    frame_rate = env.pop(
+        'DXVK_FRAME_RATE',
+        env.pop('VKD3D_FRAME_RATE', env.pop('PROTON_FRAME_RATE', None)),
+    )
     if frame_rate is not None:
         func(env, 'DXVK_CONFIG', f'dxgi.maxFrameRate={frame_rate}', ';')
         func(env, 'DXVK_CONFIG', f'd3d9.maxFrameRate={frame_rate}', ';')

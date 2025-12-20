@@ -56,7 +56,9 @@ def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
         if version in dll['version']:
             log.debug(f'Found "{upscaler.upper()}" dll version "{version}"')
             return dll
-    log.debug(f'Version "{version}" for "{upscaler.upper()}" not found, using {dlls[-1]["version"]}')
+    log.debug(
+        f'Version "{version}" for "{upscaler.upper()}" not found, using {dlls[-1]["version"]}'
+    )
     return dlls[-1]
 
 
@@ -69,8 +71,12 @@ __fsr4_version_file = 'fsr4_version'
 def __get_dlss_dlls(version: str = 'default') -> dict:
     return {
         'drive_c/windows/system32/nvngx_dlss.dll': __get_dll_manifest('dlss', version),
-        'drive_c/windows/system32/nvngx_dlssd.dll': __get_dll_manifest('dlss_d', version),
-        'drive_c/windows/system32/nvngx_dlssg.dll': __get_dll_manifest('dlss_g', version),
+        'drive_c/windows/system32/nvngx_dlssd.dll': __get_dll_manifest(
+            'dlss_d', version
+        ),
+        'drive_c/windows/system32/nvngx_dlssg.dll': __get_dll_manifest(
+            'dlss_g', version
+        ),
     }
 
 
@@ -78,14 +84,20 @@ def __get_xess_dlls(version: str = 'default') -> dict:
     return {
         'drive_c/windows/system32/libxess.dll': __get_dll_manifest('xess', version),
         'drive_c/windows/system32/libxell.dll': __get_dll_manifest('xell', version),
-        'drive_c/windows/system32/libxess_fg.dll': __get_dll_manifest('xess_fg', version),
+        'drive_c/windows/system32/libxess_fg.dll': __get_dll_manifest(
+            'xess_fg', version
+        ),
     }
 
 
 def __get_fsr3_dlls(version: str = 'default') -> dict:
     return {
-        'drive_c/windows/system32/amd_fidelityfx_vk.dll': __get_dll_manifest('fsr_31_vk', version),
-        'drive_c/windows/system32/amd_fidelityfx_dx12.dll': __get_dll_manifest('fsr_31_dx12', version),
+        'drive_c/windows/system32/amd_fidelityfx_vk.dll': __get_dll_manifest(
+            'fsr_31_vk', version
+        ),
+        'drive_c/windows/system32/amd_fidelityfx_dx12.dll': __get_dll_manifest(
+            'fsr_31_dx12', version
+        ),
     }
 
 
@@ -108,7 +120,7 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
             'download_url': 'https://download.amd.com/dir/bin/amdxcffx64.dll/68840348eb8000/amdxcffx64.dll',
             'md5_hash': None,
             'zip_md5_hash': None,
-        }
+        },
     }
     # use the safe option here for now
     if version == 'default' or version not in __fsr4_dlls.keys():
@@ -215,12 +227,18 @@ def check_upscaler(
         log.crit(repr(e))
         return False
     return __check_upscaler_files(
-        prefix_dir, files, os.path.join(compat_dir, version_file), ignore_version,
+        prefix_dir,
+        files,
+        os.path.join(compat_dir, version_file),
+        ignore_version,
     )
 
 
 def __download_upscaler_files(
-    prefix_dir: str, files: dict, dlfunc: Callable[[dict, Path, Path], None], version_file: str
+    prefix_dir: str,
+    files: dict,
+    dlfunc: Callable[[dict, Path, Path], None],
+    version_file: str,
 ) -> bool:
     """Download and install the required dlls.
 
@@ -249,7 +267,10 @@ def __download_upscaler_files(
             if temp.exists() or temp.is_symlink():
                 temp.rename(file)
             return False
-        version[dst] = {'version': files[dst]['version'], 'md5_hash': files[dst]['md5_hash']}
+        version[dst] = {
+            'version': files[dst]['version'],
+            'md5_hash': files[dst]['md5_hash'],
+        }
     with open(version_file, 'w', encoding='utf-8') as version_fd:
         version_fd.write(json.dumps(version))
     return True
@@ -289,7 +310,9 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
     if cached_file.exists():
         cached_md5 = hashlib.md5(cached_file.open('rb').read()).hexdigest().lower()
         if file_md5 is not None and cached_md5 != file_md5.lower():
-            log.crit(f'MD5 checksum mismatch between manifest and cached "{cached_file.name}"')
+            log.crit(
+                f'MD5 checksum mismatch between manifest and cached "{cached_file.name}"'
+            )
             cached_file.unlink(missing_ok=True)
     if not cached_file.exists():
         __download_file(file['download_url'], cached_file, checksum=file_md5)
@@ -300,7 +323,9 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
 
 def __download_fsr4(file: dict, cache: Path, dst: Path) -> None:
     url_path = Path(unquote(urlparse(file['download_url']).path))
-    cached_file = cache.joinpath(url_path.stem + f'_v{file["version"]}' + url_path.suffix)
+    cached_file = cache.joinpath(
+        url_path.stem + f'_v{file["version"]}' + url_path.suffix
+    )
     file_md5 = file.get('zip_md5_hash', None)
     if cached_file.exists():
         if cached_file.stat().st_size < 1024:
@@ -333,7 +358,10 @@ def download_upscaler(
     try:
         files = get_files(version)
         if not __download_upscaler_files(
-            prefix_dir, files, download_func, os.path.join(compat_dir, version_file),
+            prefix_dir,
+            files,
+            download_func,
+            os.path.join(compat_dir, version_file),
         ):
             raise RuntimeError
     except Exception as e:
@@ -357,7 +385,9 @@ def __setup_upscaler(
     return enabled
 
 
-def setup_upscalers(compat_config: set, env: dict, compat_dir: str, prefix_dir: str) -> None:
+def setup_upscalers(
+    compat_config: set, env: dict, compat_dir: str, prefix_dir: str
+) -> None:
     """Setup configured upscalers
 
     usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
