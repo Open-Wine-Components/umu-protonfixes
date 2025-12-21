@@ -167,86 +167,8 @@ class _ZenityWaitDialog:
             env=env,
         )
 
-        # Best-effort: remove window decorations (X11/XWayland only)
-        self._try_remove_decorations()
-
         return proc
 
-    def _try_remove_decorations(self) -> None:
-        # Only works on X11/XWayland
-        env = os.environ
-        if not env.get('DISPLAY'):
-            return
-
-        if subprocess.call(['sh', '-lc', 'command -v xprop >/dev/null 2>&1']) != 0:
-            return
-        if subprocess.call(['sh', '-lc', 'command -v xwininfo >/dev/null 2>&1']) != 0:
-            return
-
-        for _ in range(50):
-            try:
-                out = subprocess.check_output(
-                    ['xwininfo', '-name', self._title],
-                    stderr=subprocess.DEVNULL,
-                ).decode('utf-8', 'ignore')
-
-                wid = None
-                for line in out.splitlines():
-                    line = line.strip()
-                    if line.lower().startswith('window id:'):
-                        wid = line.split()[2]
-                        break
-                if not wid:
-                    time.sleep(0.1)
-                    continue
-
-                # 1) Tell WM "no decorations" (Motif hints)
-                subprocess.call(
-                    [
-                        'xprop',
-                        '-id',
-                        wid,
-                        '-f',
-                        '_MOTIF_WM_HINTS',
-                        '32c',
-                        '-set',
-                        '_MOTIF_WM_HINTS',
-                        '2, 0, 0, 0, 0',
-                    ],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-
-                # 2) Mark as SPLASH (many WMs won’t decorate splash windows)
-                subprocess.call(
-                    [
-                        'xprop',
-                        '-id',
-                        wid,
-                        '-set',
-                        '_NET_WM_WINDOW_TYPE',
-                        '_NET_WM_WINDOW_TYPE_SPLASH',
-                    ],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-
-                # 3) Optional: keep it out of taskbar/pager and above (cosmetic)
-                subprocess.call(
-                    [
-                        'xprop',
-                        '-id',
-                        wid,
-                        '-set',
-                        '_NET_WM_STATE',
-                        '_NET_WM_STATE_ABOVE,_NET_WM_STATE_SKIP_TASKBAR,_NET_WM_STATE_SKIP_PAGER',
-                    ],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                return
-            except Exception:
-                time.sleep(0.1)
 
     def start(self) -> None:
         try:
