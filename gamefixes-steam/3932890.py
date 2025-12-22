@@ -81,3 +81,6 @@ def main() -> None:
         )
 
         shutil.copytree(battleye_source, battleye_install, dirs_exist_ok=True)
+
+    if 'NOSTEAM' in os.environ:
+        util.replace_command('-LaunchFromSteam', '')
