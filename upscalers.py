@@ -413,6 +413,8 @@ def setup_upscalers(
 
     if 'fsr4' in loaddll_replace:
         env['FSR4_UPGRADE'] = '1'
+        if 'mlfg' in compat_config:
+            env['MLFG_UPGRADE'] = '1'
         if 'fsr4rdna3' in compat_config:
             env['DXIL_SPIRV_CONFIG'] = 'wmma_rdna3_workaround'
 
