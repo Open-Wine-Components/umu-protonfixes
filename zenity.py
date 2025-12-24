@@ -19,7 +19,7 @@ class ZenityWaitDialog:
         :type text: str
 
         :param title: the title of the dialog window
-        ;type title; str
+        :type title: str
         """
         self._text = text
         self._title = title
