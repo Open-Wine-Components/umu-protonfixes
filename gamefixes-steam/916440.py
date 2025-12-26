@@ -4,5 +4,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Game ships with outdated uPlay launcher, which will not install to be able to start the game"""
+    """Game ships with outdated UPlay launcher, which impedes normal initialization"""
     util.protontricks('ubisoftconnect')
