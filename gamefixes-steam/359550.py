@@ -4,7 +4,6 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Game ships with outdated and not working uPlay launcher."""
-    util.disable_uplay_overlay()
+    """Game ships with outdated UPlay launcher, which impedes normal initialization"""
     util.set_environment('vk_x11_override_min_image_count', '2')
     util.protontricks('ubisoftconnect')
