@@ -295,3 +295,7 @@ You can also manually run the [unit tests](/protonfixes_test.py). This requires 
 cd ..
 python -m protonfixes.protonfixes_test
 ```
+
+### Disable ProtonFixes (for advanced users only)
+If you want to disable the ProtonFixes system for any reason (for example, to test if a game works without the current fix), you can do it by using the env. var. `PROTONFIXES_DISABLE=1`.
+On Steam, you can add `PROTONFIXES_DISABLE=1 %command%` to the game's launch option.
