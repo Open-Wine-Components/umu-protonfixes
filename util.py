@@ -343,8 +343,8 @@ def protontricks(verb: str) -> bool:
             # make sure proton waits for winetricks to finish
             for idx, arg in enumerate(sys.argv):
                 if 'waitforexitandrun' not in arg:
-                    if arg == "run":
-                        sys.argv[idx] = "waitforexitandrun"
+                    if arg == 'run':
+                        sys.argv[idx] = 'waitforexitandrun'
                         log.debug(str(sys.argv))
                         break
 
