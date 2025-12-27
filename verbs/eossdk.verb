@@ -15,7 +15,7 @@ load_eossdk()
     : "${EOS_SDK_ARCHIVE_ID:=793}"
     : "${EOS_SDK_ARCHIVE_TYPE:=sdk}"
 
-    EOS_DL_URL="https://onlineservices.epicgames.com/api/sdk/download?archive_id=${EOS_SDK_ARCHIVE_ID}&archive_type=${EOS_SDK_ARCHIVE_TYPE}"
+    EOS_DL_URL="https://onlineservices.epicgames.com/api/cosmos/sdk/download?archive_id=${EOS_SDK_ARCHIVE_ID}&archive_type=${EOS_SDK_ARCHIVE_TYPE}"
 
     : "${W_CACHE:=${XDG_CACHE_HOME:-$HOME/.cache}/winetricks}"
     : "${W_TMP:=${TMPDIR:-/tmp}/winetricks}"
