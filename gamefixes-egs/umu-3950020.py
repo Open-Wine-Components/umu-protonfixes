@@ -4,5 +4,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    """Installing dotnet48 fixes CEF issues (e.g. in-game news not loading)"""
-    util.protontricks('dotnet48')
+    """CEF tries to use dcomp by default which only has stubs, this triggers a fallback to a different backend"""
+    util.winedll_override('dcomp', util.OverrideOrder.DISABLED)
