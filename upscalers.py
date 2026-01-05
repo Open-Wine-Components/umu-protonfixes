@@ -83,6 +83,9 @@ def __get_dlss_dlls(version: str = 'default') -> dict:
 def __get_xess_dlls(version: str = 'default') -> dict:
     return {
         'drive_c/windows/system32/libxess.dll': __get_dll_manifest('xess', version),
+        'drive_c/windows/system32/libxess_dx11.dll': __get_dll_manifest(
+            'xess_dx11', version
+        ),
         'drive_c/windows/system32/libxell.dll': __get_dll_manifest('xell', version),
         'drive_c/windows/system32/libxess_fg.dll': __get_dll_manifest(
             'xess_fg', version
