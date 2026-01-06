@@ -428,7 +428,7 @@ def setup_upscalers(
                 'ngx_dlss_sr_override=on,'
                 'ngx_dlss_rr_override=on,'
                 'ngx_dlss_fg_override=on,'
-                'ngx_dlss_sr_override_render_preset_selection=render_preset_latest,'
+                'ngx_dlss_sr_override_render_preset_selection=render_preset_k,'
                 'ngx_dlss_rr_override_render_preset_selection=render_preset_latest,'
             ),
         )
