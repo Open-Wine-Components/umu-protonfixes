@@ -10,10 +10,11 @@ BASEDIR       := /files
 
 # Default flags are from Proton, CFLAGS/LDFLAGS are expected to tbe overriden by Proton's makefile
 TARGET_ARCH ?= x86_64
-LIBDIR := $(BASEDIR)/lib/x86_64-linux-gnu
-CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
-LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
-ifeq ($(TARGET_ARCH),arm64)
+ifeq ($(TARGET_ARCH),x86_64)
+	LIBDIR := $(BASEDIR)/lib/x86_64-linux-gnu
+	CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
+	LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
+else ifeq ($(TARGET_ARCH),arm64)
 	CFLAGS ?= -march=armv8.2-a -mtune=cortex-x3
 	LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
 	LIBDIR := $(BASEDIR)/lib/aarch64-linux-gnu
