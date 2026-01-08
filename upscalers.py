@@ -83,6 +83,9 @@ def __get_dlss_dlls(version: str = 'default') -> dict:
 def __get_xess_dlls(version: str = 'default') -> dict:
     return {
         'drive_c/windows/system32/libxess.dll': __get_dll_manifest('xess', version),
+        'drive_c/windows/system32/libxess_dx11.dll': __get_dll_manifest(
+            'xess_dx11', version
+        ),
         'drive_c/windows/system32/libxell.dll': __get_dll_manifest('xell', version),
         'drive_c/windows/system32/libxess_fg.dll': __get_dll_manifest(
             'xess_fg', version
@@ -425,8 +428,8 @@ def setup_upscalers(
                 'ngx_dlss_sr_override=on,'
                 'ngx_dlss_rr_override=on,'
                 'ngx_dlss_fg_override=on,'
-                'ngx_dlss_sr_override_render_preset_selection=render_preset_latest,'
-                'ngx_dlss_rr_override_render_preset_selection=render_preset_latest,'
+                'ngx_dlss_sr_override_render_preset_selection=default,'
+                'ngx_dlss_rr_override_render_preset_selection=default,'
             ),
         )
 
