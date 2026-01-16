@@ -187,8 +187,9 @@ def __check_upscaler_files(
         with open(version_file, encoding='utf-8') as version_fd:
             version = version_fd.read()
         version = json.loads(version)
-        # test if new attributes as exist in the config
-        _ = version[tuple(version.keys())[0]].get('md5_hash')
+        # test if new files and their attributes exist in the tracking file
+        for dst in files.keys():
+            _ = version[dst].get('md5_hash')
     except Exception as e:
         log.warn(f'Error while reading version file "{version_file}"')
         log.warn(repr(e))
