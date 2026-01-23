@@ -83,6 +83,9 @@ def __get_dlss_dlls(version: str = 'default') -> dict:
 def __get_xess_dlls(version: str = 'default') -> dict:
     return {
         'drive_c/windows/system32/libxess.dll': __get_dll_manifest('xess', version),
+        'drive_c/windows/system32/libxess_dx11.dll': __get_dll_manifest(
+            'xess_dx11', version
+        ),
         'drive_c/windows/system32/libxell.dll': __get_dll_manifest('xell', version),
         'drive_c/windows/system32/libxess_fg.dll': __get_dll_manifest(
             'xess_fg', version
@@ -184,8 +187,9 @@ def __check_upscaler_files(
         with open(version_file, encoding='utf-8') as version_fd:
             version = version_fd.read()
         version = json.loads(version)
-        # test if new attributes as exist in the config
-        _ = version[tuple(version.keys())[0]].get('md5_hash')
+        # test if new files and their attributes exist in the tracking file
+        for dst in files.keys():
+            _ = version[dst].get('md5_hash')
     except Exception as e:
         log.warn(f'Error while reading version file "{version_file}"')
         log.warn(repr(e))
@@ -425,8 +429,8 @@ def setup_upscalers(
                 'ngx_dlss_sr_override=on,'
                 'ngx_dlss_rr_override=on,'
                 'ngx_dlss_fg_override=on,'
-                'ngx_dlss_sr_override_render_preset_selection=render_preset_latest,'
-                'ngx_dlss_rr_override_render_preset_selection=render_preset_latest,'
+                'ngx_dlss_sr_override_render_preset_selection=default,'
+                'ngx_dlss_rr_override_render_preset_selection=default,'
             ),
         )
 
