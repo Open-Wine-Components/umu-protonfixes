@@ -8,3 +8,10 @@ def main() -> None:
     # ESYNC and FSYNC causes low quality texture problems in all BioShock 1 and 2 versions (Original and Remastered).
     util.disable_esync()
     util.disable_fsync()
+    util.regedit_add(
+        'HKLM\\System\\CurrentControlSet\\Services\\winebus',
+        'DisableHidraw',
+        'REG_DWORD',
+        '1',
+    )
+
