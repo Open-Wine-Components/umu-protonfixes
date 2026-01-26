@@ -14,4 +14,3 @@ def main() -> None:
         'REG_DWORD',
         '1',
     )
-
