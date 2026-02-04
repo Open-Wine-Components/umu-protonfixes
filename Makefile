@@ -62,8 +62,11 @@ $(OBJDIR)/.build-winetricks-dist: | $(OBJDIR)/winetricks
 winetricks-dist: $(OBJDIR)/.build-winetricks-dist
 
 winetricks-install: winetricks-dist
-	install -Dm755 $(OBJDIR)/winetricks/src/winetricks $(TARGET_DIR)$(BASEDIR)/bin
-	install -Dm755 $(OBJDIR)/winetricks/src/winetricks $(TARGET_DIR)
+	install -d $(TARGET_DIR)$(BASEDIR)/bin
+	install -m755 $(OBJDIR)/winetricks/src/winetricks $(TARGET_DIR)$(BASEDIR)/bin/winetricks
+
+	install -d $(TARGET_DIR)
+	install -m755 $(OBJDIR)/winetricks/src/winetricks $(TARGET_DIR)/winetricks
 
 #
 # libmspack and cabextract
