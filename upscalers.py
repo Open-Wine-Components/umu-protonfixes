@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import lzma
 import os
 import shutil
 import urllib.request
@@ -14,7 +15,7 @@ from .logger import log
 from .config import config
 
 
-__manifest_url = 'https://raw.githubusercontent.com/beeradmoore/dlss-swapper-manifest-builder/refs/heads/main/manifest.json'
+__manifest_url = 'https://loathingkernel.github.io/proton-upscalers/manifest.json'
 __manifest_json: Union[dict, None] = None
 
 
@@ -321,8 +322,12 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
     if not cached_file.exists():
         __download_file(file['download_url'], cached_file, checksum=file_md5)
     dst.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(cached_file) as zip_fd:
-        zip_fd.extractall(dst.parent)
+    if cached_file.suffix == '.zip':
+        with zipfile.ZipFile(cached_file) as zip_fd:
+            zip_fd.extractall(dst.parent)
+    if cached_file.suffix == '.xz':
+        with dst.open('wb') as dst_fd:
+            dst_fd.write(lzma.decompress(cached_file.open('rb').read()))
 
 
 def __download_fsr4(file: dict, cache: Path, dst: Path) -> None:
