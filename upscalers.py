@@ -291,7 +291,7 @@ def __download_file(url: str, dst: Path, *, checksum: Union[str, None] = None) -
     request = urllib.request.Request(
         url,
         headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Proton/10.0'
         },
     )
     try:
