@@ -18,3 +18,5 @@ def main() -> None:
     """News tab freezes upon spawn on winewayland, disabling libGLES fixes it """
     if _is_env_one('PROTON_USE_WAYLAND') or _is_env_one('PROTON_ENABLE_WAYLAND'):
         util.winedll_override('libGLESv2', util.OverrideOrder.DISABLED)
+
+    util.set_environment('PROTON_ENABLE_INT3_HACK', '1')
