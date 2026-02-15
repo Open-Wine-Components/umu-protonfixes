@@ -33,7 +33,7 @@ def main() -> None:
     if not resolution:
         return None
 
-    screen_width, screen_height = util.get_resolution()
+    screen_width, screen_height = resolution
     if not screen_height:
         return
 
