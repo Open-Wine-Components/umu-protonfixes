@@ -472,7 +472,8 @@ def set_environment(envvar: str, value: str) -> None:
     """Add or override an environment value"""
     log.info(f'Adding env: {envvar}={value}')
     os.environ[envvar] = value
-    protonmain.g_session.env[envvar] = value
+    if hasattr(protonmain, 'g_session'):
+        protonmain.g_session.env[envvar] = value
 
 
 def del_environment(envvar: str) -> None:
@@ -480,7 +481,7 @@ def del_environment(envvar: str) -> None:
     log.info('Removing env: ' + envvar)
     if envvar in os.environ:
         del os.environ[envvar]
-    if envvar in protonmain.g_session.env:
+    if hasattr(protonmain, 'g_session') and envvar in protonmain.g_session.env:
         del protonmain.g_session.env[envvar]
 
 
