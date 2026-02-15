@@ -33,8 +33,11 @@ def main() -> None:
     if not resolution:
         return None
 
-    screen_width, screen_height = resolution
-    width = int(screen_width / screen_height * 768 // 1)
+    screen_width, screen_height = util.get_resolution()
+    if not screen_height:
+        return
+
+    width = int(screen_width / screen_height * 768)
 
     # dgvoodoo2 config patches
     subprocess.call(
