@@ -62,6 +62,19 @@ def check_iscriptevaluator() -> bool:
     return len(sys.argv) >= 3 and 'iscriptevaluator.exe' in sys.argv[2]
 
 
+def execute_early() -> None:
+    """Execute the early part of protonfixes"""
+    if check_iscriptevaluator():
+        log.debug('Skipping fix execution. We are running "iscriptevaluator.exe".')
+    elif not check_conditions():
+        log.warn('Skipping fix execution. We are probably running a unit test.')
+    else:
+        fix.early()
+
+
+execute_early()
+
+
 def setup(
     env: dict,
     bin_path_var: str,
