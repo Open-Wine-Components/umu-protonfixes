@@ -497,9 +497,13 @@ def _winepe_override(target: str, filetype: str, dtype: OverrideOrder) -> None:
     log.info(f'Overriding {target}.{filetype} = {dtype.value}')
     target_file = target if filetype == 'dll' else f'{target}.{filetype}'
     setting = f'{target_file}={dtype.value}'
-    protonmain.append_to_env_str(
-        protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';'
-    )
+    if hasattr(protonmain, 'g_session'):
+        protonmain.append_to_env_str(
+            protonmain.g_session.env, 'WINEDLLOVERRIDES', setting, ';'
+        )
+    else:
+        dlloverrides = os.environ.get('WINEDLLOVERRIDES', '')
+        os.environ['WINEDLLOVERRIDES'] = f'{dlloverrides};{setting}'
 
 
 def winedll_override(dll: str, dtype: OverrideOrder) -> None:
@@ -1056,9 +1060,13 @@ def set_game_drive(enabled: bool) -> None:
 
     """
     if enabled:
-        protonmain.g_session.compat_config.add('gamedrive')
+        if hasattr(protonmain, 'g_session'):
+            protonmain.g_session.compat_config.add('gamedrive')
     else:
-        protonmain.g_session.compat_config.discard('gamedrive')
+        if hasattr(protonmain, 'g_session'):
+            protonmain.g_session.compat_config.discard('gamedrive')
+
+    set_environment('PROTON_SET_GAME_DRIVE', str(int(enabled)))
 
 
 def import_saves_folder(
