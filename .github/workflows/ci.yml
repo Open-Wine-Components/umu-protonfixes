@@ -53,7 +53,7 @@ jobs:
 
       # Pyright uses pyproject.toml for it's configuration
       - name: Static type checking with Pyright
-        uses: jakebailey/pyright-action@v2
+        uses: jakebailey/pyright-action@v3
 
       - name: Validate gamefix modules
         run: |
