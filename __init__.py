@@ -93,9 +93,12 @@ def execute() -> None:
     elif not check_conditions():
         log.warn('Skipping fix execution. We are probably running a unit test.')
     else:
-        dialog = ZenityWaitDialog('Installing Game-Specific fixes, please wait...')
+        dialog = None
+        if os.environ.get('UMU_ID', '') != 'winetricks-gui':
+            dialog = ZenityWaitDialog('Installing Game-Specific fixes, please wait...')
         try:
-            dialog.start()
+            if isinstance(dialog, ZenityWaitDialog):
+                dialog.start()
             fix.main()
 
         except Exception:
@@ -103,7 +106,8 @@ def execute() -> None:
             sys.stderr.flush()
 
         finally:
-            dialog.stop()
+            if isinstance(dialog, ZenityWaitDialog):
+                dialog.stop()
 
 
 __all__ = [
