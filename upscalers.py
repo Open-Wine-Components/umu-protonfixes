@@ -5,6 +5,8 @@ import json
 import os
 import shutil
 import urllib.request
+from functools import lru_cache
+from urllib.error import HTTPError, URLError
 import zipfile
 from pathlib import Path
 from typing import Callable, Union
@@ -60,6 +62,19 @@ def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
         f'Version "{version}" for "{upscaler.upper()}" not found, using {dlls[-1]["version"]}'
     )
     return dlls[-1]
+
+
+@lru_cache(maxsize=32)
+def __dll_download_exists(url: str) -> bool:
+    try:
+        req = urllib.request.Request(url, method='HEAD')
+        with urllib.request.urlopen(req, timeout=2) as response:
+            if response.status == 200:
+                log.info(f'Found reachable URL {url}')
+                return True
+    except (HTTPError, URLError, ValueError) as e:
+        log.warn(f'URL {url} returned {repr(e)}')
+    return False
 
 
 __dlss_version_file = 'dlss_version'
@@ -139,6 +154,12 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
     }
     if version == 'default' or version not in __fsr4_dlls.keys():
         version = '4.1.0'
+    if not __dll_download_exists(__fsr4_dlls[version]['download_url']):
+        for key in sorted(__fsr4_dlls.keys(), reverse=True):
+            if __dll_download_exists(__fsr4_dlls[key]['download_url']):
+                version = key
+                break
+    log.info(f'Using version {version} of amdxcffx64.dll')
     return {
         'drive_c/windows/system32/amdxcffx64.dll': __fsr4_dlls[version],
     }
