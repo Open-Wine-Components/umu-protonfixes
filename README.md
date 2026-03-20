@@ -24,6 +24,18 @@ You can also set [dxvk options](https://github.com/doitsujin/dxvk/wiki/Configura
 -pf_dxvk_set=dxgi.maxFrameRate=40 -pf_dxvk_set=d3d9.maxFrameRate=40
 ```
 
+OptiScaler can also be staged into the Wine prefix without modifying the game directory.
+The first run should point `-pf_optiscaler` to an extracted OptiScaler payload directory, a `.zip`,
+or a `.7z` archive (requires `7z`/`7zz` in `PATH`). Later runs can reuse the staged payload with
+`-pf_optiscaler=1`, and `-pf_optiscaler=0` restores the original proxy DLL.
+
+```bash
+-pf_optiscaler=/path/to/OptiScaler \
+-pf_optiscaler_proxy=winmm \
+-pf_optiscaler_profile=fsr4 \
+-pf_optiscaler_cfg=Menu.Scale=1.2
+```
+
 The order is not important and the arguments are not passed on to the game.
 
 If you don't use `%command%` in your launch options, you can just add the parameters.

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch, mock_open
 
-from . import fix
+from . import fix, optiscaler
 
 
 class TestProtonfixes(unittest.TestCase):
@@ -405,6 +405,77 @@ class TestProtonfixes(unittest.TestCase):
         os.environ['STORE'] = 'gog'
         result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
+
+class TestOptiScaler(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.compat_dir = Path(self.temp_dir.name)
+        self.system32 = self.compat_dir / 'pfx/drive_c/windows/system32'
+        self.system32.mkdir(parents=True)
+        self.payload = self.compat_dir / 'payload-source'
+        self.payload.mkdir()
+        (self.payload / 'OptiScaler.dll').write_bytes(b'optiscaler-dll')
+        (self.payload / 'amd_fidelityfx_dx12.dll').write_bytes(b'helper-dll')
+        (self.payload / 'OptiScaler.ini').write_text('[Menu]\nScale=1.0\n', encoding='utf-8')
+        (self.system32 / 'winmm.dll').write_bytes(b'original-winmm')
+        os.environ['STEAM_COMPAT_DATA_PATH'] = self.compat_dir.as_posix()
+        os.environ.pop('WINEDLLOVERRIDES', None)
+
+    def tearDown(self):
+        os.environ.pop('STEAM_COMPAT_DATA_PATH', None)
+        os.environ.pop('WINEDLLOVERRIDES', None)
+        self.temp_dir.cleanup()
+
+    def testEnableOptiScalerStagesPayload(self):
+        result = optiscaler.enable_optiscaler(
+            self.payload.as_posix(),
+            proxy='winmm',
+            profile='fsr4',
+            cfg='Menu.Scale=1.2',
+        )
+
+        self.assertTrue(result)
+        self.assertTrue((self.system32 / 'winmm-original.dll').is_file())
+        self.assertTrue((self.system32 / 'winmm.dll').is_file())
+        self.assertTrue((self.system32 / 'amd_fidelityfx_dx12.dll').is_symlink())
+        self.assertTrue((self.system32 / 'OptiScaler.ini').is_symlink())
+        self.assertIn('winmm=n,b', os.environ.get('WINEDLLOVERRIDES', ''))
+
+        ini_path = self.compat_dir / 'optiscaler-managed/OptiScaler.ini'
+        ini_text = ini_path.read_text(encoding='utf-8')
+        self.assertIn('Dx12Upscaler=fsr31', ini_text)
+        self.assertIn('Scale=1.2', ini_text)
+
+    def testDisableOptiScalerRestoresProxy(self):
+        optiscaler.enable_optiscaler(self.payload.as_posix(), proxy='winmm')
+
+        result = optiscaler.disable_optiscaler()
+
+        self.assertTrue(result)
+        self.assertFalse((self.system32 / 'amd_fidelityfx_dx12.dll').exists())
+        self.assertFalse((self.system32 / 'OptiScaler.ini').exists())
+        self.assertFalse((self.system32 / 'winmm-original.dll').exists())
+        self.assertEqual(
+            (self.system32 / 'winmm.dll').read_bytes(),
+            b'original-winmm',
+        )
+
+    def testEnableOptiScalerTwiceDoesNotCreateFalseBackups(self):
+        optiscaler.enable_optiscaler(self.payload.as_posix(), proxy='winmm')
+        optiscaler.enable_optiscaler(proxy='winmm')
+        optiscaler.disable_optiscaler()
+
+        self.assertFalse((self.system32 / 'amd_fidelityfx_dx12.dll').exists())
+        self.assertFalse((self.system32 / 'OptiScaler.ini').exists())
+        self.assertFalse(
+            (self.compat_dir / 'optiscaler-managed/backups/amd_fidelityfx_dx12.dll').exists()
+        )
+        self.assertFalse((self.compat_dir / 'optiscaler-managed/backups/OptiScaler.ini').exists())
+        self.assertEqual(
+            (self.system32 / 'winmm.dll').read_bytes(),
+            b'original-winmm',
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

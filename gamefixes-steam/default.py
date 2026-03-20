@@ -4,7 +4,7 @@ even if no game fix is present. It is run before game fixes are applied.
 """
 
 import sys
-from protonfixes import util
+from protonfixes import optiscaler, util
 
 
 def main() -> None:
@@ -14,6 +14,10 @@ def main() -> None:
     def use_steam_commands() -> None:
         """Parse aliases from Steam launch options"""
         pf_alias_list = list(filter(lambda item: item.startswith('-pf_'), sys.argv))
+        optiscaler_enable = None
+        optiscaler_proxy = 'auto'
+        optiscaler_profile = 'default'
+        optiscaler_cfg = ''
 
         for pf_alias in pf_alias_list:
             alias, sep, param = pf_alias.partition('=')
@@ -31,5 +35,20 @@ def main() -> None:
                 repl_opt, repl_sep, repl_val = param.partition('=')
                 if repl_sep == '=':
                     util.replace_command(repl_opt, repl_val)
+            elif alias == '-pf_optiscaler':
+                optiscaler_enable = param
+            elif alias == '-pf_optiscaler_proxy':
+                optiscaler_proxy = param
+            elif alias == '-pf_optiscaler_profile':
+                optiscaler_profile = param
+            elif alias == '-pf_optiscaler_cfg':
+                optiscaler_cfg = param
+
+        optiscaler.handle_steam_launch_options(
+            optiscaler_enable,
+            proxy=optiscaler_proxy,
+            profile=optiscaler_profile,
+            cfg=optiscaler_cfg,
+        )
 
     use_steam_commands()
