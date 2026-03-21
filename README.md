@@ -24,22 +24,6 @@ You can also set [dxvk options](https://github.com/doitsujin/dxvk/wiki/Configura
 -pf_dxvk_set=dxgi.maxFrameRate=40 -pf_dxvk_set=d3d9.maxFrameRate=40
 ```
 
-OptiScaler uses Proton-style environment variables instead of `-pf_` aliases. Set
-`PROTON_OPTISCALER` to a proxy like `auto`, `winmm`, `dxgi`, or `version` (or `1` as shorthand
-for `auto`). If you remove the variable from your launch options, the next run restores the prefix
-to stock behavior.
-
-```bash
-PROTON_OPTISCALER=winmm %command%
-```
-
-By default this uses the pinned upstream OptiScaler `0.7.9` release. Optional variables:
-
-```bash
-PROTON_OPTISCALER_CONFIG=Menu.Scale=1.2;FSR.Fsr4ForceCapable=true
-PROTON_OPTISCALER_URL=https://github.com/optiscaler/OptiScaler/releases/download/v0.7.9/OptiScaler_0.7.9.7z
-```
-
 The order is not important and the arguments are not passed on to the game.
 
 If you don't use `%command%` in your launch options, you can just add the parameters.
