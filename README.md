@@ -35,7 +35,6 @@ PROTON_OPTISCALER=winmm %command%
 Optional variables:
 
 ```bash
-PROTON_OPTISCALER_PROFILE=fsr4
 PROTON_OPTISCALER_CONFIG=Menu.Scale=1.2;FSR.Fsr4ForceCapable=true
 PROTON_OPTISCALER_URL=https://github.com/optiscaler/OptiScaler/releases/download/v0.7.9/OptiScaler_0.7.9.7z
 ```

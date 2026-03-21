@@ -15,6 +15,7 @@ from urllib.parse import unquote, urlparse
 from .config import config
 from .logger import log
 
+
 __managed_dir = 'optiscaler-managed'
 __payload_dir = 'payload'
 __backup_dir = 'backups'
@@ -23,10 +24,7 @@ __ini_file = 'OptiScaler.ini'
 __main_dll = 'OptiScaler.dll'
 __env_var = 'PROTON_OPTISCALER'
 __url_var = 'PROTON_OPTISCALER_URL'
-__version_var = 'PROTON_OPTISCALER_VERSION'
-__profile_var = 'PROTON_OPTISCALER_PROFILE'
 __config_var = 'PROTON_OPTISCALER_CONFIG'
-__config_var_alias = 'PROTON_OPTISCALER_CFG'
 __true_values = {'1', 'true', 'yes', 'on', 'enable', 'enabled'}
 __false_values = {'0', 'false', 'no', 'off', 'disable', 'disabled'}
 __supported_proxies = (
@@ -40,38 +38,37 @@ __supported_proxies = (
     'd3d12',
 )
 __auto_proxies = ('winmm', 'dxgi', 'version', 'dbghelp', 'winhttp', 'wininet', 'd3d12')
-__profile_overrides = {
-    'default': (),
-    'fsr4': (
-        ('Upscalers', 'Dx12Upscaler', 'fsr31'),
-        ('FSR', 'Fsr4ForceCapable', 'true'),
-        ('FSR', 'Fsr4EnableWatermark', 'true'),
-    ),
-}
-__release_api = 'https://api.github.com/repos/optiscaler/OptiScaler/releases'
+__release_api = 'https://api.github.com/repos/optiscaler/OptiScaler/releases/latest'
 __default_version = '0.7.9'
 __default_url = (
     'https://github.com/optiscaler/OptiScaler/releases/download/'
     f'v{__default_version}/OptiScaler_{__default_version}.7z'
 )
 
+
 def _managed_path(compat_dir: str) -> Path:
     return Path(compat_dir) / __managed_dir
+
 
 def _payload_path(compat_dir: str) -> Path:
     return _managed_path(compat_dir) / __payload_dir
 
+
 def _backup_path(compat_dir: str) -> Path:
     return _managed_path(compat_dir) / __backup_dir
+
 
 def _manifest_path(compat_dir: str) -> Path:
     return _managed_path(compat_dir) / __manifest_file
 
+
 def _system32_path(prefix_dir: str) -> Path:
     return Path(prefix_dir) / 'drive_c/windows/system32'
 
+
 def _cache_dir() -> Path:
     return config.path.cache_dir.joinpath('optiscaler')
+
 
 def _load_manifest(compat_dir: str) -> dict:
     manifest_path = _manifest_path(compat_dir)
@@ -89,6 +86,7 @@ def _load_manifest(compat_dir: str) -> dict:
 
     return {}
 
+
 def _save_manifest(compat_dir: str, manifest: dict) -> None:
     managed_dir = _managed_path(compat_dir)
     managed_dir.mkdir(parents=True, exist_ok=True)
@@ -96,11 +94,13 @@ def _save_manifest(compat_dir: str, manifest: dict) -> None:
         json.dump(manifest, manifest_fd, indent=2, sort_keys=True)
         manifest_fd.write('\n')
 
+
 def _remove_path(path: Path) -> None:
     if path.is_symlink() or path.is_file():
         path.unlink(missing_ok=True)
     elif path.is_dir():
         shutil.rmtree(path)
+
 
 def _append_env(env: dict, key: str, value: str, separator: str = ';') -> None:
     parts = [part for part in env.get(key, '').split(separator) if part]
@@ -111,12 +111,14 @@ def _append_env(env: dict, key: str, value: str, separator: str = ';') -> None:
     elif key in env:
         del env[key]
 
+
 def _remove_env(env: dict, key: str, value: str, separator: str = ';') -> None:
     parts = [part for part in env.get(key, '').split(separator) if part and part != value]
     if parts:
         env[key] = separator.join(parts)
     elif key in env:
         del env[key]
+
 
 def _payload_root_from_manifest(compat_dir: str, manifest: dict) -> Optional[Path]:
     payload_root = manifest.get('payload_root', '')
@@ -129,11 +131,13 @@ def _payload_root_from_manifest(compat_dir: str, manifest: dict) -> Optional[Pat
 
     return _managed_path(compat_dir) / payload_root
 
+
 def _payload_root_value(compat_dir: str, payload_root: Path) -> str:
     try:
         return str(payload_root.relative_to(_managed_path(compat_dir)))
     except ValueError:
         return str(payload_root)
+
 
 def _find_payload_root(base_dir: Path) -> Path:
     candidates = sorted(
@@ -144,12 +148,14 @@ def _find_payload_root(base_dir: Path) -> Path:
         raise FileNotFoundError(f'Unable to locate {__main_dll} in "{base_dir}"')
     return candidates[0]
 
+
 def _payload_files(payload_root: Path) -> list[str]:
     return sorted(
         dll_path.name
         for dll_path in payload_root.glob('*.dll')
         if dll_path.is_file() and dll_path.name != __main_dll
     )
+
 
 def _download_json(url: str, cache_path: Path) -> dict:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -176,6 +182,7 @@ def _download_json(url: str, cache_path: Path) -> dict:
         json.dump(release, cache_fd)
     return release
 
+
 def _fallback_release() -> dict:
     return {
         'asset_name': Path(unquote(urlparse(__default_url).path)).name,
@@ -183,21 +190,12 @@ def _fallback_release() -> dict:
         'version': __default_version,
     }
 
-def _release_from_api(version: str = 'latest') -> dict:
-    cache_dir = _cache_dir().joinpath('releases')
-    normalized = version.lower()
 
-    if normalized in {'', 'default', 'latest'}:
-        release = _download_json(
-            f'{__release_api}/latest',
-            cache_dir.joinpath('latest.json'),
-        )
-    else:
-        release = _download_json(
-            f'{__release_api}/tags/v{version.lstrip("v")}',
-            cache_dir.joinpath(f'{version.lstrip("v")}.json'),
-        )
-
+def _release_from_api() -> dict:
+    release = _download_json(
+        __release_api,
+        _cache_dir().joinpath('releases', 'latest.json'),
+    )
     if not release:
         return _fallback_release()
 
@@ -215,37 +213,32 @@ def _release_from_api(version: str = 'latest') -> dict:
         'version': str(release.get('tag_name', '')).lstrip('v') or __default_version,
     }
 
-def _release_from_url(url: str, version: str = '') -> dict:
-    url_path = Path(unquote(urlparse(url).path))
-    release_version = version.strip().lstrip('v')
-    if not release_version:
-        name = url_path.name
-        prefix = 'OptiScaler_'
-        suffix = '.7z'
-        if name.startswith(prefix) and name.endswith(suffix):
-            release_version = name[len(prefix) : -len(suffix)]
-    if not release_version:
-        release_version = 'custom'
 
-    asset_name = url_path.name or f'OptiScaler_{release_version}.7z'
+def _release_from_url(url: str) -> dict:
+    url_path = Path(unquote(urlparse(url).path))
+    version = 'custom'
+    name = url_path.name
+    prefix = 'OptiScaler_'
+    suffix = '.7z'
+    if name.startswith(prefix) and name.endswith(suffix):
+        version = name[len(prefix) : -len(suffix)]
+
     return {
-        'asset_name': asset_name,
+        'asset_name': name or 'OptiScaler_custom.7z',
         'url': url,
-        'version': release_version,
+        'version': version,
     }
+
 
 def _resolve_release(env: dict, compat_dir: str) -> dict:
     manifest = _load_manifest(compat_dir)
     explicit_url = env.get(__url_var, '').strip()
-    explicit_version = env.get(__version_var, '').strip()
-
     if explicit_url:
-        return _release_from_url(explicit_url, explicit_version)
+        return _release_from_url(explicit_url)
 
     payload_root = _payload_root_from_manifest(compat_dir, manifest)
     if (
-        not explicit_version
-        and payload_root is not None
+        payload_root is not None
         and payload_root.joinpath(__main_dll).is_file()
         and manifest.get('url')
         and manifest.get('version')
@@ -256,7 +249,8 @@ def _resolve_release(env: dict, compat_dir: str) -> dict:
             'version': manifest['version'],
         }
 
-    return _release_from_api(explicit_version or 'latest')
+    return _release_from_api()
+
 
 def _download_file(url: str, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -268,14 +262,17 @@ def _download_file(url: str, destination: Path) -> None:
         with urllib.request.urlopen(request, timeout=30) as url_fd:
             shutil.copyfileobj(url_fd, destination_fd)
 
+
 def _archive_path(release: dict) -> Path:
     release_id = hashlib.sha256(release['url'].encode('utf-8')).hexdigest()[:12]
     asset_name = release['asset_name'] or f'OptiScaler_{release["version"]}.7z'
     return _cache_dir().joinpath('downloads', f'{release_id}-{asset_name}')
 
+
 def _payload_release_id(release: dict) -> str:
     release_id = hashlib.sha256(release['url'].encode('utf-8')).hexdigest()[:12]
     return f'{release["version"]}-{release_id}'
+
 
 def _extract_archive(archive_path: Path, destination: Path) -> None:
     binary = shutil.which('7z') or shutil.which('7zz')
@@ -296,6 +293,7 @@ def _extract_archive(archive_path: Path, destination: Path) -> None:
         payload_root = _find_payload_root(temp_dir)
         shutil.copytree(payload_root, destination)
 
+
 def _ensure_payload(compat_dir: str, release: dict) -> tuple[Path, list[str]]:
     payload_root = _payload_path(compat_dir) / _payload_release_id(release)
     if payload_root.joinpath(__main_dll).is_file():
@@ -310,6 +308,7 @@ def _ensure_payload(compat_dir: str, release: dict) -> tuple[Path, list[str]]:
     _extract_archive(archive_path, payload_root)
     return payload_root, _payload_files(payload_root)
 
+
 def _managed_ini_path(compat_dir: str, payload_root: Path) -> Path:
     ini_path = _managed_path(compat_dir) / __ini_file
     if ini_path.is_file():
@@ -322,6 +321,7 @@ def _managed_ini_path(compat_dir: str, payload_root: Path) -> Path:
     ini_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(payload_ini, ini_path)
     return ini_path
+
 
 def _parse_ini_overrides(config_value: str) -> list[tuple[str, str, str]]:
     overrides = []
@@ -339,6 +339,7 @@ def _parse_ini_overrides(config_value: str) -> list[tuple[str, str, str]]:
         overrides.append((section, key, value))
 
     return overrides
+
 
 def _patch_ini(lines: list[str], section: str, key: str, value: str) -> list[str]:
     section_header = f'[{section}]'
@@ -374,13 +375,9 @@ def _patch_ini(lines: list[str], section: str, key: str, value: str) -> list[str
     lines.insert(section_end, f'{key}={value}')
     return lines
 
-def _apply_ini_overrides(ini_path: Path, profile: str, config_value: str) -> None:
-    normalized_profile = profile.lower()
-    if normalized_profile not in __profile_overrides:
-        raise RuntimeError(f'Unsupported OptiScaler profile "{profile}"')
 
-    overrides = list(__profile_overrides[normalized_profile])
-    overrides.extend(_parse_ini_overrides(config_value))
+def _apply_ini_overrides(ini_path: Path, config_value: str) -> None:
+    overrides = _parse_ini_overrides(config_value)
     if not overrides:
         return
 
@@ -389,6 +386,7 @@ def _apply_ini_overrides(ini_path: Path, profile: str, config_value: str) -> Non
         lines = _patch_ini(lines, section, key, value)
 
     ini_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
 
 def _resolve_proxy(proxy: str, manifest: dict) -> str:
     normalized = proxy.strip().lower()
@@ -405,6 +403,7 @@ def _resolve_proxy(proxy: str, manifest: dict) -> str:
         return previous_proxy
 
     return __auto_proxies[0]
+
 
 def _stage_support_file(
     compat_dir: str,
@@ -429,6 +428,7 @@ def _stage_support_file(
 
     target.symlink_to(Path(os.path.relpath(source, target.parent)))
 
+
 def _restore_support_file(compat_dir: str, prefix_dir: str, filename: str) -> None:
     target = _system32_path(prefix_dir) / filename
     backup_path = _backup_path(compat_dir) / filename
@@ -437,6 +437,7 @@ def _restore_support_file(compat_dir: str, prefix_dir: str, filename: str) -> No
     if backup_path.exists() or backup_path.is_symlink():
         target.parent.mkdir(parents=True, exist_ok=True)
         backup_path.rename(target)
+
 
 def _stage_proxy(payload_root: Path, prefix_dir: str, proxy: str, previous_manifest: dict) -> None:
     system32 = _system32_path(prefix_dir)
@@ -460,6 +461,7 @@ def _stage_proxy(payload_root: Path, prefix_dir: str, proxy: str, previous_manif
 
     shutil.copy2(payload_root / __main_dll, target)
 
+
 def _restore_proxy(prefix_dir: str, proxy: str) -> None:
     system32 = _system32_path(prefix_dir)
     target = system32 / f'{proxy}.dll'
@@ -468,6 +470,7 @@ def _restore_proxy(prefix_dir: str, proxy: str) -> None:
     _remove_path(target)
     if backup.exists() or backup.is_symlink():
         backup.rename(target)
+
 
 def disable_optiscaler(
     compat_dir: str,
@@ -493,6 +496,7 @@ def disable_optiscaler(
     log.info('Disabled OptiScaler for this prefix.')
     return True
 
+
 def enable_optiscaler(
     payload_root: Path,
     compat_dir: str,
@@ -500,7 +504,6 @@ def enable_optiscaler(
     env: dict,
     *,
     proxy: str = 'auto',
-    profile: str = 'default',
     config_value: str = '',
     release: Optional[dict] = None,
     payload_files: Optional[list[str]] = None,
@@ -519,7 +522,7 @@ def enable_optiscaler(
         previous_manifest = _load_manifest(compat_dir)
 
     managed_ini = _managed_ini_path(compat_dir, payload_root)
-    _apply_ini_overrides(managed_ini, profile, config_value)
+    _apply_ini_overrides(managed_ini, config_value)
 
     for filename in payload_files:
         _stage_support_file(
@@ -548,13 +551,13 @@ def enable_optiscaler(
             'enabled': True,
             'payload_files': payload_files,
             'payload_root': _payload_root_value(compat_dir, payload_root),
-            'profile': profile.lower(),
             'proxy': resolved_proxy,
         }
     )
     _save_manifest(compat_dir, manifest)
     log.info(f'Enabled OptiScaler with proxy "{resolved_proxy}".')
     return True
+
 
 def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
     """Setup OptiScaler from Proton-style environment variables.
@@ -567,8 +570,7 @@ def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
         return
 
     proxy = 'auto' if enabled.lower() in __true_values else enabled
-    profile = env.get(__profile_var, 'default')
-    config_value = env.get(__config_var, env.get(__config_var_alias, ''))
+    config_value = env.get(__config_var, '')
 
     try:
         release = _resolve_release(env, compat_dir)
@@ -579,7 +581,6 @@ def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
             prefix_dir,
             env,
             proxy=proxy,
-            profile=profile,
             config_value=config_value,
             release=release,
             payload_files=payload_files,
