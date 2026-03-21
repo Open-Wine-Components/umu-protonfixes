@@ -37,7 +37,6 @@ __supported_proxies = (
     'd3d12',
 )
 __auto_proxies = ('winmm', 'dxgi', 'version', 'dbghelp', 'winhttp', 'wininet', 'd3d12')
-__release_api = 'https://api.github.com/repos/optiscaler/OptiScaler/releases/latest'
 __default_version = '0.7.9'
 __default_url = (
     'https://github.com/optiscaler/OptiScaler/releases/download/'
@@ -138,44 +137,6 @@ def _release_from_url(url: str) -> dict:
     return {'asset_name': name, 'url': url, 'version': version}
 
 
-def _latest_release() -> dict:
-    cache_path = _cache_dir() / 'releases/latest.json'
-    request = urllib.request.Request(
-        __release_api,
-        headers={
-            'Accept': 'application/vnd.github+json',
-            'User-Agent': 'umu-protonfixes',
-        },
-    )
-
-    release = {}
-    try:
-        with urllib.request.urlopen(request, timeout=10) as fd:
-            release = json.loads(fd.read())
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-        with cache_path.open('w', encoding='utf-8') as fd:
-            json.dump(release, fd)
-    except Exception as exc:
-        log.warn(f'Failed to fetch OptiScaler release metadata from "{__release_api}"')
-        log.warn(repr(exc))
-        if cache_path.is_file():
-            with cache_path.open(encoding='utf-8') as fd:
-                release = json.load(fd)
-
-    if isinstance(release, dict):
-        for asset in release.get('assets', ()):
-            if asset.get('name', '').endswith('.7z'):
-                return {
-                    'asset_name': asset['name'],
-                    'url': asset['browser_download_url'],
-                    'version': str(release.get('tag_name', '')).lstrip('v') or __default_version,
-                }
-
-    if release:
-        log.warn('No OptiScaler .7z asset found in release metadata')
-    return _release_from_url(__default_url)
-
-
 def _resolve_release(env: dict, compat_dir: str, manifest: dict) -> dict:
     explicit_url = env.get(__url_var, '').strip()
     if explicit_url:
@@ -194,7 +155,7 @@ def _resolve_release(env: dict, compat_dir: str, manifest: dict) -> dict:
             'version': manifest['version'],
         }
 
-    return _latest_release()
+    return _release_from_url(__default_url)
 
 
 def _find_payload_root(base_dir: Path) -> Path:

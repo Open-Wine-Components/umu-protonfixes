@@ -33,7 +33,7 @@ to stock behavior.
 PROTON_OPTISCALER=winmm %command%
 ```
 
-Optional variables:
+By default this uses the pinned upstream OptiScaler `0.7.9` release. Optional variables:
 
 ```bash
 PROTON_OPTISCALER_CONFIG=Menu.Scale=1.2;FSR.Fsr4ForceCapable=true
