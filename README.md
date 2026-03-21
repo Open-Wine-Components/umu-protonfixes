@@ -24,16 +24,20 @@ You can also set [dxvk options](https://github.com/doitsujin/dxvk/wiki/Configura
 -pf_dxvk_set=dxgi.maxFrameRate=40 -pf_dxvk_set=d3d9.maxFrameRate=40
 ```
 
-OptiScaler can also be staged into the Wine prefix without modifying the game directory.
-The first run should point `-pf_optiscaler` to an extracted OptiScaler payload directory, a `.zip`,
-or a `.7z` archive (requires `7z`/`7zz` in `PATH`). Later runs can reuse the staged payload with
-`-pf_optiscaler=1`, and `-pf_optiscaler=0` restores the original proxy DLL.
+OptiScaler uses Proton-style environment variables instead of `-pf_` aliases. Set
+`PROTON_OPTISCALER` to a proxy like `auto`, `winmm`, `dxgi`, or `version`. If you remove the
+variable from your launch options, the next run restores the prefix to stock behavior.
 
 ```bash
--pf_optiscaler=/path/to/OptiScaler \
--pf_optiscaler_proxy=winmm \
--pf_optiscaler_profile=fsr4 \
--pf_optiscaler_cfg=Menu.Scale=1.2
+PROTON_OPTISCALER=winmm %command%
+```
+
+Optional variables:
+
+```bash
+PROTON_OPTISCALER_PROFILE=fsr4
+PROTON_OPTISCALER_CONFIG=Menu.Scale=1.2;FSR.Fsr4ForceCapable=true
+PROTON_OPTISCALER_URL=https://github.com/optiscaler/OptiScaler/releases/download/v0.7.9/OptiScaler_0.7.9.7z
 ```
 
 The order is not important and the arguments are not passed on to the game.

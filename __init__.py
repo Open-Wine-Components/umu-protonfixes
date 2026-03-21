@@ -7,6 +7,7 @@ from typing import Callable
 
 from . import fix
 from .logger import log
+from .optiscaler import setup_optiscaler
 from .upscalers import setup_upscalers
 from .utilities import (
     setup_frame_rate,
@@ -100,6 +101,11 @@ def execute() -> None:
             if isinstance(dialog, ZenityWaitDialog):
                 dialog.start()
             fix.main()
+            setup_optiscaler(
+                os.environ,
+                os.environ['STEAM_COMPAT_DATA_PATH'],
+                os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx'),
+            )
 
         except Exception:
             sys.stderr.write('ProtonFixes ' + traceback.format_exc())
@@ -116,6 +122,7 @@ __all__ = [
     'setup_frame_rate',
     'setup_local_shader_cache',
     'setup_mount_drives',
+    'setup_optiscaler',
     'setup_upscalers',
     'winetricks',
 ]
