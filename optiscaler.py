@@ -45,53 +45,43 @@ __default_url = (
 )
 
 
-def _managed_path(compat_dir: str) -> Path:
+def _managed_dir(compat_dir: str) -> Path:
     return Path(compat_dir) / __managed_dir
 
 
-def _payload_path(compat_dir: str) -> Path:
-    return _managed_path(compat_dir) / __payload_dir
-
-
-def _backup_path(compat_dir: str) -> Path:
-    return _managed_path(compat_dir) / __backup_dir
-
-
-def _manifest_path(compat_dir: str) -> Path:
-    return _managed_path(compat_dir) / __manifest_file
-
-
-def _system32_path(prefix_dir: str) -> Path:
+def _system32_dir(prefix_dir: str) -> Path:
     return Path(prefix_dir) / 'drive_c/windows/system32'
 
 
 def _cache_dir() -> Path:
-    return config.path.cache_dir.joinpath('optiscaler')
+    return config.path.cache_dir / 'optiscaler'
+
+
+def _manifest_path(compat_dir: str) -> Path:
+    return _managed_dir(compat_dir) / __manifest_file
 
 
 def _load_manifest(compat_dir: str) -> dict:
-    manifest_path = _manifest_path(compat_dir)
-    if not manifest_path.is_file():
+    path = _manifest_path(compat_dir)
+    if not path.is_file():
         return {}
 
     try:
-        with manifest_path.open(encoding='utf-8') as manifest_fd:
-            manifest = json.load(manifest_fd)
-        if isinstance(manifest, dict):
-            return manifest
+        with path.open(encoding='utf-8') as fd:
+            data = json.load(fd)
+        return data if isinstance(data, dict) else {}
     except Exception as exc:
-        log.warn(f'Failed to read OptiScaler manifest "{manifest_path}"')
+        log.warn(f'Failed to read OptiScaler manifest "{path}"')
         log.warn(repr(exc))
-
-    return {}
+        return {}
 
 
 def _save_manifest(compat_dir: str, manifest: dict) -> None:
-    managed_dir = _managed_path(compat_dir)
-    managed_dir.mkdir(parents=True, exist_ok=True)
-    with _manifest_path(compat_dir).open('w', encoding='utf-8') as manifest_fd:
-        json.dump(manifest, manifest_fd, indent=2, sort_keys=True)
-        manifest_fd.write('\n')
+    path = _manifest_path(compat_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('w', encoding='utf-8') as fd:
+        json.dump(manifest, fd, indent=2, sort_keys=True)
+        fd.write('\n')
 
 
 def _remove_path(path: Path) -> None:
@@ -101,7 +91,7 @@ def _remove_path(path: Path) -> None:
         shutil.rmtree(path)
 
 
-def _append_env(env: dict, key: str, value: str, separator: str = ';') -> None:
+def _set_env_list(env: dict, key: str, value: str, separator: str = ';') -> None:
     parts = [part for part in env.get(key, '').split(separator) if part]
     if value not in parts:
         parts.append(value)
@@ -111,7 +101,7 @@ def _append_env(env: dict, key: str, value: str, separator: str = ';') -> None:
         del env[key]
 
 
-def _remove_env(env: dict, key: str, value: str, separator: str = ';') -> None:
+def _drop_env_list(env: dict, key: str, value: str, separator: str = ';') -> None:
     parts = [part for part in env.get(key, '').split(separator) if part and part != value]
     if parts:
         env[key] = separator.join(parts)
@@ -119,123 +109,79 @@ def _remove_env(env: dict, key: str, value: str, separator: str = ';') -> None:
         del env[key]
 
 
-def _payload_root_from_manifest(compat_dir: str, manifest: dict) -> Optional[Path]:
-    payload_root = manifest.get('payload_root', '')
+def _payload_root(compat_dir: str, payload_root: str = '') -> Optional[Path]:
     if not payload_root:
         return None
 
-    payload_path = Path(payload_root)
-    if payload_path.is_absolute():
-        return payload_path
-
-    return _managed_path(compat_dir) / payload_root
+    path = Path(payload_root)
+    if path.is_absolute():
+        return path
+    return _managed_dir(compat_dir) / path
 
 
 def _payload_root_value(compat_dir: str, payload_root: Path) -> str:
     try:
-        return str(payload_root.relative_to(_managed_path(compat_dir)))
+        return str(payload_root.relative_to(_managed_dir(compat_dir)))
     except ValueError:
         return str(payload_root)
 
 
-def _find_payload_root(base_dir: Path) -> Path:
-    candidates = sorted(
-        {path.parent for path in base_dir.rglob('*') if path.is_file() and path.name == __main_dll},
-        key=lambda path: (len(path.relative_to(base_dir).parts), str(path)),
-    )
-    if not candidates:
-        raise FileNotFoundError(f'Unable to locate {__main_dll} in "{base_dir}"')
-    return candidates[0]
+def _payload_id(url: str) -> str:
+    return hashlib.sha256(url.encode('utf-8')).hexdigest()[:12]
 
 
-def _payload_files(payload_root: Path) -> list[str]:
-    return sorted(
-        dll_path.name
-        for dll_path in payload_root.glob('*.dll')
-        if dll_path.is_file() and dll_path.name != __main_dll
-    )
+def _release_from_url(url: str) -> dict:
+    name = Path(unquote(urlparse(url).path)).name or 'OptiScaler_custom.7z'
+    version = 'custom'
+    if name.startswith('OptiScaler_') and name.endswith('.7z'):
+        version = name[len('OptiScaler_') : -len('.7z')]
+    return {'asset_name': name, 'url': url, 'version': version}
 
 
-def _download_json(url: str, cache_path: Path) -> dict:
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
+def _latest_release() -> dict:
+    cache_path = _cache_dir() / 'releases/latest.json'
     request = urllib.request.Request(
-        url,
+        __release_api,
         headers={
             'Accept': 'application/vnd.github+json',
             'User-Agent': 'umu-protonfixes',
         },
     )
 
+    release = {}
     try:
-        with urllib.request.urlopen(request, timeout=10) as url_fd:
-            release = json.loads(url_fd.read())
+        with urllib.request.urlopen(request, timeout=10) as fd:
+            release = json.loads(fd.read())
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        with cache_path.open('w', encoding='utf-8') as fd:
+            json.dump(release, fd)
     except Exception as exc:
-        log.warn(f'Failed to fetch OptiScaler release metadata from "{url}"')
+        log.warn(f'Failed to fetch OptiScaler release metadata from "{__release_api}"')
         log.warn(repr(exc))
         if cache_path.is_file():
-            with cache_path.open(encoding='utf-8') as cache_fd:
-                return json.load(cache_fd)
-        return {}
+            with cache_path.open(encoding='utf-8') as fd:
+                release = json.load(fd)
 
-    with cache_path.open('w', encoding='utf-8') as cache_fd:
-        json.dump(release, cache_fd)
-    return release
+    if isinstance(release, dict):
+        for asset in release.get('assets', ()):
+            if asset.get('name', '').endswith('.7z'):
+                return {
+                    'asset_name': asset['name'],
+                    'url': asset['browser_download_url'],
+                    'version': str(release.get('tag_name', '')).lstrip('v') or __default_version,
+                }
 
-
-def _fallback_release() -> dict:
-    return {
-        'asset_name': Path(unquote(urlparse(__default_url).path)).name,
-        'url': __default_url,
-        'version': __default_version,
-    }
-
-
-def _release_from_api() -> dict:
-    release = _download_json(
-        __release_api,
-        _cache_dir().joinpath('releases', 'latest.json'),
-    )
-    if not release:
-        return _fallback_release()
-
-    assets = tuple(
-        asset for asset in release.get('assets', ()) if asset.get('name', '').endswith('.7z')
-    )
-    if not assets:
+    if release:
         log.warn('No OptiScaler .7z asset found in release metadata')
-        return _fallback_release()
-
-    asset = assets[0]
-    return {
-        'asset_name': asset['name'],
-        'url': asset['browser_download_url'],
-        'version': str(release.get('tag_name', '')).lstrip('v') or __default_version,
-    }
+    return _release_from_url(__default_url)
 
 
-def _release_from_url(url: str) -> dict:
-    url_path = Path(unquote(urlparse(url).path))
-    version = 'custom'
-    name = url_path.name
-    prefix = 'OptiScaler_'
-    suffix = '.7z'
-    if name.startswith(prefix) and name.endswith(suffix):
-        version = name[len(prefix) : -len(suffix)]
-
-    return {
-        'asset_name': name or 'OptiScaler_custom.7z',
-        'url': url,
-        'version': version,
-    }
-
-
-def _resolve_release(env: dict, compat_dir: str) -> dict:
-    manifest = _load_manifest(compat_dir)
+def _resolve_release(env: dict, compat_dir: str, manifest: dict) -> dict:
     explicit_url = env.get(__url_var, '').strip()
     if explicit_url:
         return _release_from_url(explicit_url)
 
-    payload_root = _payload_root_from_manifest(compat_dir, manifest)
+    payload_root = _payload_root(compat_dir, manifest.get('payload_root', ''))
     if (
         payload_root is not None
         and payload_root.joinpath(__main_dll).is_file()
@@ -248,39 +194,42 @@ def _resolve_release(env: dict, compat_dir: str) -> dict:
             'version': manifest['version'],
         }
 
-    return _release_from_api()
+    return _latest_release()
 
 
-def _download_file(url: str, destination: Path) -> None:
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    request = urllib.request.Request(
-        url,
-        headers={'User-Agent': 'umu-protonfixes'},
+def _find_payload_root(base_dir: Path) -> Path:
+    candidates = sorted(
+        {path.parent for path in base_dir.rglob(__main_dll) if path.is_file()},
+        key=lambda path: (len(path.relative_to(base_dir).parts), str(path)),
     )
-    with destination.open('wb') as destination_fd:
+    if not candidates:
+        raise FileNotFoundError(f'Unable to locate {__main_dll} in "{base_dir}"')
+    return candidates[0]
+
+
+def _payload_files(payload_root: Path) -> list[str]:
+    return sorted(
+        path.name
+        for path in payload_root.glob('*.dll')
+        if path.is_file() and path.name != __main_dll
+    )
+
+
+def _download_file(url: str, dst: Path) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    request = urllib.request.Request(url, headers={'User-Agent': 'umu-protonfixes'})
+    with dst.open('wb') as dst_fd:
         with urllib.request.urlopen(request, timeout=30) as url_fd:
-            shutil.copyfileobj(url_fd, destination_fd)
+            shutil.copyfileobj(url_fd, dst_fd)
 
 
-def _archive_path(release: dict) -> Path:
-    release_id = hashlib.sha256(release['url'].encode('utf-8')).hexdigest()[:12]
-    asset_name = release['asset_name'] or f'OptiScaler_{release["version"]}.7z'
-    return _cache_dir().joinpath('downloads', f'{release_id}-{asset_name}')
-
-
-def _payload_release_id(release: dict) -> str:
-    release_id = hashlib.sha256(release['url'].encode('utf-8')).hexdigest()[:12]
-    return f'{release["version"]}-{release_id}'
-
-
-def _extract_archive(archive_path: Path, destination: Path) -> None:
+def _extract_archive(archive_path: Path, dst: Path) -> None:
     binary = shutil.which('7z') or shutil.which('7zz')
     if binary is None:
         raise RuntimeError('OptiScaler extraction requires the 7z or 7zz binary in PATH')
 
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    _remove_path(destination)
-
+    _remove_path(dst)
+    dst.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='optiscaler-payload-') as temp_dir_name:
         temp_dir = Path(temp_dir_name)
         subprocess.run(
@@ -289,16 +238,16 @@ def _extract_archive(archive_path: Path, destination: Path) -> None:
             capture_output=True,
             text=True,
         )
-        payload_root = _find_payload_root(temp_dir)
-        shutil.copytree(payload_root, destination)
+        shutil.copytree(_find_payload_root(temp_dir), dst)
 
 
 def _ensure_payload(compat_dir: str, release: dict) -> tuple[Path, list[str]]:
-    payload_root = _payload_path(compat_dir) / _payload_release_id(release)
+    release_id = _payload_id(release['url'])
+    payload_root = _managed_dir(compat_dir) / __payload_dir / f'{release["version"]}-{release_id}'
     if payload_root.joinpath(__main_dll).is_file():
         return payload_root, _payload_files(payload_root)
 
-    archive_path = _archive_path(release)
+    archive_path = _cache_dir() / 'downloads' / f'{release_id}-{release["asset_name"]}'
     if not archive_path.is_file() or archive_path.stat().st_size == 0:
         log.info(f'Downloading OptiScaler from "{release["url"]}"')
         _download_file(release['url'], archive_path)
@@ -309,7 +258,7 @@ def _ensure_payload(compat_dir: str, release: dict) -> tuple[Path, list[str]]:
 
 
 def _managed_ini_path(compat_dir: str, payload_root: Path) -> Path:
-    ini_path = _managed_path(compat_dir) / __ini_file
+    ini_path = _managed_dir(compat_dir) / __ini_file
     if ini_path.is_file():
         return ini_path
 
@@ -326,52 +275,41 @@ def _parse_ini_overrides(config_value: str) -> list[tuple[str, str, str]]:
     overrides = []
     for entry in filter(None, (item.strip() for item in config_value.split(';'))):
         option_key, separator, value = entry.partition('=')
-        if separator != '=':
-            log.warn(f'Skipping invalid OptiScaler override "{entry}"')
-            continue
-
         section, dot, key = option_key.partition('.')
-        if dot != '.' or not section or not key:
+        if separator != '=' or dot != '.' or not section or not key:
             log.warn(f'Skipping invalid OptiScaler override "{entry}"')
             continue
-
         overrides.append((section, key, value))
-
     return overrides
 
 
 def _patch_ini(lines: list[str], section: str, key: str, value: str) -> list[str]:
-    section_header = f'[{section}]'
-    section_start = None
-    section_end = len(lines)
-
-    for index, line in enumerate(lines):
-        if line.strip() == section_header:
-            section_start = index
-            break
-
-    if section_start is None:
+    header = f'[{section}]'
+    start = next((i for i, line in enumerate(lines) if line.strip() == header), None)
+    if start is None:
         if lines and lines[-1].strip():
             lines.append('')
-        lines.extend((section_header, f'{key}={value}'))
+        lines.extend((header, f'{key}={value}'))
         return lines
 
-    for index in range(section_start + 1, len(lines)):
-        stripped = lines[index].strip()
-        if stripped.startswith('[') and stripped.endswith(']'):
-            section_end = index
-            break
-
-    for index in range(section_start + 1, section_end):
-        stripped = lines[index].strip()
-        if not stripped or stripped.startswith(';') or stripped.startswith('#'):
+    end = next(
+        (
+            i
+            for i in range(start + 1, len(lines))
+            if lines[i].strip().startswith('[') and lines[i].strip().endswith(']')
+        ),
+        len(lines),
+    )
+    for i in range(start + 1, end):
+        stripped = lines[i].strip()
+        if not stripped or stripped.startswith((';', '#')):
             continue
         option, separator, _ = stripped.partition('=')
         if separator == '=' and option.strip() == key:
-            lines[index] = f'{key}={value}'
+            lines[i] = f'{key}={value}'
             return lines
 
-    lines.insert(section_end, f'{key}={value}')
+    lines.insert(end, f'{key}={value}')
     return lines
 
 
@@ -383,67 +321,50 @@ def _apply_ini_overrides(ini_path: Path, config_value: str) -> None:
     lines = ini_path.read_text(encoding='utf-8').splitlines()
     for section, key, value in overrides:
         lines = _patch_ini(lines, section, key, value)
-
     ini_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
-def _resolve_proxy(proxy: str, manifest: dict) -> str:
-    normalized = proxy.strip().lower()
-    if normalized in __true_values:
-        normalized = 'auto'
-    if normalized not in __supported_proxies:
+def _resolve_proxy(proxy: str, previous_proxy: str) -> str:
+    proxy = proxy.strip().lower()
+    if proxy in __true_values:
+        proxy = 'auto'
+    if proxy not in __supported_proxies:
         raise RuntimeError(f'Unsupported OptiScaler proxy "{proxy}"')
-
-    if normalized != 'auto':
-        return normalized
-
-    previous_proxy = manifest.get('proxy', '')
-    if previous_proxy in __auto_proxies:
-        return previous_proxy
-
-    return __auto_proxies[0]
+    if proxy != 'auto':
+        return proxy
+    return previous_proxy if previous_proxy in __auto_proxies else __auto_proxies[0]
 
 
-def _stage_support_file(
+def _stage_target(
     compat_dir: str,
-    filename: str,
-    source: Path,
     target: Path,
     previous_manifest: dict,
+    *,
+    managed: bool,
 ) -> None:
-    backup_path = _backup_path(compat_dir) / filename
-    backup_path.parent.mkdir(parents=True, exist_ok=True)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    managed_files = set(previous_manifest.get('payload_files', ()))
-    managed_files.add(__ini_file)
-
-    if target.exists() or target.is_symlink():
-        if previous_manifest.get('enabled') and filename in managed_files:
-            _remove_path(target)
-        elif not backup_path.exists() and not backup_path.is_symlink():
-            target.rename(backup_path)
-        else:
-            _remove_path(target)
-
-    target.symlink_to(Path(os.path.relpath(source, target.parent)))
+    backup = _managed_dir(compat_dir) / __backup_dir / target.name
+    if not target.exists() and not target.is_symlink():
+        return
+    if previous_manifest.get('enabled') and managed:
+        _remove_path(target)
+    elif not backup.exists() and not backup.is_symlink():
+        backup.parent.mkdir(parents=True, exist_ok=True)
+        target.rename(backup)
+    else:
+        _remove_path(target)
 
 
-def _restore_support_file(compat_dir: str, prefix_dir: str, filename: str) -> None:
-    target = _system32_path(prefix_dir) / filename
-    backup_path = _backup_path(compat_dir) / filename
-
+def _restore_target(compat_dir: str, target: Path) -> None:
+    backup = _managed_dir(compat_dir) / __backup_dir / target.name
     _remove_path(target)
-    if backup_path.exists() or backup_path.is_symlink():
+    if backup.exists() or backup.is_symlink():
         target.parent.mkdir(parents=True, exist_ok=True)
-        backup_path.rename(target)
+        backup.rename(target)
 
 
-def _stage_proxy(payload_root: Path, prefix_dir: str, proxy: str, previous_manifest: dict) -> None:
-    system32 = _system32_path(prefix_dir)
-    system32.mkdir(parents=True, exist_ok=True)
-
-    target = system32 / f'{proxy}.dll'
-    backup = system32 / f'{proxy}-original.dll'
+def _stage_proxy(prefix_dir: str, payload_root: Path, proxy: str, previous_manifest: dict) -> None:
+    target = _system32_dir(prefix_dir) / f'{proxy}.dll'
+    backup = _system32_dir(prefix_dir) / f'{proxy}-original.dll'
 
     if backup.exists() and previous_manifest.get('proxy') != proxy:
         raise RuntimeError(
@@ -462,33 +383,27 @@ def _stage_proxy(payload_root: Path, prefix_dir: str, proxy: str, previous_manif
 
 
 def _restore_proxy(prefix_dir: str, proxy: str) -> None:
-    system32 = _system32_path(prefix_dir)
-    target = system32 / f'{proxy}.dll'
-    backup = system32 / f'{proxy}-original.dll'
-
+    target = _system32_dir(prefix_dir) / f'{proxy}.dll'
+    backup = _system32_dir(prefix_dir) / f'{proxy}-original.dll'
     _remove_path(target)
     if backup.exists() or backup.is_symlink():
         backup.rename(target)
 
 
-def disable_optiscaler(
-    compat_dir: str,
-    prefix_dir: str,
-    env: Optional[dict] = None,
-) -> bool:
+def disable_optiscaler(compat_dir: str, prefix_dir: str, env: Optional[dict] = None) -> bool:
     manifest = _load_manifest(compat_dir)
     if not manifest.get('enabled'):
         return False
 
-    for filename in manifest.get('payload_files', ()):
-        _restore_support_file(compat_dir, prefix_dir, filename)
-    _restore_support_file(compat_dir, prefix_dir, __ini_file)
+    system32 = _system32_dir(prefix_dir)
+    for filename in (*manifest.get('payload_files', ()), __ini_file):
+        _restore_target(compat_dir, system32 / filename)
 
     proxy = manifest.get('proxy', '')
     if proxy:
         _restore_proxy(prefix_dir, proxy)
         if env is not None:
-            _remove_env(env, 'WINEDLLOVERRIDES', f'{proxy}=n,b')
+            _drop_env_list(env, 'WINEDLLOVERRIDES', f'{proxy}=n,b')
 
     manifest['enabled'] = False
     _save_manifest(compat_dir, manifest)
@@ -508,9 +423,9 @@ def enable_optiscaler(
     payload_files: Optional[list[str]] = None,
 ) -> bool:
     previous_manifest = _load_manifest(compat_dir)
-    resolved_proxy = _resolve_proxy(proxy, previous_manifest)
     payload_root = Path(payload_root)
     payload_files = payload_files or _payload_files(payload_root)
+    resolved_proxy = _resolve_proxy(proxy, previous_manifest.get('proxy', ''))
 
     if previous_manifest.get('enabled') and (
         previous_manifest.get('proxy') != resolved_proxy
@@ -520,27 +435,24 @@ def enable_optiscaler(
         disable_optiscaler(compat_dir, prefix_dir, env)
         previous_manifest = _load_manifest(compat_dir)
 
-    managed_ini = _managed_ini_path(compat_dir, payload_root)
-    _apply_ini_overrides(managed_ini, config_value)
+    system32 = _system32_dir(prefix_dir)
+    system32.mkdir(parents=True, exist_ok=True)
+    managed_names = set(previous_manifest.get('payload_files', ())) | {__ini_file}
+
+    ini_path = _managed_ini_path(compat_dir, payload_root)
+    _apply_ini_overrides(ini_path, config_value)
 
     for filename in payload_files:
-        _stage_support_file(
-            compat_dir,
-            filename,
-            payload_root / filename,
-            _system32_path(prefix_dir) / filename,
-            previous_manifest,
-        )
+        target = system32 / filename
+        _stage_target(compat_dir, target, previous_manifest, managed=filename in managed_names)
+        target.symlink_to(Path(os.path.relpath(payload_root / filename, target.parent)))
 
-    _stage_support_file(
-        compat_dir,
-        __ini_file,
-        managed_ini,
-        _system32_path(prefix_dir) / __ini_file,
-        previous_manifest,
-    )
-    _stage_proxy(payload_root, prefix_dir, resolved_proxy, previous_manifest)
-    _append_env(env, 'WINEDLLOVERRIDES', f'{resolved_proxy}=n,b')
+    ini_target = system32 / __ini_file
+    _stage_target(compat_dir, ini_target, previous_manifest, managed=True)
+    ini_target.symlink_to(Path(os.path.relpath(ini_path, ini_target.parent)))
+
+    _stage_proxy(prefix_dir, payload_root, resolved_proxy, previous_manifest)
+    _set_env_list(env, 'WINEDLLOVERRIDES', f'{resolved_proxy}=n,b')
 
     manifest = dict(previous_manifest)
     if release is not None:
@@ -568,19 +480,16 @@ def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
         disable_optiscaler(compat_dir, prefix_dir, env)
         return
 
-    proxy = 'auto' if enabled.lower() in __true_values else enabled
-    config_value = env.get(__config_var, '')
-
     try:
-        release = _resolve_release(env, compat_dir)
+        release = _resolve_release(env, compat_dir, _load_manifest(compat_dir))
         payload_root, payload_files = _ensure_payload(compat_dir, release)
         enable_optiscaler(
             payload_root,
             compat_dir,
             prefix_dir,
             env,
-            proxy=proxy,
-            config_value=config_value,
+            proxy='auto' if enabled.lower() in __true_values else enabled,
+            config_value=env.get(__config_var, ''),
             release=release,
             payload_files=payload_files,
         )
