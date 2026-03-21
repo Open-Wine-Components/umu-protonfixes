@@ -478,6 +478,53 @@ class TestOptiScaler(unittest.TestCase):
             b'original-winmm',
         )
 
+    def testEnableOptiScalerResetsManagedIniBeforeOverrides(self):
+        optiscaler.enable_optiscaler(
+            self.payload,
+            self.compat_dir.as_posix(),
+            self.prefix_dir.as_posix(),
+            self.env,
+            proxy='winmm',
+            config_value='Menu.Scale=1.2',
+        )
+        optiscaler.enable_optiscaler(
+            self.payload,
+            self.compat_dir.as_posix(),
+            self.prefix_dir.as_posix(),
+            self.env,
+            proxy='winmm',
+        )
+
+        ini_text = (self.compat_dir / 'optiscaler-managed/OptiScaler.ini').read_text(
+            encoding='utf-8'
+        )
+        self.assertIn('Scale=1.0', ini_text)
+        self.assertNotIn('Scale=1.2', ini_text)
+
+    def testEnableOptiScalerRollsBackOnFailure(self):
+        with patch(
+            'protonfixes.optiscaler._stage_proxy', side_effect=RuntimeError('boom')
+        ):
+            with self.assertRaises(RuntimeError):
+                optiscaler.enable_optiscaler(
+                    self.payload,
+                    self.compat_dir.as_posix(),
+                    self.prefix_dir.as_posix(),
+                    self.env,
+                    proxy='winmm',
+                )
+
+        self.assertFalse((self.system32 / 'amd_fidelityfx_dx12.dll').exists())
+        self.assertFalse((self.system32 / 'amd_fidelityfx_vk.dll').exists())
+        self.assertFalse((self.system32 / 'OptiScaler.ini').exists())
+        self.assertFalse((self.system32 / 'winmm-original.dll').exists())
+        self.assertEqual((self.system32 / 'winmm.dll').read_bytes(), b'original-winmm')
+        self.assertNotIn('winmm=n,b', self.env.get('WINEDLLOVERRIDES', ''))
+        self.assertEqual(
+            optiscaler._load_manifest(self.compat_dir.as_posix()),
+            {},
+        )
+
     def testSetupOptiScalerIsJanitorial(self):
         release = {
             'asset_name': 'OptiScaler_test.7z',
