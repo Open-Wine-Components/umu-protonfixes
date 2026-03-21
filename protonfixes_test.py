@@ -488,7 +488,7 @@ class TestOptiScaler(unittest.TestCase):
             'protonfixes.optiscaler._ensure_payload',
             return_value=(self.payload, ['amd_fidelityfx_dx12.dll', 'amd_fidelityfx_vk.dll']),
         ):
-            self.env['PROTON_OPTISCALER'] = 'winmm'
+            self.env['PROTON_OPTISCALER'] = '1'
             optiscaler.setup_optiscaler(
                 self.env,
                 self.compat_dir.as_posix(),

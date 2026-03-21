@@ -25,8 +25,9 @@ You can also set [dxvk options](https://github.com/doitsujin/dxvk/wiki/Configura
 ```
 
 OptiScaler uses Proton-style environment variables instead of `-pf_` aliases. Set
-`PROTON_OPTISCALER` to a proxy like `auto`, `winmm`, `dxgi`, or `version`. If you remove the
-variable from your launch options, the next run restores the prefix to stock behavior.
+`PROTON_OPTISCALER` to a proxy like `auto`, `winmm`, `dxgi`, or `version` (or `1` as shorthand
+for `auto`). If you remove the variable from your launch options, the next run restores the prefix
+to stock behavior.
 
 ```bash
 PROTON_OPTISCALER=winmm %command%

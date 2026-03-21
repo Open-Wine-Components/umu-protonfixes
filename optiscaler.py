@@ -25,8 +25,7 @@ __main_dll = 'OptiScaler.dll'
 __env_var = 'PROTON_OPTISCALER'
 __url_var = 'PROTON_OPTISCALER_URL'
 __config_var = 'PROTON_OPTISCALER_CONFIG'
-__true_values = {'1', 'true', 'yes', 'on', 'enable', 'enabled'}
-__false_values = {'0', 'false', 'no', 'off', 'disable', 'disabled'}
+__true_values = {'1'}
 __supported_proxies = (
     'auto',
     'winmm',
@@ -565,7 +564,7 @@ def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
     usage: setup_optiscaler(g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
     """
     enabled = env.get(__env_var, '').strip()
-    if not enabled or enabled.lower() in __false_values:
+    if not enabled:
         disable_optiscaler(compat_dir, prefix_dir, env)
         return
 
