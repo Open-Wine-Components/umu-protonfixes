@@ -513,6 +513,22 @@ class TestOptiScaler(unittest.TestCase):
             b'original-winmm',
         )
 
+    def testSetupOptiScalerUsesPayloadOverrideDirectory(self):
+        self.env['PROTON_OPTISCALER'] = 'winmm'
+        self.env['PROTON_OPTISCALER_PATH'] = self.payload.as_posix()
+
+        with patch('protonfixes.optiscaler._ensure_payload') as ensure_payload:
+            optiscaler.setup_optiscaler(
+                self.env,
+                self.compat_dir.as_posix(),
+                self.prefix_dir.as_posix(),
+            )
+
+        ensure_payload.assert_not_called()
+        self.assertTrue((self.system32 / 'winmm-original.dll').is_file())
+        self.assertTrue((self.system32 / 'amd_fidelityfx_dx12.dll').is_symlink())
+        self.assertTrue((self.system32 / 'amd_fidelityfx_vk.dll').is_symlink())
+
 
 if __name__ == '__main__':
     unittest.main()

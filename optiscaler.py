@@ -22,6 +22,7 @@ __manifest_file = 'manifest.json'
 __ini_file = 'OptiScaler.ini'
 __main_dll = 'OptiScaler.dll'
 __env_var = 'PROTON_OPTISCALER'
+__path_var = 'PROTON_OPTISCALER_PATH'
 __config_var = 'PROTON_OPTISCALER_CONFIG'
 __true_values = {'1'}
 __supported_proxies = (
@@ -124,6 +125,19 @@ def _resolve_release() -> dict:
         'url': __default_url,
         'version': __default_version,
     }
+
+
+def _resolve_payload_override(env: dict) -> Optional[Path]:
+    payload_path = env.get(__path_var, '').strip()
+    if not payload_path:
+        return None
+
+    payload_root = Path(payload_path).expanduser().resolve()
+    if not payload_root.is_dir():
+        raise RuntimeError(f'OptiScaler payload override is not a directory: "{payload_root}"')
+    if not payload_root.joinpath(__main_dll).is_file():
+        raise FileNotFoundError(f'OptiScaler payload override is missing "{__main_dll}"')
+    return payload_root
 
 
 def _find_payload_root(base_dir: Path) -> Path:
@@ -407,8 +421,13 @@ def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
         return
 
     try:
-        release = _resolve_release()
-        payload_root, payload_files = _ensure_payload(compat_dir, release)
+        payload_override = _resolve_payload_override(env)
+        if payload_override is not None:
+            payload_root = payload_override
+            payload_files = _payload_files(payload_root)
+        else:
+            release = _resolve_release()
+            payload_root, payload_files = _ensure_payload(compat_dir, release)
         enable_optiscaler(
             payload_root,
             compat_dir,
