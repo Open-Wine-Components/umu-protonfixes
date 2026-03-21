@@ -1,6 +1,5 @@
 """Download and setup OptiScaler as a prefix-managed payload."""
 
-import configparser
 import json
 import os
 import shutil
@@ -24,10 +23,7 @@ INI_FILE = 'OptiScaler.ini'
 MAIN_DLL = 'OptiScaler.dll'
 ENV_VAR = 'PROTON_OPTISCALER'
 PATH_VAR = 'PROTON_OPTISCALER_PATH'
-CONFIG_VAR = 'PROTON_OPTISCALER_CONFIG'
-TRUE_VALUES = {'1'}
-SUPPORTED_PROXIES = (
-    'auto',
+SUPPORTED_PROXIES = {
     'winmm',
     'dxgi',
     'version',
@@ -35,8 +31,7 @@ SUPPORTED_PROXIES = (
     'winhttp',
     'wininet',
     'd3d12',
-)
-AUTO_PROXIES = ('winmm', 'dxgi', 'version', 'dbghelp', 'winhttp', 'wininet', 'd3d12')
+}
 DEFAULT_VERSION = '0.7.9'
 DEFAULT_ASSET_NAME = f'OptiScaler_{DEFAULT_VERSION}.7z'
 DEFAULT_URL = (
@@ -51,6 +46,10 @@ def _managed_dir(compat_dir: str) -> Path:
 
 def _system32_dir(prefix_dir: str) -> Path:
     return Path(prefix_dir) / 'drive_c/windows/system32'
+
+
+def _backup_path(compat_dir: str, target: Path) -> Path:
+    return _managed_dir(compat_dir) / BACKUP_DIR / target.name
 
 
 def _load_manifest(compat_dir: str) -> dict:
@@ -83,26 +82,21 @@ def _remove_path(path: Path) -> None:
         shutil.rmtree(path)
 
 
-def _set_env_list(
-    env: MutableMapping[str, str], key: str, value: str, separator: str = ';'
-) -> None:
-    parts = [part for part in env.get(key, '').split(separator) if part]
+def _append_override(env: MutableMapping[str, str], proxy: str) -> None:
+    value = f'{proxy}=n,b'
+    parts = [part for part in env.get('WINEDLLOVERRIDES', '').split(';') if part]
     if value not in parts:
         parts.append(value)
-    if parts:
-        env[key] = separator.join(parts)
-    elif key in env:
-        del env[key]
+    env['WINEDLLOVERRIDES'] = ';'.join(parts)
 
 
-def _drop_env_list(
-    env: MutableMapping[str, str], key: str, value: str, separator: str = ';'
-) -> None:
-    parts = [part for part in env.get(key, '').split(separator) if part and part != value]
+def _remove_override(env: MutableMapping[str, str], proxy: str) -> None:
+    value = f'{proxy}=n,b'
+    parts = [part for part in env.get('WINEDLLOVERRIDES', '').split(';') if part and part != value]
     if parts:
-        env[key] = separator.join(parts)
-    elif key in env:
-        del env[key]
+        env['WINEDLLOVERRIDES'] = ';'.join(parts)
+    elif 'WINEDLLOVERRIDES' in env:
+        del env['WINEDLLOVERRIDES']
 
 
 def _resolve_payload_override(env: Mapping[str, str]) -> Optional[Path]:
@@ -162,10 +156,10 @@ def _extract_archive(archive_path: Path, dst: Path) -> None:
         shutil.copytree(_find_payload_root(temp_dir), dst)
 
 
-def _ensure_payload(compat_dir: str) -> tuple[Path, list[str]]:
+def _ensure_payload(compat_dir: str) -> Path:
     payload_root = _managed_dir(compat_dir) / PAYLOAD_DIR / 'current'
     if payload_root.joinpath(MAIN_DLL).is_file():
-        return payload_root, _payload_files(payload_root)
+        return payload_root
 
     archive_path = config.path.cache_dir / 'optiscaler/downloads' / DEFAULT_ASSET_NAME
     if not archive_path.is_file() or archive_path.stat().st_size == 0:
@@ -174,11 +168,14 @@ def _ensure_payload(compat_dir: str) -> tuple[Path, list[str]]:
 
     log.info(f'Extracting OptiScaler "{archive_path.name}"')
     _extract_archive(archive_path, payload_root)
-    return payload_root, _payload_files(payload_root)
+    return payload_root
 
 
 def _managed_ini_path(compat_dir: str, payload_root: Path) -> Path:
     ini_path = _managed_dir(compat_dir) / INI_FILE
+    if ini_path.is_file():
+        return ini_path
+
     payload_ini = payload_root / INI_FILE
     if not payload_ini.is_file():
         raise FileNotFoundError(f'OptiScaler payload is missing "{INI_FILE}"')
@@ -188,52 +185,18 @@ def _managed_ini_path(compat_dir: str, payload_root: Path) -> Path:
     return ini_path
 
 
-def _apply_ini_overrides(ini_path: Path, config_value: str) -> None:
-    if not config_value:
-        return
-
-    parser = configparser.RawConfigParser()
-    parser.optionxform = str
-    parser.read(ini_path, encoding='utf-8')
-
-    for entry in filter(None, (item.strip() for item in config_value.split(';'))):
-        option_key, separator, value = entry.partition('=')
-        section, dot, key = option_key.partition('.')
-        if separator != '=' or dot != '.' or not section or not key:
-            log.warn(f'Skipping invalid OptiScaler override "{entry}"')
-            continue
-        if not parser.has_section(section):
-            parser.add_section(section)
-        parser.set(section, key, value)
-
-    with ini_path.open('w', encoding='utf-8') as fd:
-        parser.write(fd, space_around_delimiters=False)
-
-
-def _resolve_proxy(proxy: str, previous_proxy: str) -> str:
+def _resolve_proxy(proxy: str) -> str:
     proxy = proxy.strip().lower()
-    if proxy in TRUE_VALUES:
-        proxy = 'auto'
     if proxy not in SUPPORTED_PROXIES:
         raise RuntimeError(f'Unsupported OptiScaler proxy "{proxy}"')
-    if proxy != 'auto':
-        return proxy
-    return previous_proxy if previous_proxy in AUTO_PROXIES else AUTO_PROXIES[0]
+    return proxy
 
 
-def _stage_target(
-    compat_dir: str,
-    target: Path,
-    previous_manifest: dict,
-    *,
-    managed: bool,
-) -> None:
-    backup = _managed_dir(compat_dir) / BACKUP_DIR / target.name
+def _stage_target(compat_dir: str, target: Path) -> None:
+    backup = _backup_path(compat_dir, target)
     if not target.exists() and not target.is_symlink():
         return
-    if previous_manifest.get('enabled') and managed:
-        _remove_path(target)
-    elif not backup.exists() and not backup.is_symlink():
+    if not backup.exists() and not backup.is_symlink():
         backup.parent.mkdir(parents=True, exist_ok=True)
         target.rename(backup)
     else:
@@ -241,53 +204,36 @@ def _stage_target(
 
 
 def _restore_target(compat_dir: str, target: Path) -> None:
-    backup = _managed_dir(compat_dir) / BACKUP_DIR / target.name
+    backup = _backup_path(compat_dir, target)
     _remove_path(target)
     if backup.exists() or backup.is_symlink():
         target.parent.mkdir(parents=True, exist_ok=True)
         backup.rename(target)
 
 
-def _stage_proxy(prefix_dir: str, payload_root: Path, proxy: str, previous_manifest: dict) -> None:
+def _stage_proxy(prefix_dir: str, payload_root: Path, proxy: str) -> None:
     target = _system32_dir(prefix_dir) / f'{proxy}.dll'
     backup = _system32_dir(prefix_dir) / f'{proxy}-original.dll'
     temp = target.with_name(f'.{target.name}.tmp')
-    previous_target = target.with_name(f'.{target.name}.previous')
 
-    if backup.exists() and previous_manifest.get('proxy') != proxy:
+    if backup.exists() or backup.is_symlink():
         raise RuntimeError(
             f'Cannot stage OptiScaler proxy "{proxy}" because "{backup.name}" already exists'
         )
 
     _remove_path(temp)
-    _remove_path(previous_target)
     shutil.copy2(payload_root / MAIN_DLL, temp)
-
     try:
         if target.exists() or target.is_symlink():
-            if previous_manifest.get('enabled') and previous_manifest.get('proxy') == proxy:
-                target.rename(previous_target)
-                try:
-                    temp.rename(target)
-                except Exception:
-                    previous_target.rename(target)
-                    raise
-                _remove_path(previous_target)
-                return
-            if not backup.exists() and not backup.is_symlink():
-                target.rename(backup)
-                try:
-                    temp.rename(target)
-                except Exception:
-                    backup.rename(target)
-                    raise
-                return
-            _remove_path(target)
-
+            target.rename(backup)
         temp.rename(target)
+    except Exception:
+        _remove_path(temp)
+        if backup.exists() and not target.exists() and not target.is_symlink():
+            backup.rename(target)
+        raise
     finally:
         _remove_path(temp)
-        _remove_path(previous_target)
 
 
 def _restore_proxy(prefix_dir: str, proxy: str) -> None:
@@ -316,7 +262,7 @@ def disable_optiscaler(
     if proxy:
         _restore_proxy(prefix_dir, proxy)
         if env is not None:
-            _drop_env_list(env, 'WINEDLLOVERRIDES', f'{proxy}=n,b')
+            _remove_override(env, proxy)
 
     manifest['enabled'] = False
     _save_manifest(compat_dir, manifest)
@@ -330,84 +276,51 @@ def enable_optiscaler(
     prefix_dir: str,
     env: MutableMapping[str, str],
     *,
-    proxy: str = 'auto',
-    config_value: str = '',
-    payload_files: Optional[list[str]] = None,
-    payload_key: str = 'managed',
+    proxy: str,
 ) -> bool:
     """Stage a managed OptiScaler payload into the given game prefix."""
-    previous_manifest = _load_manifest(compat_dir)
-    payload_root = Path(payload_root)
-    payload_files = payload_files or _payload_files(payload_root)
-    resolved_proxy = _resolve_proxy(proxy, previous_manifest.get('proxy', ''))
-
-    same_state = (
-        previous_manifest.get('enabled')
-        and previous_manifest.get('proxy') == resolved_proxy
-        and set(previous_manifest.get('payload_files', ())) == set(payload_files)
-        and previous_manifest.get('payload') == payload_key
-    )
-
-    if previous_manifest.get('enabled') and not same_state:
+    manifest = _load_manifest(compat_dir)
+    if manifest.get('enabled'):
         disable_optiscaler(compat_dir, prefix_dir, env)
-        previous_manifest = _load_manifest(compat_dir)
 
+    payload_root = Path(payload_root)
+    payload_files = _payload_files(payload_root)
+    resolved_proxy = _resolve_proxy(proxy)
     ini_path = _managed_ini_path(compat_dir, payload_root)
-    _apply_ini_overrides(ini_path, config_value)
-
-    if same_state:
-        _set_env_list(env, 'WINEDLLOVERRIDES', f'{resolved_proxy}=n,b')
-        manifest = dict(previous_manifest)
-        manifest.update(
-            {
-                'enabled': True,
-                'payload_files': payload_files,
-                'payload': payload_key,
-                'proxy': resolved_proxy,
-            }
-        )
-        _save_manifest(compat_dir, manifest)
-        log.info(f'Enabled OptiScaler with proxy "{resolved_proxy}".')
-        return True
-
     system32 = _system32_dir(prefix_dir)
     system32.mkdir(parents=True, exist_ok=True)
-    managed_names = set(previous_manifest.get('payload_files', ())) | {INI_FILE}
+
     staged_targets = []
     proxy_staged = False
-
     try:
         for filename in payload_files:
             target = system32 / filename
-            _stage_target(compat_dir, target, previous_manifest, managed=filename in managed_names)
+            _stage_target(compat_dir, target)
             staged_targets.append(target)
             target.symlink_to(Path(os.path.relpath(payload_root / filename, target.parent)))
 
         ini_target = system32 / INI_FILE
-        _stage_target(compat_dir, ini_target, previous_manifest, managed=True)
+        _stage_target(compat_dir, ini_target)
         staged_targets.append(ini_target)
         ini_target.symlink_to(Path(os.path.relpath(ini_path, ini_target.parent)))
 
-        _stage_proxy(prefix_dir, payload_root, resolved_proxy, previous_manifest)
+        _stage_proxy(prefix_dir, payload_root, resolved_proxy)
         proxy_staged = True
-        _set_env_list(env, 'WINEDLLOVERRIDES', f'{resolved_proxy}=n,b')
-
-        manifest = dict(previous_manifest)
-        manifest.update(
+        _append_override(env, resolved_proxy)
+        _save_manifest(
+            compat_dir,
             {
                 'enabled': True,
                 'payload_files': payload_files,
-                'payload': payload_key,
                 'proxy': resolved_proxy,
-            }
+            },
         )
-        _save_manifest(compat_dir, manifest)
     except Exception:
         for target in reversed(staged_targets):
             _restore_target(compat_dir, target)
         if proxy_staged:
             _restore_proxy(prefix_dir, resolved_proxy)
-        _drop_env_list(env, 'WINEDLLOVERRIDES', f'{resolved_proxy}=n,b')
+        _remove_override(env, resolved_proxy)
         raise
 
     log.info(f'Enabled OptiScaler with proxy "{resolved_proxy}".')
@@ -427,23 +340,13 @@ def setup_optiscaler(
         return
 
     try:
-        payload_override = _resolve_payload_override(env)
-        if payload_override is not None:
-            payload_root = payload_override
-            payload_files = _payload_files(payload_root)
-            payload_key = str(payload_root)
-        else:
-            payload_root, payload_files = _ensure_payload(compat_dir)
-            payload_key = 'managed'
+        payload_root = _resolve_payload_override(env) or _ensure_payload(compat_dir)
         enable_optiscaler(
             payload_root,
             compat_dir,
             prefix_dir,
             env,
-            proxy='auto' if enabled.lower() in TRUE_VALUES else enabled,
-            config_value=env.get(CONFIG_VAR, ''),
-            payload_files=payload_files,
-            payload_key=payload_key,
+            proxy=enabled,
         )
     except (FileNotFoundError, RuntimeError, HTTPError, URLError, OSError) as exc:
         log.crit('Failed to setup OptiScaler.')

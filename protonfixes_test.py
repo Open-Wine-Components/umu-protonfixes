@@ -435,7 +435,6 @@ class TestOptiScaler(unittest.TestCase):
             self.prefix_dir.as_posix(),
             self.env,
             proxy='winmm',
-            config_value='Menu.Scale=1.2',
         )
 
         self.assertTrue(result)
@@ -449,7 +448,7 @@ class TestOptiScaler(unittest.TestCase):
         ini_path = self.compat_dir / 'optiscaler-managed/OptiScaler.ini'
         ini_text = ini_path.read_text(encoding='utf-8')
         self.assertIn('Dx12Upscaler=none', ini_text)
-        self.assertIn('Scale=1.2', ini_text)
+        self.assertIn('Scale=1.0', ini_text)
 
     def testDisableOptiScalerRestoresProxy(self):
         optiscaler.enable_optiscaler(
@@ -477,15 +476,20 @@ class TestOptiScaler(unittest.TestCase):
             b'original-winmm',
         )
 
-    def testEnableOptiScalerResetsManagedIniBeforeOverrides(self):
+    def testEnableOptiScalerKeepsManagedIniChanges(self):
         optiscaler.enable_optiscaler(
             self.payload,
             self.compat_dir.as_posix(),
             self.prefix_dir.as_posix(),
             self.env,
             proxy='winmm',
-            config_value='Menu.Scale=1.2',
         )
+        ini_path = self.compat_dir / 'optiscaler-managed/OptiScaler.ini'
+        ini_path.write_text(
+            '; full upstream ini\n[Menu]\nScale=1.2\n[Upscalers]\nDx12Upscaler=none\n',
+            encoding='utf-8',
+        )
+
         optiscaler.enable_optiscaler(
             self.payload,
             self.compat_dir.as_posix(),
@@ -494,11 +498,8 @@ class TestOptiScaler(unittest.TestCase):
             proxy='winmm',
         )
 
-        ini_text = (self.compat_dir / 'optiscaler-managed/OptiScaler.ini').read_text(
-            encoding='utf-8'
-        )
-        self.assertIn('Scale=1.0', ini_text)
-        self.assertNotIn('Scale=1.2', ini_text)
+        ini_text = ini_path.read_text(encoding='utf-8')
+        self.assertIn('Scale=1.2', ini_text)
 
     def testEnableOptiScalerRollsBackOnFailure(self):
         with patch(
@@ -527,9 +528,9 @@ class TestOptiScaler(unittest.TestCase):
     def testSetupOptiScalerIsJanitorial(self):
         with patch(
             'protonfixes.optiscaler._ensure_payload',
-            return_value=(self.payload, ['amd_fidelityfx_dx12.dll', 'amd_fidelityfx_vk.dll']),
+            return_value=self.payload,
         ):
-            self.env['PROTON_OPTISCALER'] = '1'
+            self.env['PROTON_OPTISCALER'] = 'winmm'
             optiscaler.setup_optiscaler(
                 self.env,
                 self.compat_dir.as_posix(),
