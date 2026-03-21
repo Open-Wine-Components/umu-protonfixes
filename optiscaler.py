@@ -334,6 +334,7 @@ def _restore_proxy(prefix_dir: str, proxy: str) -> None:
 
 
 def disable_optiscaler(compat_dir: str, prefix_dir: str, env: Optional[dict] = None) -> bool:
+    """Restore the prefix to its stock state by removing OptiScaler staging."""
     manifest = _load_manifest(compat_dir)
     if not manifest.get('enabled'):
         return False
@@ -364,6 +365,7 @@ def enable_optiscaler(
     config_value: str = '',
     payload_files: Optional[list[str]] = None,
 ) -> bool:
+    """Stage a managed OptiScaler payload into the given game prefix."""
     previous_manifest = _load_manifest(compat_dir)
     payload_root = Path(payload_root)
     payload_files = payload_files or _payload_files(payload_root)
