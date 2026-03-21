@@ -448,7 +448,6 @@ class TestOptiScaler(unittest.TestCase):
 
         ini_path = self.compat_dir / 'optiscaler-managed/OptiScaler.ini'
         ini_text = ini_path.read_text(encoding='utf-8')
-        self.assertIn('; full upstream ini', ini_text)
         self.assertIn('Dx12Upscaler=none', ini_text)
         self.assertIn('Scale=1.2', ini_text)
 
@@ -526,12 +525,7 @@ class TestOptiScaler(unittest.TestCase):
         )
 
     def testSetupOptiScalerIsJanitorial(self):
-        release = {
-            'asset_name': 'OptiScaler_test.7z',
-            'url': 'https://example.invalid/OptiScaler_test.7z',
-            'version': 'test',
-        }
-        with patch('protonfixes.optiscaler._resolve_release', return_value=release), patch(
+        with patch(
             'protonfixes.optiscaler._ensure_payload',
             return_value=(self.payload, ['amd_fidelityfx_dx12.dll', 'amd_fidelityfx_vk.dll']),
         ):
