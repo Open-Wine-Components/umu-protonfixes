@@ -10,7 +10,6 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 from urllib.error import HTTPError, URLError
-from urllib.parse import unquote, urlparse
 
 from .config import config
 from .logger import log
@@ -23,7 +22,6 @@ __manifest_file = 'manifest.json'
 __ini_file = 'OptiScaler.ini'
 __main_dll = 'OptiScaler.dll'
 __env_var = 'PROTON_OPTISCALER'
-__url_var = 'PROTON_OPTISCALER_URL'
 __config_var = 'PROTON_OPTISCALER_CONFIG'
 __true_values = {'1'}
 __supported_proxies = (
@@ -38,9 +36,10 @@ __supported_proxies = (
 )
 __auto_proxies = ('winmm', 'dxgi', 'version', 'dbghelp', 'winhttp', 'wininet', 'd3d12')
 __default_version = '0.7.9'
+__default_asset_name = f'OptiScaler_{__default_version}.7z'
 __default_url = (
     'https://github.com/optiscaler/OptiScaler/releases/download/'
-    f'v{__default_version}/OptiScaler_{__default_version}.7z'
+    f'v{__default_version}/{__default_asset_name}'
 )
 
 
@@ -108,16 +107,6 @@ def _drop_env_list(env: dict, key: str, value: str, separator: str = ';') -> Non
         del env[key]
 
 
-def _payload_root(compat_dir: str, payload_root: str = '') -> Optional[Path]:
-    if not payload_root:
-        return None
-
-    path = Path(payload_root)
-    if path.is_absolute():
-        return path
-    return _managed_dir(compat_dir) / path
-
-
 def _payload_root_value(compat_dir: str, payload_root: Path) -> str:
     try:
         return str(payload_root.relative_to(_managed_dir(compat_dir)))
@@ -129,33 +118,12 @@ def _payload_id(url: str) -> str:
     return hashlib.sha256(url.encode('utf-8')).hexdigest()[:12]
 
 
-def _release_from_url(url: str) -> dict:
-    name = Path(unquote(urlparse(url).path)).name or 'OptiScaler_custom.7z'
-    version = 'custom'
-    if name.startswith('OptiScaler_') and name.endswith('.7z'):
-        version = name[len('OptiScaler_') : -len('.7z')]
-    return {'asset_name': name, 'url': url, 'version': version}
-
-
-def _resolve_release(env: dict, compat_dir: str, manifest: dict) -> dict:
-    explicit_url = env.get(__url_var, '').strip()
-    if explicit_url:
-        return _release_from_url(explicit_url)
-
-    payload_root = _payload_root(compat_dir, manifest.get('payload_root', ''))
-    if (
-        payload_root is not None
-        and payload_root.joinpath(__main_dll).is_file()
-        and manifest.get('url')
-        and manifest.get('version')
-    ):
-        return {
-            'asset_name': manifest.get('asset_name', ''),
-            'url': manifest['url'],
-            'version': manifest['version'],
-        }
-
-    return _release_from_url(__default_url)
+def _resolve_release() -> dict:
+    return {
+        'asset_name': __default_asset_name,
+        'url': __default_url,
+        'version': __default_version,
+    }
 
 
 def _find_payload_root(base_dir: Path) -> Path:
@@ -380,7 +348,6 @@ def enable_optiscaler(
     *,
     proxy: str = 'auto',
     config_value: str = '',
-    release: Optional[dict] = None,
     payload_files: Optional[list[str]] = None,
 ) -> bool:
     previous_manifest = _load_manifest(compat_dir)
@@ -416,8 +383,6 @@ def enable_optiscaler(
     _set_env_list(env, 'WINEDLLOVERRIDES', f'{resolved_proxy}=n,b')
 
     manifest = dict(previous_manifest)
-    if release is not None:
-        manifest.update(release)
     manifest.update(
         {
             'enabled': True,
@@ -442,7 +407,7 @@ def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
         return
 
     try:
-        release = _resolve_release(env, compat_dir, _load_manifest(compat_dir))
+        release = _resolve_release()
         payload_root, payload_files = _ensure_payload(compat_dir, release)
         enable_optiscaler(
             payload_root,
@@ -451,7 +416,6 @@ def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
             env,
             proxy='auto' if enabled.lower() in __true_values else enabled,
             config_value=env.get(__config_var, ''),
-            release=release,
             payload_files=payload_files,
         )
     except (FileNotFoundError, RuntimeError, HTTPError, URLError, OSError) as exc:
