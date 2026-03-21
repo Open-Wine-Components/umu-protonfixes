@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import tempfile
 import urllib.request
+from collections.abc import Mapping, MutableMapping
 from pathlib import Path
 from typing import Optional
 from urllib.error import HTTPError, URLError
@@ -90,7 +91,9 @@ def _remove_path(path: Path) -> None:
         shutil.rmtree(path)
 
 
-def _set_env_list(env: dict, key: str, value: str, separator: str = ';') -> None:
+def _set_env_list(
+    env: MutableMapping[str, str], key: str, value: str, separator: str = ';'
+) -> None:
     parts = [part for part in env.get(key, '').split(separator) if part]
     if value not in parts:
         parts.append(value)
@@ -100,7 +103,9 @@ def _set_env_list(env: dict, key: str, value: str, separator: str = ';') -> None
         del env[key]
 
 
-def _drop_env_list(env: dict, key: str, value: str, separator: str = ';') -> None:
+def _drop_env_list(
+    env: MutableMapping[str, str], key: str, value: str, separator: str = ';'
+) -> None:
     parts = [part for part in env.get(key, '').split(separator) if part and part != value]
     if parts:
         env[key] = separator.join(parts)
@@ -127,7 +132,7 @@ def _resolve_release() -> dict:
     }
 
 
-def _resolve_payload_override(env: dict) -> Optional[Path]:
+def _resolve_payload_override(env: Mapping[str, str]) -> Optional[Path]:
     payload_path = env.get(__path_var, '').strip()
     if not payload_path:
         return None
@@ -333,7 +338,11 @@ def _restore_proxy(prefix_dir: str, proxy: str) -> None:
         backup.rename(target)
 
 
-def disable_optiscaler(compat_dir: str, prefix_dir: str, env: Optional[dict] = None) -> bool:
+def disable_optiscaler(
+    compat_dir: str,
+    prefix_dir: str,
+    env: Optional[MutableMapping[str, str]] = None,
+) -> bool:
     """Restore the prefix to its stock state by removing OptiScaler staging."""
     manifest = _load_manifest(compat_dir)
     if not manifest.get('enabled'):
@@ -359,7 +368,7 @@ def enable_optiscaler(
     payload_root: Path,
     compat_dir: str,
     prefix_dir: str,
-    env: dict,
+    env: MutableMapping[str, str],
     *,
     proxy: str = 'auto',
     config_value: str = '',
@@ -412,7 +421,9 @@ def enable_optiscaler(
     return True
 
 
-def setup_optiscaler(env: dict, compat_dir: str, prefix_dir: str) -> None:
+def setup_optiscaler(
+    env: MutableMapping[str, str], compat_dir: str, prefix_dir: str
+) -> None:
     """Setup OptiScaler from Proton-style environment variables.
 
     usage: setup_optiscaler(g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
