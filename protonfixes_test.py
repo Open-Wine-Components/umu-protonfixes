@@ -521,7 +521,7 @@ class TestOptiScaler(unittest.TestCase):
         self.assertEqual((self.system32 / 'winmm.dll').read_bytes(), b'original-winmm')
         self.assertNotIn('winmm=n,b', self.env.get('WINEDLLOVERRIDES', ''))
         self.assertEqual(
-            optiscaler._load_manifest(self.compat_dir.as_posix()),
+            optiscaler._load_manifest(self.compat_dir),
             {},
         )
 
