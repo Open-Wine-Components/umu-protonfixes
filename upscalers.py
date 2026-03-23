@@ -153,14 +153,31 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
             'zip_md5_hash': None,
         },
     }
+
+    cache_dir = config.path.cache_dir.joinpath('upscalers')
+
+    def _cached_file_exists(file: dict) -> bool:
+        url_path = Path(unquote(urlparse(file['download_url']).path))
+        cached_file = cache_dir.joinpath(
+            url_path.stem + f'_v{file["version"]}' + url_path.suffix
+        )
+        return cached_file.exists()
+
     if version == 'default' or version not in __fsr4_dlls.keys():
-        version = '4.1.0'
-    if not __dll_download_exists(__fsr4_dlls[version]['download_url']):
+        version = '4.0.3'
+
+    item = __fsr4_dlls[version]
+    if not (__dll_download_exists(item['download_url']) or _cached_file_exists(item)):
         for key in sorted(__fsr4_dlls.keys(), reverse=True):
-            if __dll_download_exists(__fsr4_dlls[key]['download_url']):
+            item = __fsr4_dlls[key]
+            if __dll_download_exists(item['download_url']) or _cached_file_exists(item):
                 version = key
                 break
-    log.info(f'Using version {version} of amdxcffx64.dll')
+
+    log.info(
+        f'Found {"cached" if _cached_file_exists(item) else "remote"} version {version} of amdxcffx64.dll'
+    )
+
     return {
         'drive_c/windows/system32/amdxcffx64.dll': __fsr4_dlls[version],
     }
@@ -479,3 +496,5 @@ def setup_upscalers(
 
     if loaddll_replace:
         env['WINE_LOADDLL_REPLACE'] = ','.join(loaddll_replace)
+
+__all__ = ['setup_upscalers']
