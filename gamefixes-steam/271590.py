@@ -11,3 +11,15 @@ def main() -> None:
     game_id = os.environ.get('UMU_ID')
     if game_id and not game_id.isnumeric():
         util.del_environment('SteamAppId')
+    util.regedit_add(
+        'HKLM\\System\\CurrentControlSet\\Services\\winebus',
+        'DisableHidraw',
+        'REG_DWORD',
+        '1',
+    )
+    util.regedit_add(
+        'HKLM\\System\\CurrentControlSet\\Services\\winebus',
+        'Enable SDL',
+        'REG_DWORD',
+        '1',
+    )
