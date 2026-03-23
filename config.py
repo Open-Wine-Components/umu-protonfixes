@@ -1,9 +1,13 @@
 """Load configuration settings for protonfixes"""
-
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
 from .config_base import ConfigBase
+
+
+base_config = Path(os.getenv('XDG_CONFIG_HOME', '~/.config')).expanduser()
+base_cache = Path(os.getenv('XDG_CACHE_HOME', '~/.cache')).expanduser()
 
 
 class Config(ConfigBase):
@@ -31,10 +35,10 @@ class Config(ConfigBase):
 
         """
 
-        cache_dir: Path = Path.home() / '.cache/protonfixes'
+        cache_dir: Path = base_cache / 'protonfixes'
 
     main: MainSection
     path: PathSection
 
 
-config = Config(Path.home() / '.config/protonfixes/config.ini')
+config = Config(base_config / 'protonfixes/config.ini')
