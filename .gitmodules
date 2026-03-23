@@ -10,3 +10,6 @@
 [submodule "subprojects/unzip"]
 	path = subprojects/unzip
 	url = https://salsa.debian.org/sanvila/unzip.git
+[submodule "subprojects/procps-ng"]
+	path = subprojects/procps-ng
+	url = https://gitlab.com/procps-ng/procps.git

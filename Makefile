@@ -21,12 +21,12 @@ endif
 
 .PHONY: all
 
-all: winetricks-dist cabextract-dist libmspack-dist unzip-dist
+all: winetricks-dist cabextract-dist libmspack-dist unzip-dist procps-ng-dist
 
 .PHONY: install
 
 # Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
-install: protonfixes-install winetricks-install cabextract-install libmspack-install unzip-install
+install: protonfixes-install winetricks-install cabextract-install libmspack-install unzip-install procps-ng-install
 
 #
 # protonfixes
@@ -150,6 +150,33 @@ unzip-install: unzip-dist
 	make -f unix/Makefile prefix=$(TARGET_DIR)$(BASEDIR) install
 	# Post install
 	rm -r $(TARGET_DIR)$(BASEDIR)/man
+
+#
+# procps-ng
+#
+
+$(OBJDIR)/procps-ng: | $(OBJDIR)
+	rsync -arx --delete subprojects/procps-ng $(OBJDIR)
+
+$(OBJDIR)/.build-procps-ng-dist: | $(OBJDIR)/procps-ng
+	$(info :: Building procps-ng )
+	cd $(OBJDIR)/procps-ng && \
+	./autogen.sh && \
+	./configure --prefix=$(BASEDIR) --libdir=$(LIBDIR) --disable-static --disable-nls && \
+	make
+	touch $(@)
+
+.PHONY: procps-ng-dist
+
+procps-ng-dist: $(OBJDIR)/.build-procps-ng-dist
+
+procps-ng-install: procps-ng-dist
+	$(info :: Installing procps-ng )
+	install -d $(TARGET_DIR)$(BASEDIR)/bin
+	install -m755 $(OBJDIR)/procps-ng/src/pgrep $(TARGET_DIR)$(BASEDIR)/bin/pgrep
+	install -m755 $(OBJDIR)/procps-ng/src/pkill $(TARGET_DIR)$(BASEDIR)/bin/pkill
+	install -d $(TARGET_DIR)$(LIBDIR)
+	install -m755 $(OBJDIR)/procps-ng/library/.libs/libproc2.so.* $(TARGET_DIR)$(LIBDIR)/
 
 $(OBJDIR):
 	@mkdir -p $(@)
