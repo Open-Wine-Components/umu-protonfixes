@@ -164,13 +164,13 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
         return cached_file.exists()
 
     if version == 'default' or version not in __fsr4_dlls.keys():
-        version = '4.0.3'
+        version = next(reversed(__fsr4_dlls))
 
     item = __fsr4_dlls[version]
-    if not (__dll_download_exists(item['download_url']) or _cached_file_exists(item)):
+    if not (_cached_file_exists(item) or __dll_download_exists(item['download_url'])):
         for key in sorted(__fsr4_dlls.keys(), reverse=True):
             item = __fsr4_dlls[key]
-            if __dll_download_exists(item['download_url']) or _cached_file_exists(item):
+            if _cached_file_exists(item) or __dll_download_exists(item['download_url']):
                 version = key
                 break
 
