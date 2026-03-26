@@ -162,7 +162,7 @@ $(OBJDIR)/.build-procps-ng-dist: | $(OBJDIR)/procps-ng
 	$(info :: Building procps-ng )
 	cd $(OBJDIR)/procps-ng && \
 	./autogen.sh && \
-	./configure --prefix=$(BASEDIR) --libdir=$(LIBDIR) --disable-static --disable-nls && \
+	./configure --prefix=$(BASEDIR) --libdir=$(LIBDIR) --disable-static --disable-nls --without-ncurses && \
 	make
 	touch $(@)
 
