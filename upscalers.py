@@ -479,13 +479,11 @@ def setup_upscalers(
     if 'dlss' in loaddll_replace:
         env.setdefault(
             'DXVK_NVAPI_DRS_SETTINGS',
-            str(
-                'ngx_dlss_sr_override=on,'
-                'ngx_dlss_rr_override=on,'
-                'ngx_dlss_fg_override=on,'
-                'ngx_dlss_sr_override_render_preset_selection=default,'
-                'ngx_dlss_rr_override_render_preset_selection=default,'
-            ),
+            'ngx_dlss_sr_override=on,'
+            'ngx_dlss_rr_override=on,'
+            'ngx_dlss_fg_override=on,'
+            'ngx_dlss_sr_override_render_preset_selection=default,'
+            'ngx_dlss_rr_override_render_preset_selection=default,',
         )
 
     if 'xess' in loaddll_replace:
