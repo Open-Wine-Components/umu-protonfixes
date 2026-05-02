@@ -1,0 +1,26 @@
+From 5fc9872838412f7f9f96fa0f1dd43d4148dc0d4b Mon Sep 17 00:00:00 2001
+From: Stelios Tsampas <loathingkernel@gmail.com>
+Date: Sun, 3 May 2026 02:57:17 +0300
+Subject: [PATCH] chore: also accept WAYLAND_DISPLAY when checking for gui
+ availability
+
+---
+ src/winetricks | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/winetricks b/src/winetricks
+index e627f71..5fe7b9c 100755
+--- a/src/winetricks
++++ b/src/winetricks
+@@ -19855,7 +19855,7 @@ if ! test "${WINETRICKS_LIB}"; then
+     case "$1" in
+         die) w_die "we who are about to die salute you." ;;
+         "")
+-            if [ -z "${DISPLAY}" ]; then
++            if [ -z "${DISPLAY}" ] && [ -z "${WAYLAND_DISPLAY}" ]; then
+                 if [ "$(uname -s)" = "Darwin" ]; then
+                     echo "Running on OSX, but DISPLAY is not set...probably using Mac Driver."
+                 else
+-- 
+2.54.0
+
