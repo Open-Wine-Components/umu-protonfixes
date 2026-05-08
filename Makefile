@@ -1,4 +1,6 @@
 
+SHELL := /bin/bash
+
 BUILD ?= build
 DIST  ?= dist
 
@@ -10,14 +12,17 @@ BASEDIR       := /files
 
 # Default flags are from Proton, CFLAGS/LDFLAGS are expected to tbe overriden by Proton's makefile
 TARGET_ARCH ?= x86_64
-LIBDIR := $(BASEDIR)/lib/x86_64-linux-gnu
-CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
-LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
+
 ifeq ($(TARGET_ARCH),arm64)
+	TARGET_ARCH_unix := aarch64
 	CFLAGS ?= -march=armv8.2-a -mtune=cortex-x3
-	LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
-	LIBDIR := $(BASEDIR)/lib/aarch64-linux-gnu
+else
+	TARGET_ARCH_unix := x86_64
+	CFLAGS ?= -O2 -march=nocona -mtune=core-avx2
 endif
+
+LDFLAGS ?= -Wl,-O1,--sort-common,--as-needed
+LIBDIR := $(BASEDIR)/lib/$(TARGET_ARCH_unix)-linux-gnu
 
 .PHONY: all
 
@@ -27,6 +32,13 @@ all: winetricks-dist cabextract-dist libmspack-dist unzip-dist procps-ng-dist
 
 # Note: `export DEB_BUILD_MAINT_OPTIONS=hardening=-format` is required for the unzip target
 install: protonfixes-install winetricks-install cabextract-install libmspack-install unzip-install procps-ng-install
+
+TARGET_STEAMRT := $(shell source /etc/os-release && echo -n $$VERSION_CODENAME)
+
+ifeq ($(TARGET_STEAMRT),steamrt4)
+all: zenity-rs-dist
+install: zenity-rs-install
+endif
 
 #
 # protonfixes
@@ -177,6 +189,31 @@ procps-ng-install: procps-ng-dist
 	install -m755 $(OBJDIR)/procps-ng/src/pkill $(TARGET_DIR)$(BASEDIR)/bin/pkill
 	install -d $(TARGET_DIR)$(LIBDIR)
 	install -m755 $(OBJDIR)/procps-ng/library/.libs/libproc2.so.* $(TARGET_DIR)$(LIBDIR)/
+
+#
+# zenity-rs
+#
+
+ZENITY_RS_VER := 0.2.6
+
+$(OBJDIR)/zenity-rs: | $(OBJDIR)
+	mkdir -p $(@)
+
+$(OBJDIR)/.build-zenity-rs-dist: | $(OBJDIR)/zenity-rs
+	$(info :: Downloading zenity-rs )
+	cd $(OBJDIR)/zenity-rs && \
+	curl -L "https://github.com/QaidVoid/zenity-rs/releases/download/v$(ZENITY_RS_VER)/zenity-rs-$(TARGET_ARCH_unix)-linux" --output zenity-rs
+	touch $(@)
+
+.PHONY: zenity-rs-dist
+
+zenity-rs-dist: $(OBJDIR)/.build-zenity-rs-dist
+
+zenity-rs-install: zenity-rs-dist
+	$(info :: Installing zenity-rs )
+	install -d $(TARGET_DIR)$(BASEDIR)/bin
+	install -m755 $(OBJDIR)/zenity-rs/zenity-rs $(TARGET_DIR)$(BASEDIR)/bin/zenity
+
 
 $(OBJDIR):
 	@mkdir -p $(@)
