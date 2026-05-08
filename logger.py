@@ -24,14 +24,14 @@ class Log:
     pfx = f'ProtonFixes[{os.getpid()}]'
     is_tty = os.isatty(sys.stderr.fileno())
 
-    _cache_root = Path(os.environ.get('XDG_CACHE_HOME', Path.home() / '.cache'))
-    _log_dir = _cache_root / 'umu-protonfixes'
+    _cache_root = Path(os.getenv('XDG_CACHE_HOME', '~/.cache')).expanduser()
+    _log_dir = _cache_root / 'protonfixes'
     try:
         _log_dir.mkdir(parents=True, exist_ok=True)
-        logfile = _log_dir / 'protonfixes_test.log'
+        logfile = _log_dir / 'protonfixes.log'
     except Exception:
         # Fallback if the cache dir can't be created for any reason
-        logfile = Path('/tmp/protonfixes_test.log')
+        logfile = Path('/tmp/protonfixes.log')
 
     @classmethod
     def __colorize(cls, msg: str, level: LogLevel) -> str:
