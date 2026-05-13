@@ -7,6 +7,7 @@ def main() -> None:
     util.protontricks('xaudio29')
     util.protontricks('dotnet48')
     util.protontricks('vcrun2019')
+    util.protontricks('ole32')
 
     base_attribute = '<runtime>'
     game_opts = """
