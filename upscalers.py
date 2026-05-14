@@ -347,7 +347,8 @@ def __download_file(url: str, dst: Path, *, checksum: Union[str, None] = None) -
         with dst.open('wb') as dst_fd:
             with urllib.request.urlopen(request, timeout=10) as url_fd:
                 dst_fd.write(url_fd.read())
-        dst_md5 = hashlib.md5(dst.open('rb').read()).hexdigest().lower()
+        with dst.open('rb') as dst_fd:
+            dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
         dst_size = dst.stat().st_size if dst.exists() else 0
         # Size check is arbitrary, but nothing should be below 1K
         if (checksum is not None and dst_md5 != checksum.lower()) or dst_size < 1024:
@@ -362,7 +363,8 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
     cached_file = cache.joinpath(url_path.name)
     file_md5 = file.get('zip_md5_hash', None)
     if cached_file.exists():
-        cached_md5 = hashlib.md5(cached_file.open('rb').read()).hexdigest().lower()
+        with cached_file.open('rb') as cached_fd:
+            cached_md5 = hashlib.md5(cached_fd.read()).hexdigest().lower()
         if file_md5 is not None and cached_md5 != file_md5.lower():
             log.crit(
                 f'MD5 checksum mismatch between manifest and cached "{cached_file.name}"'
@@ -376,7 +378,9 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
             zip_fd.extractall(dst.parent)
     if cached_file.suffix == '.xz':
         with dst.open('wb') as dst_fd:
-            dst_fd.write(lzma.decompress(cached_file.open('rb').read()))
+            # this also sets the target filename
+            with cached_file.open('rb') as cached_fd:
+                dst_fd.write(lzma.decompress(cached_fd.read()))
 
 
 def __download_fsr4(file: dict, cache: Path, dst: Path) -> None:
