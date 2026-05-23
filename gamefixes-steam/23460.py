@@ -6,6 +6,10 @@ Videos still don't work.
 from protonfixes import util
 
 
+def early() -> None:
+    os.environ['PROTON_DLL_COPY'] = '*'
+
+
 def main() -> None:
     util.set_environment('PROTON_NO_XALIA', '1')
     util.protontricks('dotnet35sp1')
