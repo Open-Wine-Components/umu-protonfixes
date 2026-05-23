@@ -33,10 +33,6 @@ aarch64_lib_dir: str = (
 )
 
 
-# This is needed for protonfixes
-os.environ['PROTON_DLL_COPY'] = '*'
-
-
 def check_conditions() -> bool:
     """Determine, if the actual game was executed and protonfixes isn't deactivated.
 
