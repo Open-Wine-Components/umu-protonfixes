@@ -8,6 +8,10 @@ import shutil
 from protonfixes import util
 
 
+def early() -> None:
+    os.environ['PROTON_DLL_COPY'] = '*'
+
+
 def main() -> None:
     util.install_battleye_runtime()
     util.protontricks('dotnet48')
