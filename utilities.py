@@ -8,6 +8,24 @@ from typing import Callable
 from .logger import log
 
 
+DLL_COPY_VERBS = {
+    'dotnet',
+}
+
+
+def check_verb_requirements() -> None:
+    """Check if we are installing winetricks verbs and apply env configuration"""
+    for idx, part in enumerate(sys.argv):
+        if part.endswith('winetricks'):
+            verbs = sys.argv[idx+1:]
+            break
+    else:
+        verbs = []
+
+    if verbs and any(canary in verb for verb in verbs for canary in DLL_COPY_VERBS):
+        os.environ['PROTON_DLL_COPY'] = '*'
+
+
 def winetricks(env: dict, wine_bin: str, wineserver_bin: str) -> None:
     """Handle winetricks"""
     if (

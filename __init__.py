@@ -9,6 +9,7 @@ from . import fix
 from .logger import log
 from .upscalers import setup_upscalers
 from .utilities import (
+    check_verb_requirements,
     setup_frame_rate,
     setup_local_shader_cache,
     setup_mount_drives,
@@ -65,6 +66,7 @@ def execute_early() -> None:
     elif not check_conditions():
         log.warn('Skipping fix execution. We are probably running a unit test.')
     else:
+        check_verb_requirements()
         fix.early()
 
 
