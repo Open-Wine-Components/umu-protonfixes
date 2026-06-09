@@ -9,11 +9,6 @@ from protonfixes import util
 
 
 def main() -> None:
+    util.set_environment('PROTON_NO_XALIA', '1')
     util.protontricks('dotnet35sp1')
-    util.winedll_override('libvkd3d-1', util.OverrideOrder.NATIVE)
-
-    # Videos play and audio works but screen is black.
-    # util.protontricks('quartz')
-    # util.protontricks('klite')
-    if os.path.isdir('./data/shared/videos'):
-        subprocess.call(['mv', './data/shared/videos', './data/shared/_videos'])
+    util.set_environment('PROTON_NO_XALIA', '0')

@@ -1,1 +1,0 @@
-../gamefixes-steam/251290.py

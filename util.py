@@ -650,15 +650,6 @@ def disable_ntsync() -> None:
     set_environment('WINENTSYNC', '')
 
 
-def disable_protonmediaconverter() -> None:
-    """Disabling Proton Media Converter"""
-    log.info('Disabling Proton Media Converter')
-    set_environment('PROTON_AUDIO_CONVERT', '0')
-    set_environment('PROTON_AUDIO_CONVERT_BIN', '0')
-    set_environment('PROTON_VIDEO_CONVERT', '0')
-    set_environment('PROTON_DEMUX', '0')
-
-
 def create_dosbox_conf(
     conf_file: StrPath, conf_dict: Mapping[str, Mapping[str, Any]]
 ) -> None:

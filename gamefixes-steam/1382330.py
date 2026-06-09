@@ -1,4 +1,4 @@
-"""Pin the game to Intel P-cores on hybrid Intel CPUs via taskset."""
+""" Persona 5 Strikers """
 
 import os
 from protonfixes import util
@@ -6,8 +6,6 @@ from typing import Optional  # keep Optional; drop deprecated Tuple
 
 
 def main() -> None:
-    util.disable_protonmediaconverter()
-
     p_cores = get_intel_p_cores()
     if p_cores is not None:
         util.set_environment('taskset', f'-c {p_cores[0]}-{p_cores[1]}')

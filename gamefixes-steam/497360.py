@@ -1,8 +1,6 @@
 """Gabriel Knight 3: Blood of the Sacred, Blood of the Damned
 Fix for Insert CD
 Fixes graphical issues
-Video errors in Sydney
-Fixes email issues in Sydney
 Widescreen supported (16:9/21:9, 32:9 not tested)
 """
 
@@ -15,13 +13,6 @@ def main() -> None:
     # Create a symlink in dosdevices
     util.create_dos_device()
 
-    util.protontricks('quartz')
-    util.protontricks('amstream')
-
-    # No errors but doesn't show videos on SYDNEY
-    # util.protontricks('lavfilters')
-    # Show videos but green background is visible
-    util.protontricks('klite')
     syswow64 = os.path.join(util.protonprefix(), 'drive_c/windows/syswow64')
 
     # Everything after this call should only be executed once
