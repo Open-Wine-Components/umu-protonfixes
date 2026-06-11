@@ -194,7 +194,9 @@ procps-ng-install: procps-ng-dist
 # zenity-rs
 #
 
-ZENITY_RS_VER := 0.2.6
+ZENITY_RS_VER := 0.2.8
+ZENITY_RS_x86_64_SHA256 := 797bd492a8723d741d888320ab87b934b0c4571a1ff2c128963a08daa35df8c7
+ZENITY_RS_aarch64_SHA256 := c3f8a11fdc17632ffe3d5b1640a931139c2b8d86145c531e0f4db8a63ca3f2a2
 
 $(OBJDIR)/zenity-rs: | $(OBJDIR)
 	mkdir -p $(@)
