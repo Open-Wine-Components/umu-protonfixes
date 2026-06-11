@@ -95,10 +95,10 @@ def execute() -> None:
     else:
         dialog = None
         if os.environ.get('UMU_ID', '') != 'winetricks-gui':
-            dialog = ZenityWaitDialog('Installing Game-Specific fixes, please wait...')
+            dialog = ZenityWaitDialog(os.path.join(bin_dir, 'zenity'))
         try:
             if isinstance(dialog, ZenityWaitDialog):
-                dialog.start()
+                dialog.start(text='Installing Game-Specific fixes, please wait...')
             fix.main()
 
         except Exception:

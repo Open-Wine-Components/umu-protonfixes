@@ -10,7 +10,7 @@ from typing import Optional
 class ZenityWaitDialog:
     """Implements a waiting dialog using zenity"""
 
-    def __init__(self, text: str, title: str = 'ProtonFixes') -> None:
+    def __init__(self, zenity_bin: str) -> None:
         """Initialize zenity dialog
 
         :param text: the message displayed in the dialog window
@@ -19,8 +19,7 @@ class ZenityWaitDialog:
         :param title: the title of the dialog window
         :type title: str
         """
-        self._text = text
-        self._title = title
+        self._zenity = zenity_bin
         self._proc = None  # type: Optional[subprocess.Popen]
         self._stop_evt = threading.Event()
         self._thread = None  # type: Optional[threading.Thread]
@@ -35,20 +34,19 @@ class ZenityWaitDialog:
 
         return env
 
-    def _start_one(self) -> Optional[subprocess.Popen]:
+    def _start_one(self, text: str, title: str) -> Optional[subprocess.Popen]:
         env = self._make_env()
         if not env:
             return None  # no display; skip
 
         cmd = [
-            'zenity',
+            self._zenity,
             '--progress',
             '--pulsate',
             '--no-cancel',
             '--auto-close',
-            '--title=' + self._title,
-            '--text=' + self._text,
-            '--width=420',
+            '--text=' + text,
+            '--title=' + title,
         ]
 
         proc = subprocess.Popen(
@@ -61,10 +59,10 @@ class ZenityWaitDialog:
 
         return proc
 
-    def start(self) -> None:
+    def start(self, *, text: str, title: str = 'ProtonFixes') -> None:
         """Show the wait dialog"""
         try:
-            self._proc = self._start_one()
+            self._proc = self._start_one(text, title)
         except FileNotFoundError:
             self._proc = None
             return
@@ -76,7 +74,7 @@ class ZenityWaitDialog:
             while not self._stop_evt.is_set():
                 if self._proc and self._proc.poll() is not None:
                     try:
-                        self._proc = self._start_one()
+                        self._proc = self._start_one(text, title)
                     except FileNotFoundError:
                         self._proc = None
                         return
