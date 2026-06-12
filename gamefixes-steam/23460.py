@@ -3,8 +3,6 @@ Works with dotnet35sp1 only, now without needing Proton5
 Videos still don't work.
 """
 
-import os
-import subprocess
 from protonfixes import util
 
 

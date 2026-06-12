@@ -1,4 +1,4 @@
-""" Persona 5 Strikers """
+"""Persona 5 Strikers."""
 
 import os
 from protonfixes import util
