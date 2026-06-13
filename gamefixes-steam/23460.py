@@ -2,6 +2,7 @@
 Works with dotnet35sp1 only, now without needing Proton5
 Videos still don't work.
 """
+import os
 
 from protonfixes import util
 

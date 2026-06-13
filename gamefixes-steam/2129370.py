@@ -1,6 +1,11 @@
 r"""Fix for S\&box Editor"""
+import os
 
 from protonfixes import util
+
+
+def early() -> None:
+    os.environ['PROTON_DLL_COPY'] = '*'
 
 
 def main() -> None:
