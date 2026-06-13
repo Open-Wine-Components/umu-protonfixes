@@ -8,7 +8,7 @@ def main() -> None:
     """Imports Monster Hunter: World save from remote steam cloud folder. We need to get steam cloud ID, not steamID, which is only reported as folder name in local"""
     # get all remote IDs to anticipate for multi accounts
     listRemoteID = [
-        name for name in os.listdir(f'{os.environ["STEAM_BASE_FOLDER"]}/userdata')
+        name for name in os.listdir(f'{os.environ.get("STEAM_COMPAT_CLIENT_INSTALL_PATH", "")}/userdata')
     ]
 
     # import save for all remote IDs because we don't know which one is the right ID. import function is robust enough to anticipate wrong ID.
