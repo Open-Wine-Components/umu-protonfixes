@@ -142,13 +142,34 @@ DEFINES = -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT \
  -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD \
  -DDATE_FORMAT=DF_YMD -DUSE_BZIP2 -DIZ_HAVE_UXUIDGID -DNOMEMCPY \
  -DNO_WORKING_ISPRINT
-UNZIP_PATCHES := $(shell cat subprojects/unzip/debian/patches/series)
+UNZIP_VERSION := 6.0
+UNZIP_DEBIAN_REVISION := 29
+UNZIP_BASE_URL := https://deb.debian.org/debian/pool/main/u/unzip
+UNZIP_ORIG_TARBALL := unzip_$(UNZIP_VERSION).orig.tar.gz
+UNZIP_DEBIAN_TARBALL := unzip_$(UNZIP_VERSION)-$(UNZIP_DEBIAN_REVISION).debian.tar.xz
+UNZIP_DOWNLOAD_DIR := $(OBJDIR)/downloads/unzip
 
-$(OBJDIR)/.build-unzip-dist: | $(OBJDIR)
+$(UNZIP_DOWNLOAD_DIR):
+	mkdir -p $(@)
+
+$(UNZIP_DOWNLOAD_DIR)/$(UNZIP_ORIG_TARBALL): | $(UNZIP_DOWNLOAD_DIR)
+	$(info :: Downloading $(UNZIP_ORIG_TARBALL) )
+	python3 -c 'from urllib.request import urlretrieve; urlretrieve("$(UNZIP_BASE_URL)/$(UNZIP_ORIG_TARBALL)", "$@")'
+
+$(UNZIP_DOWNLOAD_DIR)/$(UNZIP_DEBIAN_TARBALL): | $(UNZIP_DOWNLOAD_DIR)
+	$(info :: Downloading $(UNZIP_DEBIAN_TARBALL) )
+	python3 -c 'from urllib.request import urlretrieve; urlretrieve("$(UNZIP_BASE_URL)/$(UNZIP_DEBIAN_TARBALL)", "$@")'
+
+$(OBJDIR)/unzip: $(UNZIP_DOWNLOAD_DIR)/$(UNZIP_ORIG_TARBALL) $(UNZIP_DOWNLOAD_DIR)/$(UNZIP_DEBIAN_TARBALL)
+	rm -rf $(@)
+	mkdir -p $(@)
+	tar -xzf $(UNZIP_DOWNLOAD_DIR)/$(UNZIP_ORIG_TARBALL) -C $(@) --strip-components=1
+	tar -xJf $(UNZIP_DOWNLOAD_DIR)/$(UNZIP_DEBIAN_TARBALL) -C $(@)
+
+$(OBJDIR)/.build-unzip-dist: $(OBJDIR)/unzip
 	$(info :: Building unzip )
-	rsync -arx --delete subprojects/unzip $(OBJDIR)
 	cd $(OBJDIR)/unzip && \
-	$(foreach pch, $(UNZIP_PATCHES),patch -Np1 -i debian/patches/$(pch) &&) \
+	while read -r pch; do patch -Np1 -i debian/patches/$$pch || exit 1; done < debian/patches/series && \
 	make -f unix/Makefile prefix=$(BASEDIR) D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2 LF2="$(LDFLAGS)" CF="$(CFLAGS) -I. $(DEFINES)" unzips
 	touch $(@)
 
