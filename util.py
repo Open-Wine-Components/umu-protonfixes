@@ -303,7 +303,7 @@ def check_internet() -> bool:
         return False
 
 
-def protontricks(verb: str) -> bool:
+def protontricks(verb: str, *, exe: Union[str, None] = None) -> bool:
     """Runs winetricks if available"""
     if not checkinstalled(verb):
         if check_internet():
@@ -321,6 +321,8 @@ def protontricks(verb: str) -> bool:
         env['WINESERVER'] = protonmain.g_proton.wineserver_bin
         env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
         env['LD_PRELOAD'] = ''
+        if exe:
+            env['WINETRICKS_DLLOVERRIDES_EXE'] = exe
 
         winetricks_bin = 'winetricks'
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
@@ -434,6 +436,68 @@ def regedit_add(
 
     with subprocess.Popen(regedit_cmd, env=env) as process:
         process.wait()
+
+
+def regedit_delete(
+    folder: str,
+    name: Optional[str] = None,
+) -> None:
+    """Add regedit keys"""
+    env = dict(protonmain.g_session.env)
+    env['WINEPREFIX'] = str(protonprefix())
+    env['WINE'] = protonmain.g_proton.wine_bin
+    env['WINELOADER'] = protonmain.g_proton.wine_bin
+    env['WINESERVER'] = protonmain.g_proton.wineserver_bin
+
+    if name is not None:
+        regedit_cmd = ['wine', 'reg', 'delete', folder, '/v', name, '/f']
+    else:
+        regedit_cmd = ['wine', 'reg', 'delete', folder, '/v']
+
+    log.info('Deleting key: ' + folder)
+
+    with subprocess.Popen(regedit_cmd, env=env) as process:
+        process.wait()
+
+
+class WinVer(Enum):
+    """Enumeration of Windows versions"""
+    NT351 = 'nt351'
+    NT40 = 'nt40'
+    VISTA = 'vista'
+    WIN10 = 'win10'
+    WIN11 = 'win11'
+    WIN20 = 'win20'
+    WIN2K = 'win2k'
+    WIN30 = 'win30'
+    WIN31 = 'win31'
+    WIN7 = 'win7'
+    WIN8 = 'win8'
+    WIN81 = 'win81'
+    WIN95 = 'win95'
+    WIN98 = 'win98'
+    WINME = 'winme'
+
+
+def regedit_set_version_exe(exe: str, winver: WinVer) -> None:
+    """Set Windows version for an executable"""
+    regedit_add(
+        f'HKCU\\Software\\AppDefaults\\{exe}', 'Version', 'REG_SZ', winver.value, True
+    )
+
+
+def regedit_hide_exports_exe(exe: str, enable: bool) -> None:
+    """Hide Wine exports for an executable"""
+    if enable:
+        regedit_add(
+            f'HKCU\\Software\\AppDefaults\\{exe}',
+            'HideWineExports',
+            'REG_SZ',
+            'Y',
+            True,
+        )
+    else:
+        regedit_delete(f'HKCU\\Software\\AppDefaults\\{exe}', 'HideWineExports')
 
 
 def replace_command(
