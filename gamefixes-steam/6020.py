@@ -3,7 +3,6 @@
 from protonfixes import util
 
 
-def main() -> None:
+def early() ->  None:
     # Fix game not launching
-    util.set_environment('MESA_EXTENSION_MAX_YEAR', '2003')
-    util.set_environment('__GL_ExtensionStringVersion', '17700')
+    util.set_environment('PROTON_OLD_GL_STRING', '1')
