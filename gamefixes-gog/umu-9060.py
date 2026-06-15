@@ -1,4 +1,4 @@
-"""Game fix for Quake II (Original)"""
+"""Game fix for Hexen II"""
 
 from protonfixes import util
 
