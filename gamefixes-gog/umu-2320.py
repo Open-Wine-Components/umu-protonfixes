@@ -3,7 +3,7 @@
 from protonfixes import util
 
 
-def early() ->  None:
+def early() -> None:
     # Fix game not launching when using OpenGL
     util.set_environment('PROTON_OLD_GL_STRING', '1')
 
