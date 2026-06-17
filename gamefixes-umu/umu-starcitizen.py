@@ -27,4 +27,3 @@ def main() -> None:
     # Prevent RSI Launcher install and update from hanging indefinitely
     util.winedll_override('dxwebsetup.exe', util.OverrideOrder.DISABLED)
     util.winedll_override('dotNetFx45_Full_setup.exe', util.OverrideOrder.DISABLED)
-

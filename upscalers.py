@@ -495,4 +495,5 @@ def setup_upscalers(
     if loaddll_replace:
         env['WINE_LOADDLL_REPLACE'] = ','.join(loaddll_replace)
 
+
 __all__ = ['setup_upscalers']

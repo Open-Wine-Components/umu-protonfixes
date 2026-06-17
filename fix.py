@@ -133,7 +133,9 @@ def _run_fix_local(game_id: str, stage: str, default: bool = False) -> bool:
     return _run_fix(game_id, stage, default, True)
 
 
-def _run_fix(game_id: str, stage: str, default: bool = False, local: bool = False) -> bool:
+def _run_fix(
+    game_id: str, stage: str, default: bool = False, local: bool = False
+) -> bool:
     """Private function, which actually executes gamefixes"""
     fix_type = 'protonfix' if not default else 'defaults'
     scope = 'global' if not local else 'local'
@@ -142,7 +144,9 @@ def _run_fix(game_id: str, stage: str, default: bool = False, local: bool = Fals
         module_name = get_module_name(game_id, default, local)
         game_module = import_module(module_name)
 
-        log.info(f'Using {stage} stage {scope} {fix_type} for {get_game_name()} ({game_id})')
+        log.info(
+            f'Using {stage} stage {scope} {fix_type} for {get_game_name()} ({game_id})'
+        )
         if stage == 'early':
             if hasattr(game_module, 'early_with_id'):
                 game_module.early_with_id(game_id)
@@ -155,7 +159,9 @@ def _run_fix(game_id: str, stage: str, default: bool = False, local: bool = Fals
             else:
                 game_module.main()
     except ImportError:
-        log.info(f'No {stage} stage {scope} {fix_type} found for {get_game_name()} ({game_id})')
+        log.info(
+            f'No {stage} stage {scope} {fix_type} found for {get_game_name()} ({game_id})'
+        )
         return False
     return True
 

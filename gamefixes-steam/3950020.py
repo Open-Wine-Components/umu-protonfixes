@@ -9,7 +9,7 @@ def _is_env_one(name: str) -> bool:
     return os.environ.get(name, '') == '1'
 
 
-def early() ->  None:
+def early() -> None:
     util.set_environment('PROTON_SET_GAME_DRIVE', '1')
 
 

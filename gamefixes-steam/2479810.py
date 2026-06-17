@@ -14,11 +14,11 @@ from protonfixes.logger import log
 def main() -> None:
     """Set EAC-validated cache files to read-only"""
     game_dir = Path(util.get_game_install_path())
-    cache_dir = game_dir / "GZW/Content/SKALLA/PrebuildWorldData/World/cache"
+    cache_dir = game_dir / 'GZW/Content/SKALLA/PrebuildWorldData/World/cache'
 
     files = [
-        "0xb9af63cee2e43b6c_0x3cb3b3354fb31606.dat",
-        "0xaf497c273f87b6e4_0x7a22fc105639587d.dat",
+        '0xb9af63cee2e43b6c_0x3cb3b3354fb31606.dat',
+        '0xaf497c273f87b6e4_0x7a22fc105639587d.dat',
     ]
 
     for filename in files:
