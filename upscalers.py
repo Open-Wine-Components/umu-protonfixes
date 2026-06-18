@@ -86,11 +86,11 @@ __fsr4_version_file = 'fsr4_version'
 
 def __get_dlss_dlls(version: str = 'default') -> dict:
     return {
-        'drive_c/windows/system32/nvngx_dlss.dll': __get_dll_manifest('dlss', version),
-        'drive_c/windows/system32/nvngx_dlssd.dll': __get_dll_manifest(
+        'drive_c/windows/system32/umu/nvngx_dlss.dll': __get_dll_manifest('dlss', version),
+        'drive_c/windows/system32/umu/nvngx_dlssd.dll': __get_dll_manifest(
             'dlss_d', version
         ),
-        'drive_c/windows/system32/nvngx_dlssg.dll': __get_dll_manifest(
+        'drive_c/windows/system32/umu/nvngx_dlssg.dll': __get_dll_manifest(
             'dlss_g', version
         ),
     }
@@ -98,12 +98,12 @@ def __get_dlss_dlls(version: str = 'default') -> dict:
 
 def __get_xess_dlls(version: str = 'default') -> dict:
     return {
-        'drive_c/windows/system32/libxess.dll': __get_dll_manifest('xess', version),
-        'drive_c/windows/system32/libxess_dx11.dll': __get_dll_manifest(
+        'drive_c/windows/system32/umu/libxess.dll': __get_dll_manifest('xess', version),
+        'drive_c/windows/system32/umu/libxess_dx11.dll': __get_dll_manifest(
             'xess_dx11', version
         ),
-        'drive_c/windows/system32/libxell.dll': __get_dll_manifest('xell', version),
-        'drive_c/windows/system32/libxess_fg.dll': __get_dll_manifest(
+        'drive_c/windows/system32/umu/libxell.dll': __get_dll_manifest('xell', version),
+        'drive_c/windows/system32/umu/libxess_fg.dll': __get_dll_manifest(
             'xess_fg', version
         ),
     }
@@ -111,10 +111,10 @@ def __get_xess_dlls(version: str = 'default') -> dict:
 
 def __get_fsr3_dlls(version: str = 'default') -> dict:
     return {
-        'drive_c/windows/system32/amd_fidelityfx_vk.dll': __get_dll_manifest(
+        'drive_c/windows/system32/umu/amd_fidelityfx_vk.dll': __get_dll_manifest(
             'fsr_31_vk', version
         ),
-        'drive_c/windows/system32/amd_fidelityfx_dx12.dll': __get_dll_manifest(
+        'drive_c/windows/system32/umu/amd_fidelityfx_dx12.dll': __get_dll_manifest(
             'fsr_31_dx12', version
         ),
     }
@@ -347,7 +347,8 @@ def __download_file(url: str, dst: Path, *, checksum: Union[str, None] = None) -
         with dst.open('wb') as dst_fd:
             with urllib.request.urlopen(request, timeout=10) as url_fd:
                 dst_fd.write(url_fd.read())
-        dst_md5 = hashlib.md5(dst.open('rb').read()).hexdigest().lower()
+        with dst.open('rb') as dst_fd:
+            dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
         dst_size = dst.stat().st_size if dst.exists() else 0
         # Size check is arbitrary, but nothing should be below 1K
         if (checksum is not None and dst_md5 != checksum.lower()) or dst_size < 1024:
@@ -362,7 +363,8 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
     cached_file = cache.joinpath(url_path.name)
     file_md5 = file.get('zip_md5_hash', None)
     if cached_file.exists():
-        cached_md5 = hashlib.md5(cached_file.open('rb').read()).hexdigest().lower()
+        with cached_file.open('rb') as cached_fd:
+            cached_md5 = hashlib.md5(cached_fd.read()).hexdigest().lower()
         if file_md5 is not None and cached_md5 != file_md5.lower():
             log.crit(
                 f'MD5 checksum mismatch between manifest and cached "{cached_file.name}"'
@@ -376,7 +378,9 @@ def __download_extract_zip(file: dict, cache: Path, dst: Path) -> None:
             zip_fd.extractall(dst.parent)
     if cached_file.suffix == '.xz':
         with dst.open('wb') as dst_fd:
-            dst_fd.write(lzma.decompress(cached_file.open('rb').read()))
+            # this also sets the target filename
+            with cached_file.open('rb') as cached_fd:
+                dst_fd.write(lzma.decompress(cached_fd.read()))
 
 
 def __download_fsr4(file: dict, cache: Path, dst: Path) -> None:
@@ -427,7 +431,7 @@ def download_upscaler(
         log.crit(repr(e))
 
 
-def __setup_upscaler(
+def setup_upscaler(
     env: dict,
     key: str,
     name: str,
@@ -450,33 +454,33 @@ def setup_upscalers(
 
     usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
     """
-    loaddll_replace = set()
+    upscaler_replace = set()
     if 'dlss' in compat_config:
-        if __setup_upscaler(env, 'PROTON_DLSS_UPGRADE', 'dlss', compat_dir, prefix_dir):
-            loaddll_replace.add('dlss')
+        if setup_upscaler(env, 'PROTON_DLSS_UPGRADE', 'dlss', compat_dir, prefix_dir):
+            upscaler_replace.add('dlss')
     if 'xess' in compat_config:
-        if __setup_upscaler(env, 'PROTON_XESS_UPGRADE', 'xess', compat_dir, prefix_dir):
-            loaddll_replace.add('xess')
+        if setup_upscaler(env, 'PROTON_XESS_UPGRADE', 'xess', compat_dir, prefix_dir):
+            upscaler_replace.add('xess')
     if 'fsr3' in compat_config:
-        if __setup_upscaler(env, 'PROTON_FSR3_UPGRADE', 'fsr3', compat_dir, prefix_dir):
-            loaddll_replace.add('fsr3')
+        if setup_upscaler(env, 'PROTON_FSR3_UPGRADE', 'fsr3', compat_dir, prefix_dir):
+            upscaler_replace.add('fsr3')
     if 'fsr4rdna3' in compat_config:
-        if __setup_upscaler(
+        if setup_upscaler(
             env, 'PROTON_FSR4_RDNA3_UPGRADE', 'fsr4', compat_dir, prefix_dir, '4.0.0'
         ):
-            loaddll_replace.add('fsr4')
+            upscaler_replace.add('fsr4')
     elif 'fsr4' in compat_config:
-        if __setup_upscaler(env, 'PROTON_FSR4_UPGRADE', 'fsr4', compat_dir, prefix_dir):
-            loaddll_replace.add('fsr4')
+        if setup_upscaler(env, 'PROTON_FSR4_UPGRADE', 'fsr4', compat_dir, prefix_dir):
+            upscaler_replace.add('fsr4')
 
-    if 'fsr4' in loaddll_replace:
+    if 'fsr4' in upscaler_replace:
         env['FSR4_UPGRADE'] = '1'
         if 'mlfg' in compat_config:
             env['MLFG_UPGRADE'] = '1'
         if 'fsr4rdna3' in compat_config:
             env['DXIL_SPIRV_CONFIG'] = 'wmma_rdna3_workaround'
 
-    if 'dlss' in loaddll_replace:
+    if 'dlss' in upscaler_replace:
         env.setdefault(
             'DXVK_NVAPI_DRS_SETTINGS',
             'ngx_dlss_sr_override=on,'
@@ -486,14 +490,16 @@ def setup_upscalers(
             'ngx_dlss_rr_override_render_preset_selection=default,',
         )
 
-    if 'xess' in loaddll_replace:
+    if 'xess' in upscaler_replace:
         pass
 
-    if 'fsr3' in loaddll_replace:
+    if 'fsr3' in upscaler_replace:
         pass
 
-    if loaddll_replace:
-        env['WINE_LOADDLL_REPLACE'] = ','.join(loaddll_replace)
+    if upscaler_replace:
+        env['WINE_UPSCALER_REPLACE'] = ','.join(upscaler_replace)
+        log.debug(f'WINE_UPSCALER_REPLACE: {env["WINE_UPSCALER_REPLACE"]}.')
+
 
 
 __all__ = ['setup_upscalers']
