@@ -46,6 +46,7 @@ endif
 
 .PHONY: protonfixes
 
+.PHONY: protonfixes-install
 protonfixes-install: protonfixes
 	$(info :: Installing protonfixes )
 	install -d              $(TARGET_DIR)
@@ -63,16 +64,15 @@ protonfixes-install: protonfixes
 $(OBJDIR)/winetricks: | $(OBJDIR)
 	rsync -arx --delete subprojects/winetricks $(OBJDIR)
 
-
 $(OBJDIR)/.build-winetricks-dist: | $(OBJDIR)/winetricks
 	$(info :: Building winetricks )
 	find $(CURDIR)/patches/winetricks/ -name "*.patch" | sort | xargs -n1 patch -d $(OBJDIR)/winetricks -Np1 -i
 	touch $(@)
 
-.PHONY: winetricks-dist winetricks-install
-
+.PHONY: winetricks-dist
 winetricks-dist: $(OBJDIR)/.build-winetricks-dist
 
+.PHONY: winetricks-install
 winetricks-install: winetricks-dist
 	install -d $(TARGET_DIR)$(BASEDIR)/bin
 	install -m755 $(OBJDIR)/winetricks/src/winetricks $(TARGET_DIR)$(BASEDIR)/bin/winetricks
@@ -100,13 +100,14 @@ $(OBJDIR)/.build-cabextract-dist: | $(OBJDIR)/libmspack
 	touch $(@)
 
 .PHONY: cabextract-dist
-
 cabextract-dist: $(OBJDIR)/.build-cabextract-dist
 
+.PHONY: cabextract-install
 cabextract-install: cabextract-dist
 	$(info :: Installing cabextract )
 	cd $(OBJDIR)/libmspack/cabextract && \
 	make DESTDIR=$(TARGET_DIR) install
+	strip --strip-unneeded $(TARGET_DIR)$(BASEDIR)/bin/cabextract
 	rm -r $(TARGET_DIR)$(BASEDIR)/share
 
 #
@@ -123,13 +124,14 @@ $(OBJDIR)/.build-libmspack-dist: | $(OBJDIR)/libmspack
 	touch $(@)
 
 .PHONY: libmspack-dist
-
 libmspack-dist: $(OBJDIR)/.build-libmspack-dist
 
+.PHONY: libmspack-install
 libmspack-install: libmspack-dist
 	$(info :: Installing libmspack )
 	cd $(OBJDIR)/libmspack/libmspack && \
 	make DESTDIR=$(TARGET_DIR) install
+	strip --strip-unneeded $(TARGET_DIR)$(LIBDIR)/libmspack.so*
 	rm -r $(TARGET_DIR)$(BASEDIR)/include
 	rm -r $(TARGET_DIR)$(LIBDIR)/pkgconfig
 	rm    $(TARGET_DIR)$(LIBDIR)/libmspack.la
@@ -174,13 +176,17 @@ $(OBJDIR)/.build-unzip-dist: $(OBJDIR)/unzip
 	touch $(@)
 
 .PHONY: unzip-dist
-
 unzip-dist: $(OBJDIR)/.build-unzip-dist
 
+.PHONY: unzip-install
 unzip-install: unzip-dist
 	$(info :: Installing unzip )
 	cd $(OBJDIR)/unzip && \
 	make -f unix/Makefile prefix=$(TARGET_DIR)$(BASEDIR) install
+	strip --strip-unneeded $(TARGET_DIR)$(BASEDIR)/bin/funzip
+	strip --strip-unneeded $(TARGET_DIR)$(BASEDIR)/bin/unzip
+	strip --strip-unneeded $(TARGET_DIR)$(BASEDIR)/bin/unzipsfx
+	strip --strip-unneeded $(TARGET_DIR)$(BASEDIR)/bin/zipinfo
 	# Post install
 	rm -r $(TARGET_DIR)$(BASEDIR)/man
 
@@ -200,16 +206,19 @@ $(OBJDIR)/.build-procps-ng-dist: | $(OBJDIR)/procps-ng
 	touch $(@)
 
 .PHONY: procps-ng-dist
-
 procps-ng-dist: $(OBJDIR)/.build-procps-ng-dist
 
+.PHONY: procps-ng-install
 procps-ng-install: procps-ng-dist
 	$(info :: Installing procps-ng )
 	install -d $(TARGET_DIR)$(BASEDIR)/bin
-	install -m755 $(OBJDIR)/procps-ng/src/pgrep $(TARGET_DIR)$(BASEDIR)/bin/pgrep
-	install -m755 $(OBJDIR)/procps-ng/src/pkill $(TARGET_DIR)$(BASEDIR)/bin/pkill
+	install -m755 $(OBJDIR)/procps-ng/src/.libs/pgrep $(TARGET_DIR)$(BASEDIR)/bin/pgrep
+	install -m755 $(OBJDIR)/procps-ng/src/.libs/pkill $(TARGET_DIR)$(BASEDIR)/bin/pkill
+	strip --strip-unneeded $(TARGET_DIR)$(BASEDIR)/bin/pgrep
+	strip --strip-unneeded $(TARGET_DIR)$(BASEDIR)/bin/pkill
 	install -d $(TARGET_DIR)$(LIBDIR)
 	install -m755 $(OBJDIR)/procps-ng/library/.libs/libproc2.so.* $(TARGET_DIR)$(LIBDIR)/
+	strip --strip-unneeded $(TARGET_DIR)$(LIBDIR)/libproc2.so*
 
 #
 # zenity-rs
@@ -229,9 +238,9 @@ $(OBJDIR)/.build-zenity-rs-dist: | $(OBJDIR)/zenity-rs
 	touch $(@)
 
 .PHONY: zenity-rs-dist
-
 zenity-rs-dist: $(OBJDIR)/.build-zenity-rs-dist
 
+.PHONY: zenity-rs-install
 zenity-rs-install: zenity-rs-dist
 	$(info :: Installing zenity-rs )
 	install -d $(TARGET_DIR)$(BASEDIR)/bin
