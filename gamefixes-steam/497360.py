@@ -4,20 +4,15 @@ Fixes graphical issues
 Widescreen supported (16:9/21:9, 32:9 not tested)
 """
 
-import os
-import subprocess
 from protonfixes import util
 
 
 def main() -> None:
+    # use wined3d for now, d7vk flickers with this game
+    #util.set_environment('PROTON_USE_D7VK', '1')
+
     # Create a symlink in dosdevices
     util.create_dos_device()
-
-    syswow64 = os.path.join(util.protonprefix(), 'drive_c/windows/syswow64')
-
-    # Everything after this call should only be executed once
-    if not util.protontricks('dgvoodoo2'):
-        return
 
     # Get width of resolution
     resolution = util.get_resolution()
@@ -29,20 +24,6 @@ def main() -> None:
         return
 
     width = int(screen_width / screen_height * 768)
-
-    # dgvoodoo2 config patches
-    subprocess.call(
-        [
-            f"sed -i '/[DirectX]/ {{/Resolution/s/max/{width}x768/}}' {syswow64}/dgvoodoo.conf"
-        ],
-        shell=True,
-    )
-    subprocess.call(
-        [
-            f"sed -i '/[DirectXExt]/ {{/ExtraEnumeratedResolutions/s/= /= {width}x768,/}}' {syswow64}/dgvoodoo.conf"
-        ],
-        shell=True,
-    )
 
     # Registry
     util.regedit_add('HKCU\\Software\\Sierra On-Line')
