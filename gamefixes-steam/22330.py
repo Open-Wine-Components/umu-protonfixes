@@ -30,7 +30,7 @@ def main_with_id(game_id: str) -> None:
 def get_redirect_name(game_id: str) -> util.ReplaceType:
     """Mapping for SteamID -> script extender replacements"""
     mapping = {
-        '22380': ('FalloutNV.exe', 'nvse_loader.exe'),  # Fallout New Vegas
+        '22380': ('FalloutNVLauncher.exe', 'nvse_loader.exe'),  # Fallout New Vegas
         '22370': ('FalloutLauncher.exe', 'fose_loader.exe'),  # Fallout 3
         '377160': ('Fallout4Launcher.exe', 'f4se_loader.exe'),  # Fallout 4
         '22330': ('OblivionLauncher.exe', 'obse_loader.exe'),  # Oblivion
