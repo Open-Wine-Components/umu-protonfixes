@@ -81,6 +81,7 @@ __dlss_section = 'dlss_files'
 __xess_section = 'xess_files'
 __fsr4_section = 'fsr4_files'
 __ffx3_section = 'ffx3_files'
+__ffx4_section = 'ffx4_files'
 __version_file = 'upscaler_files'
 
 
@@ -120,6 +121,19 @@ def __get_ffx3_dlls(version: str = 'default') -> dict:
     }
 
 
+def __get_ffx4_dlls(version: str = 'default') -> dict:
+    return {
+        'drive_c/windows/system32/umu/amd_fidelityfx_framegeneration_dx12.dll': __get_dll_manifest(
+            'fsr_40_fg_dx12', version
+        ),
+        'drive_c/windows/system32/umu/amd_fidelityfx_loader_dx12.dll': __get_dll_manifest(
+            'fsr_40_ldr_dx12', version
+        ),
+        'drive_c/windows/system32/umu/amd_fidelityfx_upscaler_dx12.dll': __get_dll_manifest(
+            'fsr_40_up_dx12', version
+        ),
+    }
+
 def __get_fsr4_dlls(version: str = 'default') -> dict:
     return {
         'drive_c/windows/system32/amdxcffx64.dll': __get_dll_manifest(
@@ -134,6 +148,7 @@ def __get_upscaler_items(name: str, version: str) -> tuple[dict, Callable, str]:
         'xess': (__get_xess_dlls, __download_extract_zip, __xess_section),
         'fsr4': (__get_fsr4_dlls, __download_extract_zip, __fsr4_section),
         'ffx3': (__get_ffx3_dlls, __download_extract_zip, __ffx3_section),
+        'ffx4': (__get_ffx4_dlls, __download_extract_zip, __ffx4_section),
     }
     get_items, dlfunc, section = upscalers[name]
     try:
@@ -419,11 +434,13 @@ def setup_upscalers(
     dlss_version = get_version(env, 'PROTON_DLSS_UPGRADE', 'default')
     xess_version = get_version(env, 'PROTON_XESS_UPGRADE', 'default')
 
+    # both fsr3 upgrade and fsr4 upgrade go through amdxcffx64
     fsr3_version = get_version(env, 'PROTON_FSR3_UPGRADE', 'default')
     fsr4_version = get_version(env, 'PROTON_FSR4_UPGRADE', 'default')
     fsr4_version = fsr3_version if 'fsr3' in compat_config else fsr4_version
 
     ffx3_version = get_version(env, 'PROTON_FFX3_UPGRADE', '1.0.1.41314')
+    ffx4_version = get_version(env, 'PROTON_FFX4_UPGRADE', 'default')
 
     upscaler_replace = set()
     upscalers = (
@@ -432,6 +449,7 @@ def setup_upscalers(
         # amdxcffx64 4.1.1
         ('fsr4', fsr4_version, True),
         ('ffx3', ffx3_version, 'ffx3' in compat_config),
+        ('ffx4', ffx4_version, 'ffx4' in compat_config),
     )
     for upscaler in upscalers:
         name, version, enabled = upscaler
@@ -461,6 +479,9 @@ def setup_upscalers(
         pass
 
     if 'ffx3' in upscaler_replace:
+        pass
+
+    if 'ffx4' in upscaler_replace:
         pass
 
     if upscaler_replace:
