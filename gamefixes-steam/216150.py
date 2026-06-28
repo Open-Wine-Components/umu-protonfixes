@@ -96,7 +96,7 @@ def main() -> None:
 
     Note: UseLinuxInputEvents requires the user to be in the system 'input'
     group (e.g. ``sudo usermod -aG input $USER``). This gamefix cannot
-    perform that step — it only sets the registry keys.
+    perform that step - it only sets the registry keys.
 
     Note: this fix is necessary but not sufficient to launch MapleStory on
     Proton. The game additionally requires source-level patches:
