@@ -8,7 +8,7 @@ from protonfixes.logger import log
 
 _REG_SETTINGS = r"""Windows Registry Editor Version 5.00
 
-; Alt-tab input fix — prevent Wine from stealing focus on alt-tab
+; Alt-tab input fix - prevent Wine from stealing focus on alt-tab
 [HKEY_CURRENT_USER\Software\Wine\X11 Driver]
 "UseTakeFocus"="N"
 
