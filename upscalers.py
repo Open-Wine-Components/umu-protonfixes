@@ -434,10 +434,7 @@ def setup_upscalers(
     dlss_version = get_version(env, 'PROTON_DLSS_UPGRADE', 'default')
     xess_version = get_version(env, 'PROTON_XESS_UPGRADE', 'default')
 
-    # both fsr3 upgrade and fsr4 upgrade go through amdxcffx64
-    fsr3_version = get_version(env, 'PROTON_FSR3_UPGRADE', 'default')
     fsr4_version = get_version(env, 'PROTON_FSR4_UPGRADE', 'default')
-    fsr4_version = fsr3_version if 'fsr3' in compat_config else fsr4_version
 
     ffx3_version = get_version(env, 'PROTON_FFX3_UPGRADE', '1.0.1.41314')
     ffx4_version = get_version(env, 'PROTON_FFX4_UPGRADE', 'default')
@@ -458,9 +455,7 @@ def setup_upscalers(
             upscaler_replace.add(name)
 
     if 'fsr4' in upscaler_replace:
-        if 'fsr3' in compat_config:
-            env['FSR3_UPGRADE'] = '1'
-        elif 'fsr4' in compat_config:
+        if 'fsr4' in compat_config:
             env['FSR4_UPGRADE'] = '1'
         if 'mlfg' in compat_config:
             env['MLFG_UPGRADE'] = '1'
