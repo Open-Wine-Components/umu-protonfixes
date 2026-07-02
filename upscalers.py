@@ -627,9 +627,13 @@ def setup_upscalers(
 
     fsr4_version = get_version(env, 'PROTON_FSR4_UPGRADE', 'default')
 
-    optiscaler_version = get_version(env, 'PROTON_USE_OPTISCALER', 'default')
     ffx3_version = get_version(env, 'PROTON_FFX3_UPGRADE', '1.0.1.41314')
     ffx4_version = get_version(env, 'PROTON_FFX4_UPGRADE', 'default')
+
+    optiscaler_version = get_version(env, 'PROTON_USE_OPTISCALER', 'default')
+    # if optiscaler is enabled, control ffx4_version through fsr4_version unless explicitly set
+    if 'optiscaler' in compat_config and 'fsr4' in compat_config and 'ffx4' not in compat_config:
+        ffx4_version = fsr4_version
 
     upscaler_replace = set()
     upscalers = (
@@ -651,10 +655,10 @@ def setup_upscalers(
         if setup_optiscaler(env, compat_dir, prefix_dir, optiscaler_version):
             log.info('OptiScaler enabled.')
             if 'fsr4' in compat_config:
-                if fsr4_version in {'4.0.0', '4.0.1', 'default'}:
-                    setup_upscaler('ffx3', compat_dir, prefix_dir, ffx3_version)
+                if ffx4_version in {'4.0.0', '4.0.1'}:
+                    clean_upscaler('ffx4', compat_dir, prefix_dir)
                 else:
-                    setup_upscaler('ffx4', compat_dir, prefix_dir, fsr4_version)
+                    setup_upscaler('ffx4', compat_dir, prefix_dir, ffx4_version)
             env['WINE_OPTISCALER_NAME'] = env.get('PROTON_OPTISCALER_NAME', 'dxgi.dll')
             upscaler_replace.clear()
 
