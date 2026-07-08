@@ -35,7 +35,7 @@ def __get_manifest() -> dict:
             __manifest_json = json.loads(url_fd.read())
     except Exception as e:
         log.crit(f'Failed to download "{__manifest_url}"')
-        log.crit(e)
+        log.crit(str(e))
     else:
         with cached_manifest.open('w', encoding='utf-8') as manifest_fd:
             manifest_fd.write(json.dumps(__manifest_json))
@@ -46,7 +46,7 @@ def __get_manifest() -> dict:
                 __manifest_json = json.loads(manifest_fd.read())
     except Exception as e:
         log.crit(f'Failed to read cached manifest "{str(cached_manifest)}"')
-        log.crit(e)
+        log.crit(str(e))
 
     return __manifest_json  # pyright: ignore [reportReturnType]
 
@@ -155,7 +155,7 @@ def __get_upscaler_items(name: str, version: str) -> tuple[dict, Callable, str]:
         items = get_items(version)
     except Exception as e:
         log.crit(f'Failed to get "{name}" versions from manifest')
-        log.crit(e)
+        log.crit(str(e))
         raise e
 
     return items, dlfunc, section
@@ -243,7 +243,7 @@ def __check_upscaler_files(
         for dst in remote_items.keys():
             _ = tracked_items[dst].get('md5_hash')
     except Exception as e:
-        log.warn(e)
+        log.warn(str(e))
         return False
 
     valid_files = tuple(
@@ -311,7 +311,7 @@ def __download_upscaler_files(
             temp.unlink(missing_ok=True)
         except Exception as e:
             log.crit(f'Error while downloading file "{file.name}"')
-            log.crit(e)
+            log.crit(str(e))
             file.unlink(missing_ok=True)
             if temp.exists() or temp.is_symlink():
                 temp.rename(file)
@@ -405,7 +405,7 @@ def download_upscaler(
             raise RuntimeError
     except Exception as e:
         log.crit(f'Failed to download {name.upper()} dlls.')
-        log.crit(e)
+        log.crit(str(e))
 
 
 def setup_upscaler(
