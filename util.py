@@ -1089,7 +1089,7 @@ def import_saves_folder(
     # The libraryfolders.vdf file contains the paths for all your Steam library folders that are known to the Steam client, including those on external drives or SD cards.
     try:
         with open(
-            f'{os.environ["STEAM_BASE_FOLDER"]}/steamapps/libraryfolders.vdf'
+            f'{os.environ.get("STEAM_COMPAT_CLIENT_INSTALL_PATH", "")}/steamapps/libraryfolders.vdf'
         ) as f:
             for i in f.readlines():
                 # Looking for lines of the format
@@ -1162,13 +1162,17 @@ def import_saves_folder(
 def get_steam_account_id() -> Optional[str]:
     """Returns your 17-digit Steam account ID"""
     # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
-    with open(f'{os.environ["STEAM_BASE_FOLDER"]}/config/loginusers.vdf') as f:
-        lastFoundId = None
-        for i in f.readlines():
-            if len(i) > 1 and i[2:-2].isdigit():
-                lastFoundId = i[2:-2]
-            elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
-                return lastFoundId
+    try:
+        with open(f'{os.environ.get("STEAM_COMPAT_CLIENT_INSTALL_PATH", "")}/config/loginusers.vdf') as f:
+            lastFoundId = None
+            for i in f.readlines():
+                if len(i) > 1 and i[2:-2].isdigit():
+                    lastFoundId = i[2:-2]
+                elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
+                    return lastFoundId
+    except FileNotFoundError:
+        log.info("Could not find Steam's loginusers.vdf file.")
+        return None
     return None
 
 
