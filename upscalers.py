@@ -188,7 +188,7 @@ def __set_tracked_items(compat_dir: str, section: str, checksums: dict) -> None:
         with open(tracking_file, encoding='utf-8') as file_fd:
             data = file_fd.read()
         local_versions = json.loads(data)
-    except Exception as e:
+    except Exception:
         log.warn(f'Error while reading version file "{tracking_file}"')
         local_versions = {}
 
