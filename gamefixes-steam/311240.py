@@ -3,5 +3,5 @@
 from protonfixes import util
 
 def main() -> None:
-    """Disables libglesv2 to allow launcher to render """
-    util.winedll_override('libglesv2', OverrideOrder.DISABLED)
+    util.winedll_override('libglesv2', util.OverrideOrder.DISABLED)
+
