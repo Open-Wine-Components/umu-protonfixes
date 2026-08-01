@@ -444,7 +444,8 @@ def setup_upscalers(
         ('dlss', dlss_version, 'dlss' in compat_config),
         ('xess', xess_version, 'xess' in compat_config),
         # amdxcffx64 4.1.1
-        ('fsr4', fsr4_version, True),
+        ('fsr4', fsr4_version, 'fsr4' in compat_config),
+        # fidelityfx sdk
         ('ffx3', ffx3_version, 'ffx3' in compat_config),
         ('ffx4', ffx4_version, 'ffx4' in compat_config),
     )
@@ -455,10 +456,7 @@ def setup_upscalers(
             upscaler_replace.add(name)
 
     if 'fsr4' in upscaler_replace:
-        if 'fsr4' in compat_config:
-            env['FSR4_UPGRADE'] = '1'
-        if 'mlfg' in compat_config:
-            env['MLFG_UPGRADE'] = '1'
+        pass
 
     if 'dlss' in upscaler_replace:
         env.setdefault(
