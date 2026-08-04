@@ -2,8 +2,13 @@
 Works with dotnet35sp1 only, now without needing Proton5
 Videos still don't work.
 """
+import os
 
 from protonfixes import util
+
+
+def early() -> None:
+    os.environ['PROTON_DLL_COPY'] = '*'
 
 
 def main() -> None:

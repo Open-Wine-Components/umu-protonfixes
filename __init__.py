@@ -9,6 +9,7 @@ from . import fix
 from .logger import log
 from .upscalers import setup_upscalers
 from .utilities import (
+    check_verb_requirements,
     setup_frame_rate,
     setup_local_shader_cache,
     setup_mount_drives,
@@ -31,10 +32,6 @@ x86_64_lib_dir: str = (
 aarch64_lib_dir: str = (
     f'{os.path.dirname(os.path.realpath(__file__))}/files/lib/aarch64-linux-gnu'
 )
-
-
-# This is needed for protonfixes
-os.environ['PROTON_DLL_COPY'] = '*'
 
 
 def check_conditions() -> bool:
@@ -69,6 +66,7 @@ def execute_early() -> None:
     elif not check_conditions():
         log.warn('Skipping fix execution. We are probably running a unit test.')
     else:
+        check_verb_requirements()
         fix.early()
 
 
