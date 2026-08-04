@@ -436,6 +436,28 @@ def regedit_add(
         process.wait()
 
 
+def regedit_delete(
+    folder: str,
+    name: Optional[str] = None,
+) -> None:
+    """Add regedit keys"""
+    env = dict(protonmain.g_session.env)
+    env['WINEPREFIX'] = str(protonprefix())
+    env['WINE'] = protonmain.g_proton.wine_bin
+    env['WINELOADER'] = protonmain.g_proton.wine_bin
+    env['WINESERVER'] = protonmain.g_proton.wineserver_bin
+
+    if name is not None:
+        regedit_cmd = ['wine', 'reg', 'delete', folder, '/v', name, '/f']
+    else:
+        regedit_cmd = ['wine', 'reg', 'delete', folder, '/v']
+
+    log.info('Deleting key: ' + folder)
+
+    with subprocess.Popen(regedit_cmd, env=env) as process:
+        process.wait()
+
+
 def replace_command(
     orig: str, repl: str, match_flags: re.RegexFlag = re.IGNORECASE
 ) -> bool:
