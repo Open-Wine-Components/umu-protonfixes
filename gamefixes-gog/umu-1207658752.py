@@ -11,5 +11,5 @@ def main() -> None:
         'REG_SZ',
         'win98',
     )
-    # Fix in-game music not playing
+    # Fix in-game music not playing on GOG version
     util.winedll_override('winmm', util.OverrideOrder.NATIVE_BUILTIN)
