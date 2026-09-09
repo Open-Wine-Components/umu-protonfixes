@@ -8,6 +8,7 @@ def main() -> None:
 
     # Required to not crash on game launch ("BepInEx" hook)
     util.winedll_override('winhttp', util.OverrideOrder.NATIVE_BUILTIN)
+    util.winedll_override('version', util.OverrideOrder.NATIVE_BUILTIN)
 
     # Fixes "no keyboard input" issue on ALT-TAB / focus loss
     util.regedit_add(
