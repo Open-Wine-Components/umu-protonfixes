@@ -11,14 +11,3 @@ from protonfixes import util
 
 def main() -> None:
     util.protontricks('hidewineexports=enable')
-
-    # Without Wine, the game initializes NVAPI and retries in a loop when
-    # dxvk-nvapi cannot, which hangs the menu on non-NVIDIA GPUs.
-    # Same check as Proton's disablenvapi for this game.
-    try:
-        with open('/proc/modules', encoding='ascii') as f:
-            drivers = {line.partition(' ')[0] for line in f.read().splitlines()}
-    except OSError:
-        drivers = set()
-    if not drivers.intersection({'nvidia', 'nouveau', 'nova'}):
-        util.disable_nvapi()
