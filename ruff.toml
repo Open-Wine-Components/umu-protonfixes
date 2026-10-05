@@ -28,6 +28,8 @@ exclude = [
     "venv",
     "protonfixes_test.py",
     "subprojects",
+    # Vendored sign-in helper; kept identical to Dungeons2_linux_fix.
+    "gamefixes-steam/_dungeons2",
 ]
 
 # Same as Black.

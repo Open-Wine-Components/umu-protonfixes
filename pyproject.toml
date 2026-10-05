@@ -16,7 +16,8 @@ Issues = "https://github.com/Open-Wine-Components/umu-protonfixes/issues"
 exclude = [
     "**/__pycache__",
     "subprojects",
-    "verbs"
+    "verbs",
+    "gamefixes-steam/_dungeons2"
 ]
 extraPaths = [ ".." ] # Fix "protonfixes" module resolution
 pythonVersion = "3.9"
