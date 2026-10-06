@@ -504,7 +504,7 @@ def download_upscaler(
     """
     if check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=False):
         return
-    log.info(f'Failed to validate {name.upper()} files.')
+    log.info(f'Failed to validate {name} files.')
 
     try:
         items, section = __get_upscaler_items(name, version)
@@ -516,7 +516,7 @@ def download_upscaler(
         ):
             raise RuntimeError
     except Exception as e:
-        log.crit(f'Failed to download {name.upper()} dlls.')
+        log.crit(f'Failed to download {name} dlls.')
         log.crit(str(e))
 
 
@@ -588,7 +588,7 @@ def download_component(
     """
     if check_component(name, compat_dir, prefix_dir, version, ignore_version=False):
         return
-    log.info(f'Failed to validate {name.upper()} files.')
+    log.info(f'Failed to validate {name} files.')
 
     try:
         component, section = __get_component_item(name, version)
@@ -602,7 +602,7 @@ def download_component(
         ):
             raise RuntimeError
     except Exception as e:
-        log.crit(f'Failed to download {name.upper()} files')
+        log.crit(f'Failed to download {name} files')
         log.crit(str(e))
 
 
@@ -612,7 +612,7 @@ def setup_upscaler(
     prefix_dir: str,
     version: str,
 ) -> bool:
-    log.info(f'Setting up {name.upper()} version "{version}".')
+    log.info(f'Setting up {name} version "{version}".')
     download_upscaler(name, compat_dir, prefix_dir, version)
     enabled = check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=True)
     return enabled
@@ -624,13 +624,13 @@ def setup_optiscaler(
     prefix_dir: str,
     version: str,
 ) -> bool:
-    log.info(f'Setting up OptiScaler version "{version}".')
+    log.info(f'Setting up optiscaler version "{version}".')
     download_component("optiscaler", compat_dir, prefix_dir, version)
     enabled = check_component("optiscaler", compat_dir, prefix_dir, version, ignore_version=True)
 
     if enabled and env.get('PROTON_OPTISCALER_STREAMLINE', '0') != '0':
         streamline_version = get_version(env, 'PROTON_OPTISCALER_STREAMLINE', 'default')
-        log.info(f'Setting up Streamline version "{streamline_version}".')
+        log.info(f'Setting up streamline version "{streamline_version}".')
         download_component("streamline", compat_dir, prefix_dir, streamline_version)
     else:
         clean_tracked_files('streamline', compat_dir, prefix_dir)
@@ -678,7 +678,7 @@ def clean_tracked_files(
         except Exception:
             return False
 
-    log.info(f'Cleaning {name.upper()} files.')
+    log.info(f'Cleaning {name} files.')
 
     try:
         tracked_items = __get_tracked_items(compat_dir, section)
@@ -733,7 +733,7 @@ def setup_upscalers(
     for upscaler in upscalers:
         name, version, enabled = upscaler
         if enabled and setup_upscaler(name, compat_dir, prefix_dir, version):
-            log.info(f'Automatic {name.upper()} upgrade enabled.')
+            log.info(f'Automatic {name} upgrade enabled.')
             upscaler_replace.add(name)
 
     if 'optiscaler' in compat_config:
