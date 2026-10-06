@@ -11,7 +11,7 @@ from functools import lru_cache
 from urllib.error import HTTPError, URLError
 import zipfile
 from pathlib import Path
-from typing import Callable, Union
+from typing import Union
 from urllib.parse import unquote, urlparse
 
 from .logger import log
@@ -53,6 +53,7 @@ def __get_manifest() -> dict:
     return __manifest_json  # pyright: ignore [reportReturnType]
 
 
+@lru_cache(16)
 def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
     dlls = __get_manifest()[upscaler]
     dlls = tuple(filter(lambda dll: not dll['is_dev_file'], dlls))
@@ -154,15 +155,15 @@ def __get_fsr4_dlls(version: str = 'default') -> dict:
     }
 
 
-def __get_upscaler_items(name: str, version: str) -> tuple[dict, Callable, str]:
+def __get_upscaler_items(name: str, version: str) -> tuple[dict[str, dict], str]:
     upscalers = {
-        'dlss': (__get_dlss_dlls, __download_extract_zip, __dlss_section),
-        'xess': (__get_xess_dlls, __download_extract_zip, __xess_section),
-        'fsr4': (__get_fsr4_dlls, __download_extract_zip, __fsr4_section),
-        'ffx3': (__get_ffx3_dlls, __download_extract_zip, __ffx3_section),
-        'ffx4': (__get_ffx4_dlls, __download_extract_zip, __ffx4_section),
+        'dlss': (__get_dlss_dlls, __dlss_section),
+        'xess': (__get_xess_dlls, __xess_section),
+        'fsr4': (__get_fsr4_dlls, __fsr4_section),
+        'ffx3': (__get_ffx3_dlls, __ffx3_section),
+        'ffx4': (__get_ffx4_dlls, __ffx4_section),
     }
-    get_items, dlfunc, section = upscalers[name]
+    get_items, section = upscalers[name]
     try:
         items = get_items(version)
     except Exception as e:
@@ -170,7 +171,7 @@ def __get_upscaler_items(name: str, version: str) -> tuple[dict, Callable, str]:
         log.crit(str(e))
         raise e
 
-    return items, dlfunc, section
+    return items, section
 
 
 def __get_component_item(name: str, version: str) -> tuple[tuple[str, dict], str]:
@@ -297,7 +298,7 @@ def check_upscaler(
     ignore_version: ignore version mismatch but still check if the dlls are present
     """
     try:
-        items, _, section = __get_upscaler_items(name, version)
+        items, section = __get_upscaler_items(name, version)
     except Exception:
         return False
 
@@ -395,48 +396,6 @@ def check_component(
     )
 
 
-def __download_upscaler_files(
-    compat_dir: str,
-    prefix_dir: str,
-    items: dict,
-    dlfunc: Callable[[dict, Path, Path], None],
-    section: str,
-) -> bool:
-    """Download and install the required dlls.
-
-    This function takes care of backing up, downloading, and installing the required dlls
-    If the download fails, it will uses the backups to revert to the previous files, otherwise
-    the backups are removed.
-
-    The downloading, caching and installation of the dlls is facilitated in the callable passed through
-    the `dlfunc` argument.
-    """
-    cache_dir = config.path.cache_dir.joinpath('upscalers')
-    version = {}
-    for dst in items.keys():
-        log.info(f'Downloading upscaler file "{os.path.basename(dst)}"')
-        file = Path(prefix_dir, dst)
-        temp = Path(prefix_dir, dst + '.old')
-        try:
-            if file.exists() or file.is_symlink():
-                file.rename(temp)
-            dlfunc(items[dst], cache_dir, file)
-            temp.unlink(missing_ok=True)
-        except Exception as e:
-            log.crit(f'Error while downloading file "{file.name}"')
-            log.crit(str(e))
-            file.unlink(missing_ok=True)
-            if temp.exists() or temp.is_symlink():
-                temp.rename(file)
-            return False
-        version[dst] = {
-            'version': items[dst]['version'],
-            'md5_hash': items[dst]['md5_hash'],
-        }
-    __set_tracked_items(compat_dir, section, version)
-    return True
-
-
 def __download_file(url: str, dst: Path, *, checksum: Union[str, None] = None) -> None:
     """Downloads a file and checks against a checksum.
 
@@ -494,6 +453,47 @@ def __download_extract_zip(item: dict, cache: Path, dst: Path) -> None:
                 dst_fd.write(lzma.decompress(cached_fd.read()))
 
 
+def __download_upscaler_files(
+    compat_dir: str,
+    prefix_dir: str,
+    items: dict,
+    section: str,
+) -> bool:
+    """Download and install the required dlls.
+
+    This function takes care of backing up, downloading, and installing the required dlls
+    If the download fails, it will uses the backups to revert to the previous files, otherwise
+    the backups are removed.
+
+    The downloading, caching and installation of the dlls is facilitated in the callable passed through
+    the `dlfunc` argument.
+    """
+    cache_dir = config.path.cache_dir.joinpath('upscalers')
+    version = {}
+    for dst in items.keys():
+        log.info(f'Downloading upscaler file "{os.path.basename(dst)}"')
+        file = Path(prefix_dir, dst)
+        temp = Path(prefix_dir, dst + '.old')
+        try:
+            if file.exists() or file.is_symlink():
+                file.rename(temp)
+            __download_extract_zip(items[dst], cache_dir, file)
+            temp.unlink(missing_ok=True)
+        except Exception as e:
+            log.crit(f'Error while downloading file "{file.name}"')
+            log.crit(str(e))
+            file.unlink(missing_ok=True)
+            if temp.exists() or temp.is_symlink():
+                temp.rename(file)
+            return False
+        version[dst] = {
+            'version': items[dst]['version'],
+            'md5_hash': items[dst]['md5_hash'],
+        }
+    __set_tracked_items(compat_dir, section, version)
+    return True
+
+
 def download_upscaler(
     name: str, compat_dir: str, prefix_dir: str, version: str = 'default'
 ) -> None:
@@ -507,12 +507,11 @@ def download_upscaler(
     log.info(f'Failed to validate "{name.upper()}" files.')
 
     try:
-        items, download_func, section = __get_upscaler_items(name, version)
+        items, section = __get_upscaler_items(name, version)
         if not __download_upscaler_files(
             compat_dir,
             prefix_dir,
             items,
-            download_func,
             section,
         ):
             raise RuntimeError
@@ -668,9 +667,8 @@ def clean_tracked_files(
     compat_dir: str,
     prefix_dir: str,
 ) -> bool:
-
     try:
-        _, _, section = __get_upscaler_items(name, 'default')
+        _, section = __get_upscaler_items(name, 'default')
     except Exception:
         section = None
 
