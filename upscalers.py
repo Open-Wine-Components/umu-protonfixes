@@ -155,15 +155,17 @@ def __get_fsr4_dlls(version: str = 'default') -> dict[str, dict]:
     }
 
 
-def __get_upscaler_items(name: str, version: str) -> tuple[dict[str, dict], str]:
-    upscalers = {
+def __get_items(name: str, version: str) -> tuple[Union[dict[str, dict], tuple[str, dict]], str]:
+    components = {
         'dlss': (__get_dlss_dlls, __dlss_section),
         'xess': (__get_xess_dlls, __xess_section),
         'fsr4': (__get_fsr4_dlls, __fsr4_section),
         'ffx3': (__get_ffx3_dlls, __ffx3_section),
         'ffx4': (__get_ffx4_dlls, __ffx4_section),
+        'optiscaler': (__get_opti_files, __opti_section),
+        'streamline': (__get_nvsl_files, __nvsl_section),
     }
-    get_items, section = upscalers[name]
+    get_items, section = components[name]
     try:
         items = get_items(version)
     except Exception as e:
@@ -172,22 +174,6 @@ def __get_upscaler_items(name: str, version: str) -> tuple[dict[str, dict], str]
         raise e
 
     return items, section
-
-
-def __get_component_item(name: str, version: str) -> tuple[tuple[str, dict], str]:
-    components = {
-        'optiscaler': (__get_opti_files, __opti_section),
-        'streamline': (__get_nvsl_files, __nvsl_section),
-    }
-    get_item, section = components[name]
-    try:
-        item = get_item(version)
-    except Exception as e:
-        log.crit(f'Failed to get "{name}" versions from manifest')
-        log.crit(str(e))
-        raise e
-
-    return item, section
 
 
 def __get_tracked_items(compat_dir: str, section: str) -> dict:
@@ -298,7 +284,9 @@ def check_upscaler(
     ignore_version: ignore version mismatch but still check if the dlls are present
     """
     try:
-        items, section = __get_upscaler_items(name, version)
+        items, section = __get_items(name, version)
+        if not isinstance(items, dict):
+            raise RuntimeError(f'got return type {type(items).__name__}, expected dict')
     except Exception:
         return False
 
@@ -381,7 +369,9 @@ def check_component(
     ignore_version: ignore version mismatch but still check if the dlls are present
     """
     try:
-        component, section = __get_component_item(name, version)
+        component, section = __get_items(name, version)
+        if not isinstance(component, tuple):
+            raise RuntimeError(f'got return type {type(component).__name__}, expected tuple')
         target_path, remote_item = component
     except Exception:
         return False
@@ -507,7 +497,9 @@ def download_upscaler(
     log.info(f'Failed to validate {name} files.')
 
     try:
-        items, section = __get_upscaler_items(name, version)
+        items, section = __get_items(name, version)
+        if not isinstance(items, dict):
+            raise RuntimeError(f'got return type {type(items).__name__}, expected dict')
         if not __download_upscaler_files(
             compat_dir,
             prefix_dir,
@@ -591,7 +583,9 @@ def download_component(
     log.info(f'Failed to validate {name} files.')
 
     try:
-        component, section = __get_component_item(name, version)
+        component, section = __get_items(name, version)
+        if not isinstance(component, tuple):
+            raise RuntimeError(f'got return type {type(component).__name__}, expected tuple')
         target_path, remote_item = component
         if not __download_component_files(
             compat_dir,
@@ -668,15 +662,9 @@ def clean_tracked_files(
     prefix_dir: str,
 ) -> bool:
     try:
-        _, section = __get_upscaler_items(name, 'default')
+        _, section = __get_items(name, 'default')
     except Exception:
-        section = None
-
-    if section is None:
-        try:
-            _, section = __get_component_item(name, 'default')
-        except Exception:
-            return False
+        return False
 
     log.info(f'Cleaning {name} files.')
 
