@@ -98,7 +98,7 @@ def __get_nvsl_files(version: str = 'default') -> tuple[str, dict]:
     return 'drive_c/windows/system32/umu/streamline/', __get_dll_manifest('streamline', version)
 
 
-def __get_dlss_dlls(version: str = 'default') -> dict:
+def __get_dlss_dlls(version: str = 'default') -> dict[str, dict]:
     return {
         'drive_c/windows/system32/umu/nvngx_dlss.dll': __get_dll_manifest('dlss', version),
         'drive_c/windows/system32/umu/nvngx_dlssd.dll': __get_dll_manifest(
@@ -110,7 +110,7 @@ def __get_dlss_dlls(version: str = 'default') -> dict:
     }
 
 
-def __get_xess_dlls(version: str = 'default') -> dict:
+def __get_xess_dlls(version: str = 'default') -> dict[str, dict]:
     return {
         'drive_c/windows/system32/umu/libxess.dll': __get_dll_manifest('xess', version),
         'drive_c/windows/system32/umu/libxess_dx11.dll': __get_dll_manifest(
@@ -123,7 +123,7 @@ def __get_xess_dlls(version: str = 'default') -> dict:
     }
 
 
-def __get_ffx3_dlls(version: str = 'default') -> dict:
+def __get_ffx3_dlls(version: str = 'default') -> dict[str, dict]:
     return {
         'drive_c/windows/system32/umu/amd_fidelityfx_vk.dll': __get_dll_manifest(
             'fsr_31_vk', version
@@ -134,7 +134,7 @@ def __get_ffx3_dlls(version: str = 'default') -> dict:
     }
 
 
-def __get_ffx4_dlls(version: str = 'default') -> dict:
+def __get_ffx4_dlls(version: str = 'default') -> dict[str, dict]:
     return {
         'drive_c/windows/system32/umu/amd_fidelityfx_framegeneration_dx12.dll': __get_dll_manifest(
             'fsr_40_fg_dx12', version
@@ -147,7 +147,7 @@ def __get_ffx4_dlls(version: str = 'default') -> dict:
         ),
     }
 
-def __get_fsr4_dlls(version: str = 'default') -> dict:
+def __get_fsr4_dlls(version: str = 'default') -> dict[str, dict]:
     return {
         'drive_c/windows/system32/amdxcffx64.dll': __get_dll_manifest(
             'fsr_40_drv', version
@@ -221,7 +221,7 @@ def __set_tracked_items(compat_dir: str, section: str, checksums: dict) -> None:
 
 
 def __check_upscaler_file(
-    prefix_dir: str, dst: str, remote_item: dict, tracked_item: dict, ignore_version: bool
+    prefix_dir: str, dst: str, remote: dict, tracked: dict, ignore_version: bool
 ) -> bool:
     target = os.path.join(prefix_dir, dst)
 
@@ -243,7 +243,7 @@ def __check_upscaler_file(
         dst_md5 = hashlib.md5(dst_fd.read()).hexdigest().lower()
 
     # Then check if the file matches the one recorded in the tracking file
-    tracked_md5 = tracked_item['md5_hash']
+    tracked_md5 = tracked['md5_hash']
     if tracked_md5 and dst_md5 != tracked_md5.lower():
         log.warn(f'MD5 checksum mismatch between tracking file and prefix "{dst}"')
         return False
@@ -251,10 +251,10 @@ def __check_upscaler_file(
     # If we don't want to ignore the update
     # We ignore updates in the validation check after the downloads
     if not ignore_version:
-        if tracked_item['version'] != remote_item['version']:
+        if tracked['version'] != remote['version']:
             log.warn(f'Version mismatch between tracking file and prefix "{dst}"')
             return False
-        item_md5 = remote_item.get('md5_hash', '')
+        item_md5 = remote.get('md5_hash', '')
         if item_md5 and dst_md5 != item_md5.lower():
             log.warn(f'MD5 checksum mismatch between manifest and prefix "{dst}"')
             return False
@@ -504,7 +504,7 @@ def download_upscaler(
     """
     if check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=False):
         return
-    log.info(f'Failed to validate "{name.upper()}" files.')
+    log.info(f'Failed to validate {name.upper()} files.')
 
     try:
         items, section = __get_upscaler_items(name, version)
@@ -570,7 +570,7 @@ def __download_component_files(
             }
 
     except Exception as e:
-        log.crit(f'Failed to download {item["file_description"]} package.')
+        log.crit(f'Failed to download "{item["file_description"]}" package.')
         log.crit(str(e))
         return False
 
@@ -579,7 +579,7 @@ def __download_component_files(
 
 
 def download_component(
-    name: str, compat_dir: str, prefix_dir: str, version: str = 'latest'
+    name: str, compat_dir: str, prefix_dir: str, version: str = 'default'
 ) -> None:
     """Check for upscaler files and their versions
 
@@ -612,7 +612,7 @@ def setup_upscaler(
     prefix_dir: str,
     version: str,
 ) -> bool:
-    log.info(f'Setting up {name.upper()} version {version}.')
+    log.info(f'Setting up {name.upper()} version "{version}".')
     download_upscaler(name, compat_dir, prefix_dir, version)
     enabled = check_upscaler(name, compat_dir, prefix_dir, version, ignore_version=True)
     return enabled
