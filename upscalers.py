@@ -85,11 +85,16 @@ __fsr4_section = 'fsr4_files'
 __opti_section = 'opti_files'
 __ffx3_section = 'ffx3_files'
 __ffx4_section = 'ffx4_files'
+__nvsl_section = 'nvsl_files'
 __version_file = 'upscaler_files'
 
 
 def __get_opti_files(version: str = 'default') -> tuple[str, dict]:
     return 'drive_c/windows/system32/umu/', __get_dll_manifest('optiscaler', version)
+
+
+def __get_nvsl_files(version: str = 'default') -> tuple[str, dict]:
+    return 'drive_c/windows/system32/umu/streamline/', __get_dll_manifest('streamline', version)
 
 
 def __get_dlss_dlls(version: str = 'default') -> dict:
@@ -166,6 +171,22 @@ def __get_upscaler_items(name: str, version: str) -> tuple[dict, Callable, str]:
         raise e
 
     return items, dlfunc, section
+
+
+def __get_component_item(name: str, version: str) -> tuple[tuple[str, dict], str]:
+    components = {
+        'optiscaler': (__get_opti_files, __opti_section),
+        'streamline': (__get_nvsl_files, __nvsl_section),
+    }
+    get_item, section = components[name]
+    try:
+        item = get_item(version)
+    except Exception as e:
+        log.crit(f'Failed to get "{name}" versions from manifest')
+        log.crit(str(e))
+        raise e
+
+    return item, section
 
 
 def __get_tracked_items(compat_dir: str, section: str) -> dict:
@@ -289,29 +310,23 @@ def check_upscaler(
     )
 
 
-def check_optiscaler(
+def __check_component_files(
     compat_dir: str,
     prefix_dir: str,
-    version: str = 'default',
-    *,
+    path: str,
+    remote_item: dict,
+    section: str,
     ignore_version: bool = False,
 ) -> bool:
-    """Check for optiscaler files and its version
+    """Check for component files and its version
 
-    version: the version of the optiscaler to download
+    version: the version of the component to download
     ignore_version: ignore version mismatch but still check if the files are present
     """
     try:
-        path, item = __get_opti_files(version)
-    except Exception as e:
-        log.crit('Failed to get "optiscaler" versions from manifest')
-        log.crit(str(e))
-        return False
-
-    try:
-        tracked_items = __get_tracked_items(compat_dir, __opti_section)
+        tracked_items = __get_tracked_items(compat_dir, section)
         # test if new files and their attributes exist in the tracking file
-        for dst in [os.path.join(path, f) for f in item['md5_hash']]:
+        for dst in [os.path.join(path, f) for f in remote_item['md5_hash']]:
             _ = tracked_items[dst].get('md5_hash')
     except Exception as e:
         log.warn(str(e))
@@ -332,22 +347,52 @@ def check_optiscaler(
         dst_hashes.update({dst: dst_md5})
 
     if not ignore_version:
-        for name in item['md5_hash']:
+        for name in remote_item['md5_hash']:
             dst = os.path.join(path, name)
             target = os.path.join(prefix_dir, dst)
             if not os.path.isfile(target):
                 log.warn(f'Missing file from prefix "{dst}"')
                 return False
-            if tracked_items[dst]['version'] != item['version']:
+            if tracked_items[dst]['version'] != remote_item['version']:
                 log.warn(f'Version mismatch between configuration and prefix "{dst}"')
                 return False
-            item_md5 = item['md5_hash'][name]
+            item_md5 = remote_item['md5_hash'][name]
             if item_md5 and dst_hashes[dst] != item_md5.lower():
                 log.warn(f'MD5 checksum mismatch between manifest and prefix "{dst}"')
                 return False
             log.debug(f'Found matching file in prefix "{dst}"')
 
     return True
+
+
+def check_component(
+    name: str,
+    compat_dir: str,
+    prefix_dir: str,
+    version: str = 'default',
+    *,
+    ignore_version: bool = False,
+) -> bool:
+    """Check for component files and their versions
+
+    name: the name of the component, possible values optiscaler, streamline
+    version: the version of the component to download
+    ignore_version: ignore version mismatch but still check if the dlls are present
+    """
+    try:
+        component, section = __get_component_item(name, version)
+        target_path, remote_item = component
+    except Exception:
+        return False
+
+    return __check_component_files(
+        compat_dir,
+        prefix_dir,
+        target_path,
+        remote_item,
+        section,
+        ignore_version,
+    )
 
 
 def __download_upscaler_files(
@@ -476,26 +521,25 @@ def download_upscaler(
         log.crit(str(e))
 
 
-def download_optiscaler(
-    compat_dir: str, prefix_dir: str, version: str = 'default'
-) -> None:
+def __download_component_files(
+    compat_dir: str,
+    prefix_dir: str,
+    path: str,
+    item: dict,
+    section: str,
+) -> bool:
     """Check for optiscaler files and their versions
 
     version: the version of the upscaler dll to download
     """
-    if check_optiscaler(compat_dir, prefix_dir, version, ignore_version=False):
-        return
-    log.info('Failed to validate "optiscaler" files.')
-
     try:
-        tracked_items = __get_tracked_items(compat_dir, __opti_section)
+        tracked_items = __get_tracked_items(compat_dir, section)
     except Exception:
         tracked_items = {}
         pass
 
     try:
-        path, item = __get_opti_files(version)
-        log.info(f'Updating OptiScaler "{os.path.basename(item["version"])}"')
+        log.info(f'Updating {item["file_description"]} to "{item["version"]}"')
 
         url_path = Path(unquote(urlparse(item['download_url']).path))
         cache_dir = config.path.cache_dir.joinpath('upscalers')
@@ -527,11 +571,40 @@ def download_optiscaler(
             }
 
     except Exception as e:
-        log.crit('Failed to download OptiScaler package.')
+        log.crit(f'Failed to download {item["file_description"]} package.')
         log.crit(str(e))
-        return
+        return False
 
-    __set_tracked_items(compat_dir, __opti_section, version)
+    __set_tracked_items(compat_dir, section, version)
+    return True
+
+
+def download_component(
+    name: str, compat_dir: str, prefix_dir: str, version: str = 'latest'
+) -> None:
+    """Check for upscaler files and their versions
+
+    name: the name of the upscaler, possible values dlss, xess, fsr3, fsr4
+    version: the version of the upscaler dll to download
+    """
+    if check_component(name, compat_dir, prefix_dir, version, ignore_version=False):
+        return
+    log.info(f'Failed to validate {name.upper()} files.')
+
+    try:
+        component, section = __get_component_item(name, version)
+        target_path, remote_item = component
+        if not __download_component_files(
+            compat_dir,
+            prefix_dir,
+            target_path,
+            remote_item,
+            section,
+        ):
+            raise RuntimeError
+    except Exception as e:
+        log.crit(f'Failed to download {name.upper()} files')
+        log.crit(str(e))
 
 
 def setup_upscaler(
@@ -553,8 +626,15 @@ def setup_optiscaler(
     version: str,
 ) -> bool:
     log.info(f'Setting up OptiScaler version "{version}".')
-    download_optiscaler(compat_dir, prefix_dir, version)
-    enabled = check_optiscaler(compat_dir, prefix_dir, version, ignore_version=True)
+    download_component("optiscaler", compat_dir, prefix_dir, version)
+    enabled = check_component("optiscaler", compat_dir, prefix_dir, version, ignore_version=True)
+
+    if enabled and env.get('PROTON_OPTISCALER_STREAMLINE', '0') != '0':
+        streamline_version = get_version(env, 'PROTON_OPTISCALER_STREAMLINE', 'default')
+        log.info(f'Setting up Streamline version "{streamline_version}".')
+        download_component("streamline", compat_dir, prefix_dir, streamline_version)
+    else:
+        clean_tracked_files('streamline', compat_dir, prefix_dir)
 
     if enabled and (env_config := env.get('PROTON_OPTISCALER_CONFIG', '')):
         path, _ = __get_opti_files(version)
@@ -583,15 +663,22 @@ def setup_optiscaler(
     return enabled
 
 
-def clean_upscaler(
+def clean_tracked_files(
     name: str,
     compat_dir: str,
     prefix_dir: str,
 ) -> bool:
+
     try:
         _, _, section = __get_upscaler_items(name, 'default')
     except Exception:
-        return False
+        section = None
+
+    if section is None:
+        try:
+            _, section = __get_component_item(name, 'default')
+        except Exception:
+            return False
 
     log.info(f'Cleaning {name.upper()} files.')
 
@@ -656,7 +743,7 @@ def setup_upscalers(
             log.info('OptiScaler enabled.')
             if 'fsr4' in compat_config:
                 if ffx4_version in {'4.0.0', '4.0.1'}:
-                    clean_upscaler('ffx4', compat_dir, prefix_dir)
+                    clean_tracked_files('ffx4', compat_dir, prefix_dir)
                 else:
                     setup_upscaler('ffx4', compat_dir, prefix_dir, ffx4_version)
             env['WINE_OPTISCALER_NAME'] = env.get('PROTON_OPTISCALER_NAME', 'dxgi.dll')
