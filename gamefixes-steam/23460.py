@@ -12,6 +12,6 @@ def early() -> None:
 
 
 def main() -> None:
-    util.set_environment('PROTON_NO_XALIA', '1')
+    util.set_environment('PROTON_USE_XALIA', '0')
     util.protontricks('dotnet35sp1')
-    util.set_environment('PROTON_NO_XALIA', '0')
+    util.set_environment('PROTON_USE_XALIA', '1')

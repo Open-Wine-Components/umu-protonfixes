@@ -14,3 +14,5 @@ def main() -> None:
     util.protontricks('dotnet35sp1')
     util.protontricks('dotnet40')
     util.protontricks('win10')
+    util.set_environment('PROTON_USE_XALIA', '0')
+
