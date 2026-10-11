@@ -406,5 +406,9 @@ class TestProtonfixes(unittest.TestCase):
         result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
 
+    def testResolveCodename(self):
+        result = fix.resolve_codename('Heather', 'egs')
+        self.assertEqual(result, 'umu-1174180')
+
 if __name__ == '__main__':
     unittest.main()

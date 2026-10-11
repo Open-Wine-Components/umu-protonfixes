@@ -7,6 +7,7 @@ import csv
 
 from functools import lru_cache
 from importlib import import_module
+from pathlib import Path
 from typing import Optional
 
 from .util import ProtonVersion
@@ -26,9 +27,24 @@ def get_game_id() -> str:
         return os.environ['SteamGameId']
     if 'STEAM_COMPAT_DATA_PATH' in os.environ:
         return re.findall(r'\d+', os.environ['STEAM_COMPAT_DATA_PATH'])[-1]
+    if (store := os.environ.get('STORE')) and (codename := os.environ.get('CODENAME')):
+        if resolved := resolve_codename(codename, store):
+            return resolved
 
     log.crit('Game ID not found in environment variables')
     exit()
+
+
+@lru_cache
+def resolve_codename(codename: str, store: str) -> Optional[str]:
+    """Resolve a store-internal codename (e.g. Epic AppName, GOG ID) to umu's ID using `umu-database.csv`"""
+    db = Path(__file__).parent / 'umu-database.csv'
+    with db.open(newline='') as csvfile:
+        db_reader = csv.reader(csvfile)
+        for row in db_reader:
+            if row[2] == codename and row[1] == store:
+                return row[3]
+    return None
 
 
 def get_game_title(database: str) -> str:
@@ -171,8 +187,12 @@ def run_fix(game_id: str, *, stage: str) -> None:
 
     local fixes prevent global fixes from being executed
     """
-    if game_id is None:
-        return
+    # STEAM_COMPAT_APP_ID triggers some fixes inside the proton script / Wine. Set it based on the game ID
+    # This isn't a *great* place for this, but arguably, setting this variable is its own kind of fix
+    split_id = game_id.split('-')
+    maybe_steam_id = split_id[1] if len(split_id) > 0 else None
+    if maybe_steam_id and maybe_steam_id.isnumeric():
+        os.environ['STEAM_COMPAT_APP_ID'] = maybe_steam_id
 
     if config.main.enable_checks:
         run_checks()
