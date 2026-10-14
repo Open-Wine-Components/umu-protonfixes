@@ -92,11 +92,14 @@ def execute() -> None:
         log.warn('Skipping fix execution. We are probably running a unit test.')
     else:
         dialog = None
-        if os.environ.get('UMU_ID', '') != 'winetricks-gui':
+        umu_id = os.environ.get('UMU_ID', '') or 'default'
+        # TODO: remove the `STORE` fallback after further refactors
+        umu_store = os.environ.get('UMU_STORE', os.environ.get('STORE', '')) or 'umu'
+        if umu_id != 'winetricks-gui':
             dialog = ZenityWaitDialog(os.path.join(bin_dir, 'zenity'))
         try:
             if isinstance(dialog, ZenityWaitDialog):
-                dialog.start(text='Installing Game-Specific fixes, please wait...')
+                dialog.start(text=f'Installing fixes for "{umu_store}-{umu_id}", please wait...')
             fix.main()
 
         except Exception:
