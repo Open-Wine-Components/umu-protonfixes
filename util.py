@@ -305,73 +305,70 @@ def check_internet() -> bool:
 
 def protontricks(verb: str) -> bool:
     """Runs winetricks if available"""
+    if checkinstalled(verb):
+        log.warn(f'Verb "{verb}" is already installed')
+        return False
+
+    if not check_internet():
+        log.info('No internet connection. Winetricks will be skipped.')
+        return False
+
+    log.info('Installing winetricks ' + verb)
+    env = protonmain.g_session.env.copy()
+    env['WINEPREFIX'] = str(protonprefix())
+    env['WINE'] = protonmain.g_proton.wine_bin
+    env['WINELOADER'] = protonmain.g_proton.wine_bin
+    env['WINESERVER'] = protonmain.g_proton.wineserver_bin
+    env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
+    env['LD_PRELOAD'] = ''
+
+    # winetricks is exposed in path in $PATH
+    winetricks_bin = shutil.which('winetricks', path=env['PATH'])
+    if winetricks_bin is None:
+        log.warn('"winetricks" was not found in $PATH')
+        return False
+
+    winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
+    if verb == 'gui':
+        winetricks_cmd = [winetricks_bin, '--unattended']
+    if 'dotnet' in verb:
+        env['PROTON_USE_XALIA'] = '0'
+
+    # check is verb a custom winetricks verb
+    custom_verb = is_custom_verb(verb)
+    if custom_verb:
+        winetricks_cmd = [winetricks_bin, '--unattended', custom_verb]
+
+    log.debug(f'Using winetricks command: {winetricks_cmd}')
+
+    # make sure proton waits for winetricks to finish
+    for idx, arg in enumerate(sys.argv):
+        if 'waitforexitandrun' not in arg:
+            if arg == 'run':
+                sys.argv[idx] = 'waitforexitandrun'
+                log.debug(str(sys.argv))
+                break
+
+    # run winetricks
+    log.info(f'Using winetricks verb "{verb}"')
+    subprocess.call([env['WINESERVER'], '-w'], env=env)
+    with subprocess.Popen(winetricks_cmd, env=env) as process:
+        process.wait()
+    _killhanging()
+
+    # check if the verb failed (eg. access denied)
+    retc = process.returncode
+    if retc != 0:
+        log.warn(f'Winetricks failed running verb "{verb}" with status {retc}.')
+        return False
+
+    # check if verb recorded to winetricks log
     if not checkinstalled(verb):
-        if check_internet():
-            # Proceed with your function logic here
-            pass
-        else:
-            log.info('No internet connection. Winetricks will be skipped.')
-            return False
+        log.warn(f'Not recorded as installed: winetricks {verb}, forcing!')
+        _forceinstalled(verb)
 
-        log.info('Installing winetricks ' + verb)
-        env = dict(protonmain.g_session.env)
-        env['WINEPREFIX'] = str(protonprefix())
-        env['WINE'] = protonmain.g_proton.wine_bin
-        env['WINELOADER'] = protonmain.g_proton.wine_bin
-        env['WINESERVER'] = protonmain.g_proton.wineserver_bin
-        env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
-        env['LD_PRELOAD'] = ''
-
-        winetricks_bin = 'winetricks'
-        winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
-        if verb == 'gui':
-            winetricks_cmd = [winetricks_bin, '--unattended']
-        if 'dotnet' in verb:
-            env['PROTON_USE_XALIA'] = '0'
-
-        # check is verb a custom winetricks verb
-        custom_verb = is_custom_verb(verb)
-        if custom_verb:
-            winetricks_cmd = [winetricks_bin, '--unattended', custom_verb]
-
-        if winetricks_bin is None:
-            log.warn('No winetricks was found in $PATH')
-
-        if winetricks_bin is not None:
-            log.debug(f'Using winetricks command: {winetricks_cmd}')
-
-            # make sure proton waits for winetricks to finish
-            for idx, arg in enumerate(sys.argv):
-                if 'waitforexitandrun' not in arg:
-                    if arg == 'run':
-                        sys.argv[idx] = 'waitforexitandrun'
-                        log.debug(str(sys.argv))
-                        break
-
-            log.info(f'Using winetricks verb "{verb}"')
-            subprocess.call([env['WINESERVER'], '-w'], env=env)
-            with subprocess.Popen(winetricks_cmd, env=env) as process:
-                process.wait()
-            _killhanging()
-
-            # Check if the verb failed (eg. access denied)
-            retc = process.returncode
-            if retc != 0:
-                log.warn(f'Winetricks failed running verb "{verb}" with status {retc}.')
-                return False
-
-            # Check if verb recorded to winetricks log
-            if not checkinstalled(verb):
-                log.warn(f'Not recorded as installed: winetricks {verb}, forcing!')
-                _forceinstalled(verb)
-
-            log.info('Winetricks complete')
-            return True
-
-        if 'dotnet' in verb:
-            env['PROTON_USE_XALIA'] = '1'
-
-    return False
+    log.info('Winetricks complete')
+    return True
 
 
 def regedit_add(
