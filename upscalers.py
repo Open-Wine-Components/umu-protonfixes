@@ -183,6 +183,9 @@ def __get_tracked_items(compat_dir: str, section: str) -> dict:
             data = file_fd.read()
         tracked_versions = json.loads(data)
         tracked_versions = tracked_versions[section]
+    except KeyError as e:
+        log.warn(f'Section "{section}" not found in "{tracking_file}"')
+        raise e
     except Exception as e:
         log.warn(f'Error while reading version file "{tracking_file}"')
         raise e
