@@ -3,6 +3,11 @@
 import os
 from protonfixes import util
 
+
+def early() -> None:
+    os.environ['PROTON_DLL_COPY'] = '*'
+
+
 def main() -> None:
     # patch libcuda to workaround crashes related to DLSS
     # See: https://github.com/jp7677/dxvk-nvapi/issues/174#issuecomment-2227462795
