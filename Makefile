@@ -35,10 +35,8 @@ install: protonfixes-install winetricks-install cabextract-install libmspack-ins
 
 TARGET_STEAMRT := $(shell source /etc/os-release && echo -n $$VERSION_CODENAME)
 
-ifeq ($(TARGET_STEAMRT),steamrt4)
 all: zenity-rs-dist
 install: zenity-rs-install
-endif
 
 #
 # protonfixes
@@ -224,9 +222,9 @@ procps-ng-install: procps-ng-dist
 # zenity-rs
 #
 
-ZENITY_RS_VER := 0.2.8
-ZENITY_RS_x86_64_SHA256 := 797bd492a8723d741d888320ab87b934b0c4571a1ff2c128963a08daa35df8c7
-ZENITY_RS_aarch64_SHA256 := c3f8a11fdc17632ffe3d5b1640a931139c2b8d86145c531e0f4db8a63ca3f2a2
+ZENITY_RS_VER := 0.3.0
+ZENITY_RS_x86_64_SHA256 := f7a351180f364501855181420ceecd40b42ff84742ab79eca7aec43fe8ec074a
+ZENITY_RS_aarch64_SHA256 := a75c846e9461aef13120686cdf62750025e8fa2f234d71cd6b9846cace50c561
 
 $(OBJDIR)/zenity-rs: | $(OBJDIR)
 	mkdir -p $(@)
