@@ -3,7 +3,6 @@
 import os
 from protonfixes import util
 
-
 def main() -> None:
     # patch libcuda to workaround crashes related to DLSS
     # See: https://github.com/jp7677/dxvk-nvapi/issues/174#issuecomment-2227462795
@@ -23,6 +22,12 @@ def main() -> None:
 
     # Prevents Error code 3221225477
     util.protontricks('vcrun2022')
+
+    # New launcher needs dotnet48
+    util.protontricks('dotnet48')
+
+    # Reset version to win10
+    util.protontricks('win10')
 
     # Prevent RSI Launcher install and update from hanging indefinitely
     util.winedll_override('dxwebsetup.exe', util.OverrideOrder.DISABLED)

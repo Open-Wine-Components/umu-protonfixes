@@ -228,6 +228,12 @@ def _forceinstalled(verb: str) -> None:
         forcedlog.write(f'{verb}\n')
 
 
+WINETRICKS_WINVER_VERBS = frozenset((
+    'nt351', 'nt40', 'vista', 'win10', 'win11', 'win20', 'win2k', 'win2k3', 'win2k8',
+    'win2k8r2', 'win30', 'win31', 'win7', 'win8', 'win81', 'win95', 'win98', 'winme', 'winxp',
+))
+
+
 def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
     """Returns True if the winetricks verb is found in the winetricks log"""
     if not isinstance(verb, str):
@@ -248,6 +254,17 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
             return wt_is_set
         except OSError:
             return False
+    # Windows version verbs are settings, not installs: only the most recent
+    # one is in effect. Verbs such as dotnet40 also call winxp internally.
+    if verb in WINETRICKS_WINVER_VERBS:
+        try:
+            with open(winetricks_log, encoding='ascii') as tricklog:
+                for xline in reversed([x.strip() for x in tricklog.readlines()]):
+                    if xline in WINETRICKS_WINVER_VERBS:
+                        return xline == verb
+        except OSError:
+            pass
+        return False
     # Check for regular verbs
     try:
         with open(winetricks_log, encoding='ascii') as tricklog:
@@ -264,7 +281,7 @@ def checkinstalled(verb: str) -> bool:
         return False
 
     log.info(f'Checking if winetricks "{verb}" is installed')
-    if _checkinstalled(verb, 'winetricks.log.forced'):
+    if verb not in WINETRICKS_WINVER_VERBS and _checkinstalled(verb, 'winetricks.log.forced'):
         return True
     return _checkinstalled(verb)
 
