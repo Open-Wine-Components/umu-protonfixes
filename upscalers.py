@@ -738,8 +738,20 @@ def setup_upscalers(
             env['WINE_OPTISCALER_NAME'] = env.get('PROTON_OPTISCALER_NAME', 'dxgi.dll')
             upscaler_replace.clear()
 
+    # let me explain...
     if 'fsr4' in upscaler_replace:
-        pass
+        # FSR4_UPGRADE is enabled by default on certain GPUs, under normal conditions we
+        # do not want to force-enable it. If the user sets the PROTON_ env variable themselves
+        # assume they know what they are doing and enable the extended GPU support for them.
+        if env.get('PROTON_FSR4_UPGRADE') not in {'0', None}:
+            env.setdefault('FSR4_UPGRADE', '1')
+        if 'mlfg' in env:
+            env.setdefault('MLFG_UPGRADE', '1')
+    else:
+        # At the same time if PROTON_FSR4_UPGRADE is set to '0', disable the upgrade, unless
+        # the user has already set the FSR4_UPGRADE.
+        env.setdefault('FSR4_UPGRADE', '0')
+        env.setdefault('MLFG_UPGRADE', '0')
 
     if 'dlss' in upscaler_replace:
         env.setdefault(
