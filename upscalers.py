@@ -53,7 +53,7 @@ def __get_manifest() -> dict:
     return __manifest_json  # pyright: ignore [reportReturnType]
 
 
-@lru_cache(16)
+@lru_cache(maxsize=16)
 def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
     dlls = __get_manifest()[upscaler]
     dlls = tuple(filter(lambda dll: not dll['is_dev_file'], dlls))
@@ -65,6 +65,25 @@ def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
         f'Version "{version}" for "{upscaler.upper()}" not found, using {dlls[-1]["version"]}'
     )
     return dlls[-1]
+
+
+@lru_cache(maxsize=32)
+def __get_dll_manifest_from_path(upscaler: str, path: Path) -> dict[str, Union[str , int , bool]]:
+    file_size = path.stat().st_size
+    with path.open("rb") as path_fd:
+        file_md5_hash = hashlib.md5(path_fd.read()).hexdigest().upper()
+    entry = {
+        "version": "unknown",
+        "download_url": str(path),
+        "file_description": upscaler,
+        "file_size": file_size,
+        "zip_file_size": file_size,
+        "is_dev_file": False,
+        "is_bundle": False,
+        "md5_hash": file_md5_hash,
+        "zip_md5_hash": file_md5_hash,
+    }
+    return entry
 
 
 @lru_cache(maxsize=32)
@@ -90,6 +109,22 @@ __nvsl_section = 'nvsl_files'
 __version_file = 'upscaler_files'
 
 
+def __get_entry(filepath: str, group: str, version: str) -> dict[str, dict]:
+    path = Path(version)
+    __sys32 = 'drive_c/windows/system32'
+    if path.is_absolute() and path.is_file():
+        return {f'{__sys32}/{filepath}': __get_dll_manifest_from_path(group, path)}
+    else:
+        return {f'{__sys32}/{filepath}': __get_dll_manifest(group, version)}
+
+
+def __get_entries(entries: tuple) -> dict:
+    items: dict = {}
+    for entry in entries:
+        items.update(__get_entry(*entry))
+    return items
+
+
 def __get_opti_files(version: str = 'default') -> tuple[str, dict]:
     return 'drive_c/windows/system32/umu/', __get_dll_manifest('optiscaler', version)
 
@@ -99,60 +134,63 @@ def __get_nvsl_files(version: str = 'default') -> tuple[str, dict]:
 
 
 def __get_dlss_dlls(version: str = 'default') -> dict[str, dict]:
-    return {
-        'drive_c/windows/system32/umu/nvngx_dlss.dll': __get_dll_manifest('dlss', version),
-        'drive_c/windows/system32/umu/nvngx_dlssd.dll': __get_dll_manifest(
-            'dlss_d', version
-        ),
-        'drive_c/windows/system32/umu/nvngx_dlssg.dll': __get_dll_manifest(
-            'dlss_g', version
-        ),
-    }
+    versions = version.split(':')
+    if len(versions) != 3:
+        versions = [version] * 3
+
+    entries: tuple = (
+        ('umu/nvngx_dlss.dll',  'dlss',   versions[0]),
+        ('umu/nvngx_dlssd.dll', 'dlss_d', versions[1]),
+        ('umu/nvngx_dlssg.dll', 'dlss_g', versions[2]),
+    )
+    return __get_entries(entries)
 
 
 def __get_xess_dlls(version: str = 'default') -> dict[str, dict]:
-    return {
-        'drive_c/windows/system32/umu/libxess.dll': __get_dll_manifest('xess', version),
-        'drive_c/windows/system32/umu/libxess_dx11.dll': __get_dll_manifest(
-            'xess_dx11', version
-        ),
-        'drive_c/windows/system32/umu/libxell.dll': __get_dll_manifest('xell', version),
-        'drive_c/windows/system32/umu/libxess_fg.dll': __get_dll_manifest(
-            'xess_fg', version
-        ),
-    }
+    versions = version.split(':')
+    if len(versions) != 4:
+        versions = [version] * 4
+
+    entries: tuple = (
+        ('umu/libxess.dll',      'xess',      versions[0]),
+        ('umu/libxess_dx11.dll', 'xess_dx11', versions[1]),
+        ('umu/libxell.dll',      'xell',      versions[2]),
+        ('umu/libxess_fg.dll',   'xess_fg',   versions[3]),
+    )
+    return __get_entries(entries)
 
 
 def __get_ffx3_dlls(version: str = 'default') -> dict[str, dict]:
-    return {
-        'drive_c/windows/system32/umu/amd_fidelityfx_vk.dll': __get_dll_manifest(
-            'fsr_31_vk', version
-        ),
-        'drive_c/windows/system32/umu/amd_fidelityfx_dx12.dll': __get_dll_manifest(
-            'fsr_31_dx12', version
-        ),
-    }
+    versions = version.split(':')
+    if len(versions) != 2:
+        versions = [version] * 2
+
+    entries: tuple = (
+        ('umu/amd_fidelityfx_vk.dll',   'fsr_31_vk',   versions[0]),
+        ('umu/amd_fidelityfx_dx12.dll', 'fsr_31_dx12', versions[1]),
+    )
+    return __get_entries(entries)
 
 
 def __get_ffx4_dlls(version: str = 'default') -> dict[str, dict]:
-    return {
-        'drive_c/windows/system32/umu/amd_fidelityfx_framegeneration_dx12.dll': __get_dll_manifest(
-            'fsr_40_fg_dx12', version
-        ),
-        'drive_c/windows/system32/umu/amd_fidelityfx_loader_dx12.dll': __get_dll_manifest(
-            'fsr_40_ldr_dx12', version
-        ),
-        'drive_c/windows/system32/umu/amd_fidelityfx_upscaler_dx12.dll': __get_dll_manifest(
-            'fsr_40_up_dx12', version
-        ),
-    }
+    versions = version.split(':')
+    if len(versions) != 3:
+        versions = [version] * 3
+
+    entries: tuple = (
+        ('umu/amd_fidelityfx_framegeneration_dx12.dll', 'fsr_40_fg_dx12',  versions[0]),
+        ('umu/amd_fidelityfx_loader_dx12.dll',          'fsr_40_ldr_dx12', versions[1]),
+        ('umu/amd_fidelityfx_upscaler_dx12.dll',        'fsr_40_up_dx12',  versions[2]),
+    )
+    return __get_entries(entries)
+
 
 def __get_fsr4_dlls(version: str = 'default') -> dict[str, dict]:
-    return {
-        'drive_c/windows/system32/amdxcffx64.dll': __get_dll_manifest(
-            'fsr_40_drv', version
-        ),
-    }
+    versions = version.split(':')
+    entries: tuple = (
+        ('amdxcffx64.dll', 'fsr_40_drv', versions[0]),
+    )
+    return __get_entries(entries)
 
 
 def __get_items(name: str, version: str) -> tuple[Union[dict[str, dict], tuple[str, dict]], str]:
@@ -432,6 +470,11 @@ def __cached_download(item: dict, cached_file: Path) -> None:
 
 
 def __download_extract_zip(item: dict, cache: Path, dst: Path) -> None:
+    url = item['download_url']
+    if (not url.lower().startswith(('http://', 'https://'))) and Path(url).is_absolute():
+        with Path(url).open('rb') as url_fd, dst.open('wb') as dst_fd:
+            dst_fd.write(url_fd.read())
+        return
     url_path = Path(unquote(urlparse(item['download_url']).path))
     cached_file = cache.joinpath(url_path.name)
     __cached_download(item, cached_file)
@@ -698,13 +741,13 @@ def setup_upscalers(
 
     usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
     """
-    dlss_version = get_version(env, 'PROTON_DLSS_UPGRADE', 'default')
-    xess_version = get_version(env, 'PROTON_XESS_UPGRADE', 'default')
+    dlss_version: str = get_version(env, 'PROTON_DLSS_UPGRADE', 'default')
+    xess_version: str = get_version(env, 'PROTON_XESS_UPGRADE', 'default')
 
-    fsr4_version = get_version(env, 'PROTON_FSR4_UPGRADE', 'default')
+    fsr4_version: str = get_version(env, 'PROTON_FSR4_UPGRADE', 'default')
 
-    ffx3_version = get_version(env, 'PROTON_FFX3_UPGRADE', '1.0.1.41314')
-    ffx4_version = get_version(env, 'PROTON_FFX4_UPGRADE', 'default')
+    ffx3_version: str = get_version(env, 'PROTON_FFX3_UPGRADE', '1.0.1.41314')
+    ffx4_version: str = get_version(env, 'PROTON_FFX4_UPGRADE', 'default')
 
     optiscaler_version = get_version(env, 'PROTON_USE_OPTISCALER', 'default')
     # if optiscaler is enabled, control ffx4_version through fsr4_version unless explicitly set
