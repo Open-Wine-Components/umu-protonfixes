@@ -4,10 +4,6 @@ import os
 from protonfixes import util
 
 def main() -> None:
-    # Keep the address range libcuda reserves in free of the game's huge allocations,
-    # otherwise the Vulkan extensions DLSS needs fail to initialize
-    util.set_environment('WINE_DISABLE_BOTTOM_UP_ALLOC', '1')
-
     # Satisfy check for the existence of these dlls when trying to initialize ngx
     # Copy an existing DLL to these three names
     env_path = os.path.join(util.protonprefix(), 'drive_c', 'windows', 'system32')
