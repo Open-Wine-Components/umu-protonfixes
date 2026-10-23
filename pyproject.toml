@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Stop gap solution to fix issues in games that run under Wine."
 keywords = ["proton", "protontricks", "wine", "winetricks", "linux", "gaming"]
 license = {file = "LICENSE"}
-requires-python = ">=3.9,<3.10"
+requires-python = ">=3.13,<3.14"
 
 
 [project.urls]
@@ -19,7 +19,7 @@ exclude = [
     "verbs"
 ]
 extraPaths = [ ".." ] # Fix "protonfixes" module resolution
-pythonVersion = "3.9"
+pythonVersion = "3.13"
 pythonPlatform = "Linux"
 
 # Pyright rules, that are not covered by `typeCheckingMode = 'standard'`
