@@ -734,6 +734,15 @@ def get_version(env: dict, key: str, fallback: str) -> str:
     return env[key] if env.get(key, '0') not in {'0', '1'} else fallback
 
 
+def check_upscalers_disabled() -> bool:
+    """Determine if protonfixes upscalers have been explicitly disabled
+
+    Returns:
+        bool : True if upscaler installation is disabled from the environment
+    """
+    return 'PROTONFIXES_DISABLE_UPSCALERS' in os.environ and os.environ['PROTONFIXES_DISABLE_UPSCALERS'] != '0'
+
+
 def setup_upscalers(
     compat_config: set, env: dict, compat_dir: str, prefix_dir: str
 ) -> None:
@@ -820,4 +829,7 @@ def setup_upscalers(
         log.debug(f'WINE_UPSCALER_REPLACE: {env["WINE_UPSCALER_REPLACE"]}.')
 
 
-__all__ = ['setup_upscalers']
+__all__ = [
+    'check_upscalers_disabled',
+    'setup_upscalers',
+]

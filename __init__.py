@@ -6,10 +6,10 @@ import traceback
 from typing import Callable
 
 from . import fix
+from . import upscalers
 from .logger import log
-from .upscalers import setup_upscalers
+from .util import check_verb_requirements
 from .utilities import (
-    check_verb_requirements,
     setup_frame_rate,
     setup_local_shader_cache,
     setup_mount_drives,
@@ -35,7 +35,7 @@ aarch64_lib_dir: str = (
 
 
 def check_conditions() -> bool:
-    """Determine, if the actual game was executed and protonfixes isn't deactivated.
+    """Determine if the actual game was executed and protonfixes isn't deactivated.
 
     Returns:
         bool: True, if the fix should be executed.
@@ -44,13 +44,23 @@ def check_conditions() -> bool:
     return (
         len(sys.argv) >= 1
         and 'STEAM_COMPAT_DATA_PATH' in os.environ
-        and 'PROTONFIXES_DISABLE' not in os.environ
         and 'waitforexitandrun' in sys.argv[1]
     )
 
 
+def check_disabled() -> bool:
+    """Determine if protonfixes has been explicitly disabled
+
+    Returns:
+        bool : True if fix execution is disabled from the environment
+    """
+    return (
+        'PROTONFIXES_DISABLE' in os.environ and os.environ['PROTONFIXES_DISABLE'] != '0'
+    )
+
+
 def check_iscriptevaluator() -> bool:
-    """Determine, if we were invoked while running "iscriptevaluator.exe".
+    """Determine if we were invoked while running "iscriptevaluator.exe".
 
     Returns:
         bool: True, if we were invoked while running "iscriptevaluator.exe".
@@ -64,7 +74,9 @@ def execute_early() -> None:
     if check_iscriptevaluator():
         log.debug('Skipping fix execution. We are running "iscriptevaluator.exe".')
     elif not check_conditions():
-        log.warn('Skipping fix execution. We are probably running a unit test.')
+        log.warn('Skipping fix execution. Execution conditions are not satisfied.')
+    elif check_disabled():
+        log.warn('Skipping fix execution. Explicitly disabled from the environment.')
     else:
         check_verb_requirements()
         fix.early()
@@ -89,7 +101,9 @@ def execute() -> None:
     if check_iscriptevaluator():
         log.debug('Skipping fix execution. We are running "iscriptevaluator.exe".')
     elif not check_conditions():
-        log.warn('Skipping fix execution. We are probably running a unit test.')
+        log.warn('Skipping fix execution. Execution conditions are not satisfied.')
+    elif check_disabled():
+        log.warn('Skipping fix execution. Explicitly disabled from the environment.')
     else:
         dialog = None
         if os.environ.get('UMU_ID', '') != 'winetricks-gui':
@@ -106,6 +120,20 @@ def execute() -> None:
         finally:
             if isinstance(dialog, ZenityWaitDialog):
                 dialog.stop()
+
+
+def setup_upscalers(
+    compat_config: set, env: dict, compat_dir: str, prefix_dir: str
+) -> None:
+    """Execute upscaler setup"""
+    if check_iscriptevaluator():
+        log.debug('Skipping upscaler setup. We are running "iscriptevaluator.exe".')
+    elif not check_conditions():
+        log.warn('Skipping upscaler setup. Execution conditions are not satisfied.')
+    elif upscalers.check_upscalers_disabled():
+        log.warn('Skipping upscaler setup. Explicitly disabled from the environment.')
+    else:
+        upscalers.setup_upscalers(compat_config, env, compat_dir, prefix_dir)
 
 
 __all__ = [
