@@ -3,6 +3,11 @@
 import os
 from protonfixes import util
 
+
+def early() -> None:
+    os.environ['PROTON_DLL_COPY'] = '*'
+
+
 def main() -> None:
     # Satisfy check for the existence of these dlls when trying to initialize ngx
     # Copy an existing DLL to these three names
