@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch, mock_open
 
 from . import fix
+from . import util
 
 
 class TestProtonfixes(unittest.TestCase):
@@ -405,6 +406,503 @@ class TestProtonfixes(unittest.TestCase):
         os.environ['STORE'] = 'gog'
         result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
+
+
+class TestSteamVdf(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.base_dir = Path(self.temp_dir.name)
+        self.client_dir = self.base_dir / 'steam_client'
+        self.client_dir.mkdir(parents=True, exist_ok=True)
+        self.current_prefix = self.base_dir / 'current_pfx'
+        self.current_prefix.mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_parse_vdf_basic(self):
+        """Verifies parsing of standard KeyValues hierarchy."""
+        text = '"root"\n{\n\t"key1"\t"value1"\n\t"sub"\n\t{\n\t\t"key2"\t"value2"\n\t}\n}'
+        data = util.parse_vdf(text)
+        expected = {'root': {'key1': 'value1', 'sub': {'key2': 'value2'}}}
+        self.assertEqual(data, expected)
+
+    def test_parse_vdf_whitespace_crlf_and_comments(self):
+        """Verifies handling of irregular tabs, spaces, CRLF line endings, and comments."""
+        text = (
+            '// Top comment\r\n'
+            '"libraryfolders"\r\n'
+            '{\r\n'
+            '  // Space indentation\r\n'
+            '  "0"\r\n'
+            '  {\r\n'
+            '\t\t"path"\t"/home/user/.steam/steam"\r\n'
+            '    "label"   "" // trailing comment\r\n'
+            '    "totalsize" 12345678\r\n'
+            '  }\r\n'
+            '}\r\n'
+        )
+        data = util.parse_vdf(text)
+        self.assertIn('libraryfolders', data)
+        self.assertEqual(data['libraryfolders']['0']['path'], '/home/user/.steam/steam')
+        self.assertEqual(data['libraryfolders']['0']['totalsize'], '12345678')
+
+    def test_parse_vdf_escapes(self):
+        """Verifies unescaping of backslashes and quotes without corrupting \\t or \\n in paths."""
+        text = '"entry"\n{\n\t"winpath"\t"C:\\\\tools\\\\new_folder"\n\t"msg"\t"hello \\"world\\""\n}'
+        data = util.parse_vdf(text)
+        self.assertEqual(data['entry']['winpath'], 'C:\\tools\\new_folder')
+        self.assertEqual(data['entry']['msg'], 'hello "world"')
+
+    def test_parse_vdf_utf8_bom(self):
+        """Verifies parsing text containing UTF-8 BOM."""
+        text = '\ufeff"libraryfolders"\n{\n\t"0"\n\t{\n\t\t"path"\t\t"/home/user/.steam"\n\t}\n}'
+        data = util.parse_vdf(text)
+        self.assertIn('libraryfolders', data)
+        self.assertEqual(data['libraryfolders']['0']['path'], '/home/user/.steam')
+
+    def test_parse_vdf_users_section(self):
+        """Verifies parsing of loginusers user sections."""
+        text = '"users"\n{\n\t"12345"\n\t{\n\t\t"AccountName"\t\t"gamer"\n\t}\n}'
+        data = util.parse_vdf(text)
+        self.assertEqual(data, {'users': {'12345': {'AccountName': 'gamer'}}})
+
+    def test_import_saves_folder_invalid_appid(self):
+        """Verifies that invalid or non-zero ending AppIDs return False."""
+        self.assertFalse(util.import_saves_folder(0, 'Saved Games'))
+        self.assertFalse(util.import_saves_folder(-10, 'Saved Games'))
+        self.assertFalse(util.import_saves_folder(12345, 'Saved Games'))
+
+    def test_import_saves_folder_missing_client_env_or_file(self):
+        """Verifies graceful False when environment variable or VDF file is missing."""
+        with patch.dict(os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': ''}):
+            self.assertFalse(util.import_saves_folder(123450, 'Saved Games'))
+
+        with patch.dict(os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}):
+            self.assertFalse(util.import_saves_folder(123450, 'Saved Games'))
+
+    def test_import_saves_folder_success(self):
+        """Verifies successful symlink creation from another game prefix across parsed library folders."""
+        steamapps = self.client_dir / 'steamapps'
+        steamapps.mkdir(parents=True, exist_ok=True)
+        library_vdf = steamapps / 'libraryfolders.vdf'
+        library_path = self.base_dir / 'library1'
+        library_vdf.write_text(
+            f'"libraryfolders"\r\n{{\r\n  "0"\r\n  {{\r\n\t"path"\t"{library_path}"\r\n  }}\r\n}}\r\n',
+            encoding='utf-8',
+        )
+
+        source_pfx_user = (
+            library_path
+            / 'steamapps'
+            / 'compatdata'
+            / '123450'
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+        )
+        source_saves = source_pfx_user / 'Saved Games' / 'MyGame'
+        source_saves.mkdir(parents=True, exist_ok=True)
+        (source_saves / 'save1.dat').write_text('save_data', encoding='utf-8')
+
+        with patch.dict(
+            os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}
+        ), patch.object(util, 'protonprefix', return_value=str(self.current_prefix / 'pfx')):
+            result = util.import_saves_folder(123450, 'Saved Games/MyGame')
+            self.assertTrue(result)
+
+            goal = (
+                self.current_prefix
+                / 'pfx'
+                / 'drive_c'
+                / 'users'
+                / 'steamuser'
+                / 'Saved Games'
+                / 'MyGame'
+            )
+            self.assertTrue(goal.is_symlink())
+            self.assertEqual(goal.resolve(), source_saves.resolve())
+
+    def test_import_saves_folder_demo_mode(self):
+        """Verifies demo mode copying files without overwriting existing files."""
+        steamapps = self.client_dir / 'steamapps'
+        steamapps.mkdir(parents=True, exist_ok=True)
+        library_vdf = steamapps / 'libraryfolders.vdf'
+        library_path = self.base_dir / 'library_demo'
+        library_vdf.write_text(
+            f'"libraryfolders"\n{{\n\t"0"\n\t{{\n\t\t"path"\t\t"{library_path}"\n\t}}\n}}\n',
+            encoding='utf-8',
+        )
+
+        source_pfx_user = (
+            library_path
+            / 'steamapps'
+            / 'compatdata'
+            / '234560'
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+        )
+        source_saves = source_pfx_user / 'Saved Games'
+        source_saves.mkdir(parents=True, exist_ok=True)
+        (source_saves / 'demo_save.dat').write_text('demo_data', encoding='utf-8')
+        (source_saves / 'common.dat').write_text('demo_common', encoding='utf-8')
+
+        goal = (
+            self.current_prefix
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+            / 'Saved Games'
+        )
+        goal.mkdir(parents=True, exist_ok=True)
+        (goal / 'common.dat').write_text('existing_full_game_common', encoding='utf-8')
+
+        with patch.dict(
+            os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}
+        ), patch.object(util, 'protonprefix', return_value=str(self.current_prefix / 'pfx')):
+            result = util.import_saves_folder(234560, 'Saved Games', is_demo=True)
+            self.assertTrue(result)
+            self.assertTrue((goal / 'demo_save.dat').is_file())
+            # Existing full game file must be preserved
+            self.assertEqual((goal / 'common.dat').read_text(encoding='utf-8'), 'existing_full_game_common')
+
+    def test_import_saves_folder_relink_moved_prefix(self):
+        """Verifies replacing a broken symlink when target was moved or re-pathed."""
+        steamapps = self.client_dir / 'steamapps'
+        steamapps.mkdir(parents=True, exist_ok=True)
+        library_vdf = steamapps / 'libraryfolders.vdf'
+        library_path = self.base_dir / 'library_relink'
+        library_vdf.write_text(
+            f'"libraryfolders"\n{{\n\t"0"\n\t{{\n\t\t"path"\t\t"{library_path}"\n\t}}\n}}\n',
+            encoding='utf-8',
+        )
+
+        source_pfx_user = (
+            library_path
+            / 'steamapps'
+            / 'compatdata'
+            / '345670'
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+        )
+        source_saves = source_pfx_user / 'Saved Games'
+        source_saves.mkdir(parents=True, exist_ok=True)
+
+        goal = (
+            self.current_prefix
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+            / 'Saved Games'
+        )
+        goal.parent.mkdir(parents=True, exist_ok=True)
+        deleted_target = self.base_dir / 'deleted_location'
+        # Create a broken symlink pointing to a deleted path
+        goal.symlink_to(deleted_target, True)
+        self.assertTrue(goal.is_symlink())
+        self.assertFalse(goal.resolve().exists())
+
+        with patch.dict(
+            os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}
+        ), patch.object(util, 'protonprefix', return_value=str(self.current_prefix / 'pfx')):
+            result = util.import_saves_folder(345670, 'Saved Games')
+            self.assertTrue(result)
+            self.assertTrue(goal.is_symlink())
+            self.assertEqual(goal.resolve(), source_saves.resolve())
+            # Ensure broken target location was not modified or turned into a symlink
+            self.assertFalse(deleted_target.exists())
+
+    def test_import_saves_folder_legacy_format_and_casing(self):
+        """Verifies handling of legacy LibraryFolders format where entries map to paths directly."""
+        steamapps = self.client_dir / 'steamapps'
+        steamapps.mkdir(parents=True, exist_ok=True)
+        library_vdf = steamapps / 'libraryfolders.vdf'
+        library_path = self.base_dir / 'library_legacy'
+        library_vdf.write_text(
+            f'"LibraryFolders"\n{{\n\t"TimeNextStatsReport"\t"123456"\n\t"1"\t"{library_path}"\n}}\n',
+            encoding='utf-8',
+        )
+
+        source_pfx_user = (
+            library_path
+            / 'steamapps'
+            / 'compatdata'
+            / '456780'
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+        )
+        source_saves = source_pfx_user / 'Saved Games' / 'LegacyGame'
+        source_saves.mkdir(parents=True, exist_ok=True)
+        (source_saves / 'legacy_save.dat').write_text('legacy_data', encoding='utf-8')
+
+        with patch.dict(
+            os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}
+        ), patch.object(util, 'protonprefix', return_value=str(self.current_prefix / 'pfx')):
+            result = util.import_saves_folder(456780, 'Saved Games/LegacyGame')
+            self.assertTrue(result)
+
+            goal = (
+                self.current_prefix
+                / 'pfx'
+                / 'drive_c'
+                / 'users'
+                / 'steamuser'
+                / 'Saved Games'
+                / 'LegacyGame'
+            )
+            self.assertTrue(goal.is_symlink())
+            self.assertEqual(goal.resolve(), source_saves.resolve())
+
+    def test_import_saves_folder_multi_library_empty_prefix_skipped(self):
+        """Verifies that an empty compatdata prefix on one library is skipped to find the valid saves on another library."""
+        steamapps = self.client_dir / 'steamapps'
+        steamapps.mkdir(parents=True, exist_ok=True)
+        library_vdf = steamapps / 'libraryfolders.vdf'
+        lib0 = self.base_dir / 'library_empty_pfx'
+        lib1 = self.base_dir / 'library_valid_pfx'
+        library_vdf.write_text(
+            f'"libraryfolders"\n{{\n\t"0"\n\t{{\n\t\t"path"\t\t"{lib0}"\n\t}}\n\t"1"\n\t{{\n\t\t"path"\t\t"{lib1}"\n\t}}\n}}\n',
+            encoding='utf-8',
+        )
+
+        # lib0 has compatdata folder for app 567890 but without the requested relative save folder
+        (lib0 / 'steamapps' / 'compatdata' / '567890' / 'pfx' / 'drive_c' / 'users' / 'steamuser').mkdir(parents=True, exist_ok=True)
+
+        # lib1 has the actual save folder
+        source_saves = (
+            lib1
+            / 'steamapps'
+            / 'compatdata'
+            / '567890'
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+            / 'Saved Games'
+            / 'GameB'
+        )
+        source_saves.mkdir(parents=True, exist_ok=True)
+        (source_saves / 'save.dat').write_text('save_data', encoding='utf-8')
+
+        with patch.dict(
+            os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}
+        ), patch.object(util, 'protonprefix', return_value=str(self.current_prefix / 'pfx')):
+            result = util.import_saves_folder(567890, 'Saved Games/GameB')
+            self.assertTrue(result)
+
+            goal = (
+                self.current_prefix
+                / 'pfx'
+                / 'drive_c'
+                / 'users'
+                / 'steamuser'
+                / 'Saved Games'
+                / 'GameB'
+            )
+            self.assertTrue(goal.is_symlink())
+            self.assertEqual(goal.resolve(), source_saves.resolve())
+
+    def test_import_saves_folder_windows_backslashes_and_leading_slash(self):
+        """Verifies normalization of Windows backslashes and leading slashes in relative_path."""
+        steamapps = self.client_dir / 'steamapps'
+        steamapps.mkdir(parents=True, exist_ok=True)
+        library_vdf = steamapps / 'libraryfolders.vdf'
+        library_path = self.base_dir / 'library_winpath'
+        library_vdf.write_text(
+            f'"libraryfolders"\n{{\n\t"0"\n\t{{\n\t\t"path"\t\t"{library_path}"\n\t}}\n}}\n',
+            encoding='utf-8',
+        )
+
+        source_saves = (
+            library_path
+            / 'steamapps'
+            / 'compatdata'
+            / '678910'
+            / 'pfx'
+            / 'drive_c'
+            / 'users'
+            / 'steamuser'
+            / 'AppData'
+            / 'Local'
+            / 'MyGame'
+        )
+        source_saves.mkdir(parents=True, exist_ok=True)
+        (source_saves / 'save.dat').write_text('win_data', encoding='utf-8')
+
+        with patch.dict(
+            os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}
+        ), patch.object(util, 'protonprefix', return_value=str(self.current_prefix / 'pfx')):
+            # Pass Windows-style backslashes and a leading slash
+            result = util.import_saves_folder(678910, r'/AppData\Local\MyGame')
+            self.assertTrue(result)
+
+            goal = (
+                self.current_prefix
+                / 'pfx'
+                / 'drive_c'
+                / 'users'
+                / 'steamuser'
+                / 'AppData'
+                / 'Local'
+                / 'MyGame'
+            )
+            self.assertTrue(goal.is_symlink())
+            self.assertEqual(goal.resolve(), source_saves.resolve())
+
+    def test_import_saves_folder_empty_relative_path(self):
+        """Verifies that empty relative_path returns False."""
+        self.assertFalse(util.import_saves_folder(123450, ''))
+        self.assertFalse(util.import_saves_folder(123450, '/'))
+        self.assertFalse(util.import_saves_folder(123450, '\\'))
+
+    def test_get_steam_account_id_matching_steam_user(self):
+        """Verifies matching account ID using SteamUser environment variable."""
+        config_dir = self.client_dir / 'config'
+        config_dir.mkdir(parents=True, exist_ok=True)
+        loginusers_vdf = config_dir / 'loginusers.vdf'
+        loginusers_vdf.write_text(
+            '"users"\r\n'
+            '{\r\n'
+            '  "76561198000000001"\r\n'
+            '  {\r\n'
+            '\t\t"AccountName"\t\t"alpha"\r\n'
+            '  }\r\n'
+            '  "76561198000000002"\r\n'
+            '  {\r\n'
+            '    "AccountName"    "beta"\r\n'
+            '  }\r\n'
+            '}\r\n',
+            encoding='utf-8',
+        )
+
+        with patch.dict(
+            os.environ,
+            {
+                'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir),
+                'SteamUser': 'Beta',
+            },
+        ):
+            account_id = util.get_steam_account_id()
+            self.assertEqual(account_id, '76561198000000002')
+
+    def test_get_steam_account_id_fallback_mostrecent(self):
+        """Verifies falling back to user marked as most recent when SteamUser is not set."""
+        config_dir = self.client_dir / 'config'
+        config_dir.mkdir(parents=True, exist_ok=True)
+        loginusers_vdf = config_dir / 'loginusers.vdf'
+        loginusers_vdf.write_text(
+            '"users"\n'
+            '{\n'
+            '\t"76561198000000001"\n'
+            '\t{\n'
+            '\t\t"AccountName"\t\t"alpha"\n'
+            '\t\t"mostrecent"\t\t"0"\n'
+            '\t}\n'
+            '\t"76561198000000002"\n'
+            '\t{\n'
+            '\t\t"AccountName"\t\t"beta"\n'
+            '\t\t"mostrecent"\t\t"1"\n'
+            '\t}\n'
+            '}\n',
+            encoding='utf-8',
+        )
+
+        env = {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}
+        if 'SteamUser' in os.environ:
+            env_to_pop = 'SteamUser'
+        else:
+            env_to_pop = None
+
+        with patch.dict(os.environ, env):
+            if env_to_pop:
+                os.environ.pop('SteamUser', None)
+            account_id = util.get_steam_account_id()
+            self.assertEqual(account_id, '76561198000000002')
+
+    def test_get_steam_account_id_fallback_single_user(self):
+        """Verifies falling back to sole user in loginusers.vdf when SteamUser is unset."""
+        config_dir = self.client_dir / 'config'
+        config_dir.mkdir(parents=True, exist_ok=True)
+        loginusers_vdf = config_dir / 'loginusers.vdf'
+        loginusers_vdf.write_text(
+            '"users"\n{\n\t"76561198000000099"\n\t{\n\t\t"AccountName"\t\t"only_user"\n\t}\n}\n',
+            encoding='utf-8',
+        )
+
+        with patch.dict(os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}):
+            os.environ.pop('SteamUser', None)
+            account_id = util.get_steam_account_id()
+            self.assertEqual(account_id, '76561198000000099')
+
+    def test_get_steam_account_id_steam_base_folder(self):
+        """Verifies account ID resolution when using STEAM_BASE_FOLDER."""
+        config_dir = self.client_dir / 'config'
+        config_dir.mkdir(parents=True, exist_ok=True)
+        loginusers_vdf = config_dir / 'loginusers.vdf'
+        loginusers_vdf.write_text(
+            '"users"\n{\n\t"76561198000000077"\n\t{\n\t\t"AccountName"\t\t"base_user"\n\t}\n}\n',
+            encoding='utf-8',
+        )
+
+        with patch.dict(
+            os.environ,
+            {
+                'STEAM_COMPAT_CLIENT_INSTALL_PATH': '',
+                'STEAM_BASE_FOLDER': str(self.client_dir),
+                'SteamUser': 'base_user',
+            },
+        ):
+            account_id = util.get_steam_account_id()
+            self.assertEqual(account_id, '76561198000000077')
+
+    def test_get_steam_account_id_case_variations(self):
+        """Verifies account resolution with mixed-case fields and autologin flag."""
+        config_dir = self.client_dir / 'config'
+        config_dir.mkdir(parents=True, exist_ok=True)
+        loginusers_vdf = config_dir / 'loginusers.vdf'
+        loginusers_vdf.write_text(
+            '"Users"\n'
+            '{\n'
+            '\t"76561198000000088"\n'
+            '\t{\n'
+            '\t\t"accountname"\t\t"case_user"\n'
+            '\t\t"autologin"\t\t"1"\n'
+            '\t}\n'
+            '}\n',
+            encoding='utf-8',
+        )
+
+        with patch.dict(os.environ, {'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir)}):
+            os.environ.pop('SteamUser', None)
+            account_id = util.get_steam_account_id()
+            self.assertEqual(account_id, '76561198000000088')
+
+    def test_get_steam_account_id_missing_env_or_file(self):
+        """Verifies graceful None return when environment or file is missing."""
+        with patch.dict(
+            os.environ,
+            {'STEAM_COMPAT_CLIENT_INSTALL_PATH': '', 'STEAM_BASE_FOLDER': ''},
+        ):
+            self.assertIsNone(util.get_steam_account_id())
+
+        with patch.dict(
+            os.environ,
+            {
+                'STEAM_COMPAT_CLIENT_INSTALL_PATH': str(self.client_dir),
+                'STEAM_BASE_FOLDER': '',
+            },
+        ):
+            self.assertIsNone(util.get_steam_account_id())
+
 
 if __name__ == '__main__':
     unittest.main()

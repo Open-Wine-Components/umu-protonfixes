@@ -50,6 +50,7 @@ protonfixes-install: protonfixes
 	install -d              $(TARGET_DIR)
 	cp      -r gamefixes-*  $(TARGET_DIR)
 	cp      -r verbs        $(TARGET_DIR)
+	cp      -r vdf          $(TARGET_DIR)
 	cp         *.py         $(TARGET_DIR)
 	mkdir   -p              $(TARGET_DIR)$(BASEDIR)/bin
 	cp         umu-database.csv   $(TARGET_DIR)
