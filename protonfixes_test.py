@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch, mock_open
 
 from . import fix
+from .config import Config
 
 
 class TestProtonfixes(unittest.TestCase):
@@ -405,6 +406,75 @@ class TestProtonfixes(unittest.TestCase):
         os.environ['STORE'] = 'gog'
         result = fix.get_game_title(self.db.as_posix())
         self.assertEqual(result, 'UNKNOWN')
+
+
+class TestConfig(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.config_path = Path(self.temp_dir.name) / 'config.ini'
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_write_config_file_serializes_home_path_with_tilde(self):
+        """Verifies that paths within user's home directory are serialized using ~"""
+        config = Config(self.config_path)
+        config.path.cache_dir = Path.home() / '.cache/protonfixes'
+        config.write_config_file(self.config_path)
+        content = self.config_path.read_text(encoding='utf-8')
+        self.assertIn('cache_dir = ~/.cache/protonfixes', content)
+
+    def test_write_config_file_preserves_external_path(self):
+        """Verifies that absolute paths outside user's home directory are serialized as absolute paths"""
+        config = Config(self.config_path)
+        config.path.cache_dir = Path('/tmp/custom_cache')
+        config.write_config_file(self.config_path)
+        content = self.config_path.read_text(encoding='utf-8')
+        self.assertIn('cache_dir = /tmp/custom_cache', content)
+
+    def test_parse_config_file_resolves_tilde_path(self):
+        """Verifies that ~ in config file is expanded to user's home directory"""
+        self.config_path.write_text(
+            '[main]\nenable_checks = true\nenable_global_fixes = true\n\n'
+            '[path]\ncache_dir = ~/.cache/protonfixes\n',
+            encoding='utf-8',
+        )
+        config = Config(self.config_path)
+        expected = Path.home() / '.cache/protonfixes'
+        self.assertEqual(config.path.cache_dir, expected)
+
+    def test_parse_config_file_resolves_quoted_tilde_path(self):
+        """Verifies that quoted ~ in config file is expanded properly"""
+        self.config_path.write_text(
+            '[main]\nenable_checks = true\nenable_global_fixes = true\n\n'
+            '[path]\ncache_dir = "~/.cache/protonfixes"\n',
+            encoding='utf-8',
+        )
+        config = Config(self.config_path)
+        expected = Path.home() / '.cache/protonfixes'
+        self.assertEqual(config.path.cache_dir, expected)
+
+    def test_parse_config_file_absolute_path_outside_home(self):
+        """Verifies that absolute paths outside user's home directory are preserved"""
+        self.config_path.write_text(
+            '[main]\nenable_checks = true\nenable_global_fixes = true\n\n'
+            '[path]\ncache_dir = /tmp/custom_cache\n',
+            encoding='utf-8',
+        )
+        config = Config(self.config_path)
+        self.assertEqual(config.path.cache_dir, Path('/tmp/custom_cache'))
+
+    def test_round_trip_custom_home_subpath(self):
+        """Verifies round-trip writing and reading of custom paths under home"""
+        config = Config(self.config_path)
+        config.path.cache_dir = Path.home() / 'custom_dotfiles/cache'
+        config.write_config_file(self.config_path)
+        content = self.config_path.read_text(encoding='utf-8')
+        self.assertIn('cache_dir = ~/custom_dotfiles/cache', content)
+
+        # Parse it again into a new config instance
+        reloaded = Config(self.config_path)
+        self.assertEqual(reloaded.path.cache_dir, Path.home() / 'custom_dotfiles/cache')
 
 if __name__ == '__main__':
     unittest.main()
