@@ -123,6 +123,12 @@ class ConfigBase:
 
                 parser_items = parser[section_name]
 
+                def _parse_path(option: str) -> Path:
+                    val = parser_items.get(option, '').strip().strip('\'"')
+                    if not val:
+                        return Path('')
+                    return Path(val).expanduser()
+
                 # FIXME: match is not supported in Python 3.9
                 def _get_parse_function(type_name: str) -> Callable[[str], Any]:
                     # Mapping of type_name to according value get function
@@ -130,8 +136,8 @@ class ConfigBase:
                         'int': parser_items.getint,
                         'float': parser_items.getfloat,
                         'bool': parser_items.getboolean,
-                        'Path': lambda option: Path(parser_items.get(option, '')),
-                        'PosixPath': lambda option: Path(parser_items.get(option, '')),
+                        'Path': _parse_path,
+                        'PosixPath': _parse_path,
                         'str': parser_items.get,
                     }.get(type_name, None)
                     if not value:
@@ -179,7 +185,22 @@ class ConfigBase:
                     parser.add_section(section_name)
 
                 for option_name, option_item in section_item.__dict__.items():
-                    parser.set(section_name, option_name, str(option_item))
+                    if isinstance(option_item, Path):
+                        try:
+                            home = Path.home()
+                            val_str = str(Path('~') / option_item.relative_to(home))
+                        except (ValueError, RuntimeError):
+                            try:
+                                home_resolved = Path.home().resolve()
+                                val_str = str(
+                                    Path('~')
+                                    / option_item.resolve().relative_to(home_resolved)
+                                )
+                            except (ValueError, RuntimeError):
+                                val_str = str(option_item)
+                    else:
+                        val_str = str(option_item)
+                    parser.set(section_name, option_name, val_str)
 
             # Write config file
             with file.open(mode='w') as stream:
