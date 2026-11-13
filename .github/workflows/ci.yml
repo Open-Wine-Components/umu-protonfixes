@@ -21,8 +21,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          # The Steam Runtime platform (sniper) uses Python 3.9
-          python-version: "3.9"
+          # The Steam Runtime platform (steamrt4) uses Python 3.13
+          python-version: "3.13"
           cache: 'pip' # caching pip dependencies
 
       - name: Install Python dependencies
