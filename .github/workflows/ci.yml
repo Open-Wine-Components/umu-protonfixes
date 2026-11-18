@@ -11,7 +11,8 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # ubuntu-latest is Ubuntu 26.04, which has no Python 3.9 build for setup-python
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
         with:
