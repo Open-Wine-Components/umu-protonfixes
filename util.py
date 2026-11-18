@@ -24,6 +24,7 @@ from collections.abc import Mapping, Generator, Callable
 from .logger import log
 from .config import config
 from .steamhelper import install_app
+from . import vdf
 
 try:
     import __main__ as protonmain
@@ -971,6 +972,15 @@ def set_game_drive(enabled: bool) -> None:
     set_environment('PROTON_SET_GAME_DRIVE', str(int(enabled)))
 
 
+def parse_vdf(text: str) -> dict[str, Any]:
+    """Parse Valve KeyValues / VDF format text into a Python dictionary."""
+    text = text.lstrip('\ufeff')
+    res = vdf.loads(text)
+    if isinstance(res, dict):
+        return res
+    return {}
+
+
 def import_saves_folder(
     from_appid: int, relative_path: str, is_demo: bool = False
 ) -> bool:
@@ -988,52 +998,94 @@ def import_saves_folder(
         This is good for obtaining save data from demos that save in the same location as the full game, in case the full game already made the target folder.
         This also means you won't lose the files if you delete the demo's prefix.
     """
-    from pathlib import Path
-
-    paths = []
     # Valid Steam app IDs always end with a zero.
     if from_appid <= 0 or from_appid % 10 != 0:
         log.warn(f'Invalid ID used for import_saves_folder ({from_appid}).')
         return False
-    # Locate the prefix for from_appid
-    # The location of Steam's main folder can be found in the STEAM_BASE_FOLDER environment variable
-    # The libraryfolders.vdf file contains the paths for all your Steam library folders that are known to the Steam client, including those on external drives or SD cards.
-    try:
-        with open(
-            f'{os.environ.get("STEAM_COMPAT_CLIENT_INSTALL_PATH", "")}/steamapps/libraryfolders.vdf'
-        ) as f:
-            for i in f.readlines():
-                # Looking for lines of the format
-                # \t\t"path"\t\t"(the path)"
-                if '"path"' in i:
-                    paths.append(i[11:-2])
-    except FileNotFoundError:
+
+    client_path = (
+        os.environ.get('STEAM_COMPAT_CLIENT_INSTALL_PATH')
+        or os.environ.get('STEAM_BASE_FOLDER', '')
+    )
+    if not client_path:
+        log.info('STEAM_COMPAT_CLIENT_INSTALL_PATH environment variable not set.')
+        return False
+
+    vdf_file = Path(client_path) / 'steamapps' / 'libraryfolders.vdf'
+    if not vdf_file.is_file():
         log.info("Could not find Steam's libraryfolders.vdf file.")
         return False
-    # Find which of the library folders the prefix is in
-    for i in paths:
-        if Path(f'{i}/steamapps/compatdata/{from_appid}').exists():
-            # The user's folder in the prefix location for from_appid
-            prefix = Path(
-                f'{i}/steamapps/compatdata/{from_appid}/pfx/drive_c/users/steamuser/{relative_path}'
-            ).resolve()
-            if not prefix.exists():
-                # Better to just abort than create a broken symlink
-                log.info(
-                    f'Skipping save data folder import due to location `{relative_path}` not existing in the prefix for {from_appid}.'
-                )
-                return False
-            break
-    # If one wasn't found, do nothing.
-    else:
-        log.info(
-            f'Skipping save data folder import, due to not finding a prefix for game {from_appid} to get the folder from.'
-        )
+
+    try:
+        content = vdf_file.read_text(encoding='utf-8-sig', errors='replace')
+        vdf_data = parse_vdf(content)
+    except Exception as e:
+        log.warn(f'Failed to parse Steam libraryfolders.vdf: {e}')
         return False
+
+    library_folders: Optional[dict[str, Any]] = None
+    for k, v in vdf_data.items():
+        if k.lower() == 'libraryfolders' and isinstance(v, dict):
+            library_folders = v
+            break
+
+    if library_folders is None:
+        log.info('Malformed libraryfolders.vdf file.')
+        return False
+
+    paths: list[str] = []
+    for item in library_folders.values():
+        if isinstance(item, dict):
+            for ik, iv in item.items():
+                if ik.lower() == 'path' and iv:
+                    path_str = str(iv)
+                    if path_str not in paths:
+                        paths.append(path_str)
+                    break
+        elif isinstance(item, str) and item and item not in paths:
+            # Support legacy Steam VDF format where keys mapped directly to path strings
+            paths.append(item)
+
+    if not paths:
+        log.info('No library paths found in libraryfolders.vdf.')
+        return False
+
+    clean_rel_path = relative_path.replace('\\', '/').lstrip('/')
+    if not clean_rel_path:
+        log.warn('Empty relative_path provided to import_saves_folder.')
+        return False
+
+    # Find which of the library folders the prefix and save location are in
+    prefix: Optional[Path] = None
+    found_compatdata = False
+    for p in paths:
+        candidate_compatdata = Path(p) / 'steamapps' / 'compatdata' / str(from_appid)
+        if candidate_compatdata.exists():
+            found_compatdata = True
+            candidate_prefix = Path(
+                os.path.normpath(
+                    candidate_compatdata / 'pfx' / 'drive_c' / 'users' / 'steamuser' / clean_rel_path
+                )
+            ).resolve()
+            if candidate_prefix.exists():
+                prefix = candidate_prefix
+                break
+
+    if prefix is None:
+        if found_compatdata:
+            log.info(
+                f'Skipping save data folder import due to location `{relative_path}` not existing in the prefix for {from_appid}.'
+            )
+        else:
+            log.info(
+                f'Skipping save data folder import, due to not finding a prefix for game {from_appid} to get the folder from.'
+            )
+        return False
+
     # Create the symlink
-    goal = Path(f'{protonprefix()}/drive_c/users/steamuser/{relative_path}').resolve()
+    goal = Path(os.path.normpath(f'{protonprefix()}/drive_c/users/steamuser/{clean_rel_path}'))
     # The goal is where we intend to create the symlink
-    if not goal.exists():
+    if not goal.exists() and not goal.is_symlink():
         # Create the necessary parent folders if needed
         goal.parent.mkdir(parents=True, exist_ok=True)
         if not is_demo:
@@ -1045,23 +1097,24 @@ def import_saves_folder(
         return True
     elif not goal.is_symlink():
         if is_demo and goal.is_dir():
-            changesMade = False
+            changes_made = False
             for i in prefix.iterdir():
                 # To prevent overwriting files from the full game
-                if not (goal / i.name).exists():
+                target_file = goal / i.name
+                if not target_file.exists():
                     if i.is_file():
-                        shutil.copyfile(i, goal / i.name)
-                        log.info(f'Copied file from `{i}` to `{goal / i.name}`')
-                        changesMade = True
+                        shutil.copyfile(i, target_file)
+                        log.info(f'Copied file from `{i}` to `{target_file}`')
+                        changes_made = True
                     elif i.is_dir():
-                        shutil.copytree(i, goal / i.name)
-                        log.info(f'Copied folder from `{i}` to `{goal / i.name}`')
-                        changesMade = True
-            return changesMade
+                        shutil.copytree(i, target_file)
+                        log.info(f'Copied folder from `{i}` to `{target_file}`')
+                        changes_made = True
+            return changes_made
         else:
             return False
-    elif not goal.readlink().exists():
-        # In the case the prefix for the other game was moved to another location, remove and re-create the symlink to point to the correct location
+    elif not goal.resolve().exists() or goal.resolve() != prefix.resolve():
+        # In the case the symlink is broken or points to a moved/different location, replace it
         goal.unlink()
         goal.symlink_to(prefix, True)
         log.info(f'Replaced symlink at `{goal}` to go to `{prefix}`')
@@ -1072,18 +1125,65 @@ def import_saves_folder(
 
 def get_steam_account_id() -> Optional[str]:
     """Returns your 17-digit Steam account ID"""
-    # The loginusers.vdf file contains information about accounts known to the Steam client, and contains their 17-digit IDs
-    try:
-        with open(f'{os.environ.get("STEAM_COMPAT_CLIENT_INSTALL_PATH", "")}/config/loginusers.vdf') as f:
-            lastFoundId = None
-            for i in f.readlines():
-                if len(i) > 1 and i[2:-2].isdigit():
-                    lastFoundId = i[2:-2]
-                elif i == (f'\t\t"AccountName"\t\t"{os.environ["SteamUser"]}"\n'):
-                    return lastFoundId
-    except FileNotFoundError:
+    client_path = (
+        os.environ.get('STEAM_COMPAT_CLIENT_INSTALL_PATH')
+        or os.environ.get('STEAM_BASE_FOLDER', '')
+    )
+    if not client_path:
+        log.info('STEAM_COMPAT_CLIENT_INSTALL_PATH environment variable not set.')
+        return None
+
+    vdf_file = Path(client_path) / 'config' / 'loginusers.vdf'
+    if not vdf_file.is_file():
         log.info("Could not find Steam's loginusers.vdf file.")
         return None
+
+    try:
+        content = vdf_file.read_text(encoding='utf-8-sig', errors='replace')
+        vdf_data = parse_vdf(content)
+    except Exception as e:
+        log.warn(f'Failed to parse Steam loginusers.vdf: {e}')
+        return None
+
+    users: Optional[dict[str, Any]] = None
+    for k, v in vdf_data.items():
+        if k.lower() == 'users' and isinstance(v, dict):
+            users = v
+            break
+
+    if not users:
+        return None
+
+    # Match against SteamUser environment variable if set
+    steam_user = os.environ.get('SteamUser')
+    if steam_user:
+        target_account = steam_user.lower()
+        for uid, info in users.items():
+            if isinstance(info, dict):
+                acc_name = ''
+                for ik, iv in info.items():
+                    if ik.lower() == 'accountname':
+                        acc_name = str(iv)
+                        break
+                if acc_name.lower() == target_account:
+                    return str(uid)
+
+    # Check for user marked as most recent or auto login
+    for uid, info in users.items():
+        if isinstance(info, dict):
+            for ik, iv in info.items():
+                if ik.lower() in ('mostrecent', 'autologin') and str(iv) == '1':
+                    return str(uid)
+
+    # Fallback to sole user in file
+    if len(users) == 1:
+        return str(next(iter(users.keys())))
+
+    # Fallback to first numeric ID in users dictionary
+    for uid in users:
+        if str(uid).isdigit():
+            return str(uid)
+
     return None
 
 

@@ -28,6 +28,7 @@ exclude = [
     "venv",
     "protonfixes_test.py",
     "subprojects",
+    "vdf",
 ]
 
 # Same as Black.
