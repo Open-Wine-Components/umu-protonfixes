@@ -3,6 +3,7 @@
 import os
 import sys
 
+import __main__
 from __main__ import CURRENT_PREFIX_VERSION, g_proton
 from .logger import log
 
@@ -29,6 +30,11 @@ def show_debug_info() -> None:
     log.debug(line)
 
     log.debug('Proton Version:')
+    build_name = getattr(__main__, 'proton_build_name', None)
+    log.debug(build_name() if build_name else CURRENT_PREFIX_VERSION)
+    log.debug(line)
+
+    log.debug('Prefix Version:')
     log.debug(CURRENT_PREFIX_VERSION)
     log.debug(line)
 
