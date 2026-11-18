@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch, mock_open
 
-from . import fix
+from . import fix, util
 from .config import Config
 
 
@@ -410,6 +410,34 @@ class TestProtonfixes(unittest.TestCase):
     def testResolveCodename(self):
         result = fix.resolve_codename('Heather', 'egs')
         self.assertEqual(result, 'umu-1174180')
+
+    def testWolfensteinTheNewOrderFix(self):
+        """Verifies Wolfenstein: The New Order (201810) creates AppData Local cache directory"""
+        with tempfile.TemporaryDirectory() as tmp_compat:
+            os.environ['STEAM_COMPAT_DATA_PATH'] = tmp_compat
+            util.protonprefix.cache_clear()
+            res = fix._run_fix('201810', 'main')
+            self.assertTrue(res)
+            expected_dir = (
+                Path(tmp_compat)
+                / 'pfx/drive_c/users/steamuser/AppData/Local/MachineGames/Wolfenstein The New Order'
+            )
+            self.assertTrue(expected_dir.is_dir())
+            util.protonprefix.cache_clear()
+
+    def testWolfensteinTheOldBloodFix(self):
+        """Verifies Wolfenstein: The Old Blood (350080) creates AppData Local cache directory"""
+        with tempfile.TemporaryDirectory() as tmp_compat:
+            os.environ['STEAM_COMPAT_DATA_PATH'] = tmp_compat
+            util.protonprefix.cache_clear()
+            res = fix._run_fix('350080', 'main')
+            self.assertTrue(res)
+            expected_dir = (
+                Path(tmp_compat)
+                / 'pfx/drive_c/users/steamuser/AppData/Local/MachineGames/Wolfenstein The Old Blood'
+            )
+            self.assertTrue(expected_dir.is_dir())
+            util.protonprefix.cache_clear()
 
 
 class TestConfig(unittest.TestCase):
