@@ -10,20 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  steamrt3:
-    runs-on: ubuntu-latest
-    container: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:beta
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          submodules: recursive
-      - name: Build umu-protonfixes
-        run: |
-          make install
-      - name: List dist files
-        run: |
-          find dist/
-
   steamrt4:
     runs-on: ubuntu-latest
     container: registry.gitlab.steamos.cloud/proton/steamrt4/sdk/x86_64:4.0.20260331.220802-0
