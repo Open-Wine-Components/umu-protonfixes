@@ -13,11 +13,8 @@ class ZenityWaitDialog:
     def __init__(self, zenity_bin: str) -> None:
         """Initialize zenity dialog
 
-        :param text: the message displayed in the dialog window
-        :type text: str
-
-        :param title: the title of the dialog window
-        :type title: str
+        :param zenity_bin: path to the zenity compatible binary to use
+        :type zenity_bin: str
         """
         self._zenity = zenity_bin
         self._proc = None  # type: Optional[subprocess.Popen]
