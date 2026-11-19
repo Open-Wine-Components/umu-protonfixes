@@ -43,9 +43,17 @@ def setup_mount_drives(func: Callable[[str, str, str], None]) -> None:
             os.path.expanduser('~'): 'x:',  # Current user's home directory
         }
 
-        for directory in drive_map.keys():
-            if os.access(directory, os.R_OK) and not _is_directory_empty(directory):
-                func('gamedrive', drive_map[directory], directory)
+        dosdevices = os.path.join(
+            os.environ.get('STEAM_COMPAT_DATA_PATH', ''), 'pfx', 'dosdevices'
+        )
+        for directory, drive in drive_map.items():
+            if not os.access(directory, os.R_OK) or _is_directory_empty(directory):
+                continue
+            # Keep a drive letter the user pointed somewhere else, e.g. in winecfg
+            link = os.path.join(dosdevices, drive)
+            if os.path.islink(link) and os.readlink(link) != directory:
+                continue
+            func('gamedrive', drive, directory)
 
 
 def setup_frame_rate(env: dict, func: Callable[[dict, str, str, str], None]) -> None:
