@@ -809,8 +809,9 @@ def install_battleye_runtime() -> None:
     install_app('1161040')
 
 
-def install_all_from_tgz(url: str, path: StrPath = os.getcwd()) -> None:
+def install_all_from_tgz(url: str, path: Optional[StrPath] = None) -> None:
     """Install all files from a downloaded tar.gz"""
+    path = path or os.getcwd()
     config.path.cache_dir.mkdir(parents=True, exist_ok=True)
 
     tgz_file_name = os.path.basename(url)
@@ -825,8 +826,9 @@ def install_all_from_tgz(url: str, path: StrPath = os.getcwd()) -> None:
         tgz_obj.extractall(path)
 
 
-def install_from_zip(url: str, filename: str, path: StrPath = os.getcwd()) -> None:
+def install_from_zip(url: str, filename: str, path: Optional[StrPath] = None) -> None:
     """Install a file from a downloaded zip"""
+    path = path or os.getcwd()
     if filename in os.listdir(path):
         log.info(f'File "{filename}" found in "{path}"')
         return
