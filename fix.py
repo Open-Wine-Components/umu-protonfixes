@@ -8,7 +8,6 @@ import csv
 from functools import lru_cache
 from importlib import import_module
 from pathlib import Path
-from typing import Optional
 
 from .util import ProtonVersion
 from .config import config
@@ -36,7 +35,7 @@ def get_game_id() -> str:
 
 
 @lru_cache
-def resolve_codename(codename: str, store: str) -> Optional[str]:
+def resolve_codename(codename: str, store: str) -> str | None:
     """Resolve a store-internal codename (e.g. Epic AppName, GOG ID) to umu's ID using `umu-database.csv`"""
     db = Path(__file__).parent / 'umu-database.csv'
     with db.open(newline='') as csvfile:
@@ -93,7 +92,7 @@ def get_game_name() -> str:
     return 'UNKNOWN'
 
 
-def get_store_name(store: str) -> Optional[str]:
+def get_store_name(store: str) -> str | None:
     """Mapping for store identifier to store name"""
     return {
         'amazon': 'Amazon',

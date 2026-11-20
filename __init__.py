@@ -3,7 +3,7 @@
 import os
 import sys
 import traceback
-from typing import Callable
+from collections.abc import Callable
 
 from . import fix
 from . import upscalers

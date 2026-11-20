@@ -4,7 +4,6 @@ import os
 import subprocess
 import threading
 import time
-from typing import Optional
 
 
 class ZenityWaitDialog:
@@ -20,11 +19,11 @@ class ZenityWaitDialog:
         :type title: str
         """
         self._zenity = zenity_bin
-        self._proc = None  # type: Optional[subprocess.Popen]
+        self._proc: subprocess.Popen | None = None
         self._stop_evt = threading.Event()
-        self._thread = None  # type: Optional[threading.Thread]
+        self._thread: threading.Thread | None = None
 
-    def _make_env(self) -> Optional[dict[str, str]]:
+    def _make_env(self) -> dict[str, str] | None:
         env = os.environ.copy()
         env['GTK_CSD'] = '1'
 
@@ -34,7 +33,7 @@ class ZenityWaitDialog:
 
         return env
 
-    def _start_one(self, text: str, title: str) -> Optional[subprocess.Popen]:
+    def _start_one(self, text: str, title: str) -> subprocess.Popen | None:
         env = self._make_env()
         if not env:
             return None  # no display; skip
