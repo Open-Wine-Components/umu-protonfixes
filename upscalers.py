@@ -668,13 +668,6 @@ def setup_optiscaler(
     download_component("optiscaler", compat_dir, prefix_dir, version)
     enabled = check_component("optiscaler", compat_dir, prefix_dir, version, ignore_version=True)
 
-    if enabled and env.get('PROTON_OPTISCALER_STREAMLINE', '0') != '0':
-        streamline_version = get_version(env, 'PROTON_OPTISCALER_STREAMLINE', 'default')
-        log.info(f'Setting up streamline version "{streamline_version}".')
-        download_component("streamline", compat_dir, prefix_dir, streamline_version)
-    else:
-        clean_tracked_files('streamline', compat_dir, prefix_dir)
-
     if enabled and (env_config := env.get('PROTON_OPTISCALER_CONFIG', '')):
         path, _ = __get_opti_files(version)
         ini = os.path.join(prefix_dir, path, 'OptiScaler.ini')
@@ -751,6 +744,8 @@ def setup_upscalers(
     usage: setup_upscalers(g_session.compat_config, g_session.env, g_compatdata.base_dir, g_compatdata.prefix_dir)
     """
     dlss_version: str = get_version(env, 'PROTON_DLSS_UPGRADE', 'default')
+    slne_version: str = get_version(env, 'PROTON_STREAMLINE_UPGRADE', 'default')
+
     xess_version: str = get_version(env, 'PROTON_XESS_UPGRADE', 'default')
 
     fsr4_version: str = get_version(env, 'PROTON_FSR4_UPGRADE', 'default')
@@ -778,6 +773,15 @@ def setup_upscalers(
         if enabled and setup_upscaler(name, compat_dir, prefix_dir, version):
             log.info(f'Automatic {name} upgrade enabled.')
             upscaler_replace.add(name)
+
+    if  {'dlss', 'streamline'}.issubset(compat_config) or 'optiscaler' in compat_config:
+        log.info(f'Setting up streamline version "{slne_version}".')
+        download_component('streamline', compat_dir, prefix_dir, slne_version)
+        if check_component('streamline', compat_dir, prefix_dir, slne_version, ignore_version=True):
+            log.info('Automatic streamline upgrade enabled.')
+            upscaler_replace.add('streamline')
+    else:
+        clean_tracked_files('streamline', compat_dir, prefix_dir)
 
     if 'optiscaler' in compat_config:
         if setup_optiscaler(env, compat_dir, prefix_dir, optiscaler_version):
