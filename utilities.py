@@ -3,7 +3,7 @@
 import os
 import subprocess
 import sys
-from typing import Callable
+from collections.abc import Callable
 
 from .logger import log
 

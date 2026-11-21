@@ -2,7 +2,6 @@
 
 import os
 from protonfixes import util
-from typing import Optional  # keep Optional; drop deprecated Tuple
 
 
 def main() -> None:
@@ -11,7 +10,7 @@ def main() -> None:
         util.set_environment('taskset', f'-c {p_cores[0]}-{p_cores[1]}')
 
 
-def get_intel_p_cores() -> Optional[tuple[int, int]]:
+def get_intel_p_cores() -> tuple[int, int] | None:
     # Maps Intel CPU generation numbers to their respective names
     INTEL_GEN_MODEL_CODES = (
         151,  # 12th Gen (Alder Lake)
