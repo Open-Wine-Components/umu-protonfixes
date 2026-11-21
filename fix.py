@@ -190,7 +190,7 @@ def run_fix(game_id: str, *, stage: str) -> None:
     # STEAM_COMPAT_APP_ID triggers some fixes inside the proton script / Wine. Set it based on the game ID
     # This isn't a *great* place for this, but arguably, setting this variable is its own kind of fix
     split_id = game_id.split('-')
-    maybe_steam_id = split_id[1] if len(split_id) > 0 else None
+    maybe_steam_id = split_id[1] if len(split_id) > 1 else None
     if maybe_steam_id and maybe_steam_id.isnumeric():
         os.environ['STEAM_COMPAT_APP_ID'] = maybe_steam_id
 
