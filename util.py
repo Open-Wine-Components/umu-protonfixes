@@ -721,7 +721,11 @@ def set_xml_options(
 
 
 def get_resolution() -> Optional[tuple[int, int]]:
-    """Returns screen res width, height using xrandr"""
+    """Returns screen res width, height using xrandr
+
+    Uses the primary output. Without one, as under gamescope's Xwayland, the first
+    connected output with a mode is used. Returns None if there is no such output.
+    """
     # Execute xrandr command and capture its output
     xrandr_bin = shutil.which('xrandr')
 
@@ -737,18 +741,26 @@ def get_resolution() -> Optional[tuple[int, int]]:
 
     xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
 
-    # Find the line that starts with 'Screen   0:' and extract the resolution
+    # Output lines look like 'XWAYLAND0 connected primary 1920x1080+0+0 (...)'.
+    # gamescope's Xwayland marks no output as primary: 'gamescope connected 1602x720+0+0'
+    fallback = None
     for line in xrandr_output.splitlines():
-        if 'primary' in line:
-            resolution = line.split()[3]
-            width_height = resolution.split('x')
-            offset_values = width_height[1].split('+')
-            clean_resolution = width_height[0] + 'x' + offset_values[0]
-            screenx, screeny = clean_resolution.split('x')
-            return (int(screenx), int(screeny))
+        fields = line.split()
+        if len(fields) < 2 or fields[1] != 'connected':
+            continue
+        geometry = re.search(r'\b(\d+)x(\d+)\+\d+\+\d+\b', line)
+        if not geometry:
+            # Connected, but switched off
+            continue
+        resolution = (int(geometry.group(1)), int(geometry.group(2)))
+        if 'primary' in fields:
+            return resolution
+        if fallback is None:
+            fallback = resolution
 
-    # If no resolution is found, return default values or raise an exception
-    return (0, 0)  # or raise Exception('Resolution not found')
+    if fallback is None:
+        log.info('xrandr reports no active output, skipping screen resolution determination')
+    return fallback
 
 
 def read_dxvk_conf(cfp: TextIOWrapper) -> Generator[str, None, None]:

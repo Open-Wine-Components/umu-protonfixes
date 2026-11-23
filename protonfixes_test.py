@@ -439,6 +439,52 @@ class TestProtonfixes(unittest.TestCase):
             self.assertTrue(expected_dir.is_dir())
             util.protonprefix.cache_clear()
 
+    def _resolution_from(self, xrandr_output):
+        with patch('protonfixes.util.shutil.which', return_value='/usr/bin/xrandr'), \
+                patch('protonfixes.util.subprocess.check_output', return_value=xrandr_output.encode()), \
+                patch.dict(os.environ, {'DISPLAY': ':0'}):
+            return util.get_resolution()
+
+    def testGetResolutionPrimary(self):
+        """The primary output wins, even when another connected output comes first"""
+        output = (
+            'Screen 0: minimum 16 x 16, current 4480 x 1440, maximum 32767 x 32767\n'
+            'XWAYLAND0 connected 1920x1080+2560+0 (normal left inverted right x axis y axis) 0mm x 0mm\n'
+            '   1920x1080     59.96*+\n'
+            'XWAYLAND1 connected primary 2560x1440+0+0 (normal left inverted right x axis y axis) 0mm x 0mm\n'
+            '   2560x1440     59.95*+\n'
+        )
+        self.assertEqual(self._resolution_from(output), (2560, 1440))
+
+    def testGetResolutionWithoutPrimary(self):
+        """gamescope's Xwayland marks no output as primary"""
+        output = (
+            'Screen 0: minimum 16 x 16, current 1602 x 720, maximum 32767 x 32767\n'
+            'gamescope connected 1602x720+0+0 (normal left inverted right x axis y axis) 0mm x 0mm\n'
+            '   1602x720      60.00*+\n'
+        )
+        self.assertEqual(self._resolution_from(output), (1602, 720))
+
+    def testGetResolutionPrimaryOff(self):
+        """A primary output that is switched off has no geometry and is skipped"""
+        output = (
+            'Screen 0: minimum 8 x 8, current 1920 x 1080, maximum 32767 x 32767\n'
+            'eDP-1 connected primary (normal left inverted right x axis y axis)\n'
+            '   2880x1800     60.00 +\n'
+            'HDMI-1 connected 1920x1080+0+0 (normal left inverted right x axis y axis) 527mm x 296mm\n'
+            '   1920x1080     60.00*+\n'
+            'DP-1 disconnected (normal left inverted right x axis y axis)\n'
+        )
+        self.assertEqual(self._resolution_from(output), (1920, 1080))
+
+    def testGetResolutionNoActiveOutput(self):
+        """Without an active output there is no resolution, not 0x0"""
+        output = (
+            'Screen 0: minimum 8 x 8, current 0 x 0, maximum 32767 x 32767\n'
+            'DP-1 disconnected (normal left inverted right x axis y axis)\n'
+        )
+        self.assertIsNone(self._resolution_from(output))
+
 
 class TestConfig(unittest.TestCase):
     def setUp(self):
