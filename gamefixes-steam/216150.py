@@ -83,6 +83,16 @@ _REG_SETTINGS = r"""Windows Registry Editor Version 5.00
 """
 
 
+def early() -> None:
+    """Copy Wine builtin DLLs into the prefix instead of symlinking them.
+
+    MapleStory.exe crashes shortly after start, inside its protected code,
+    when system32 DLLs (e.g. kernel32.dll) are symlinks into the Proton
+    install. This was the default for all games before commit 26e2e54a.
+    """
+    os.environ['PROTON_DLL_COPY'] = '*'
+
+
 def main() -> None:
     """Apply MapleStory registry settings.
 
