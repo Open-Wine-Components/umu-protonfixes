@@ -13,7 +13,7 @@ from collections.abc import Generator
 whitelist_verbs = {'gui', 'vd=1280x720'}
 
 
-def extract_verbs_from_glob(path_glob: Generator[Path, None, None]) -> set[str]:
+def extract_verbs_from_glob(path_glob: Generator[Path]) -> set[str]:
     """Simply strip the extension from all found files."""
     return {file.stem for file in path_glob}
 

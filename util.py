@@ -15,10 +15,10 @@ import functools
 from enum import Enum
 from pathlib import Path
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from io import TextIOWrapper
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Any, Union, Optional
+from typing import Any
 from collections.abc import Mapping, Generator, Callable
 
 from .logger import log
@@ -34,7 +34,7 @@ except ImportError:
 
 
 # TypeAliases
-StrPath = Union[str, Path]
+type StrPath = str | Path
 
 
 # Enums
@@ -131,7 +131,7 @@ class ProtonVersion:
             log.crit(f'Version string "{version_string}" is invalid!')
             return
         self.build_date: datetime = datetime.fromtimestamp(
-            int(parts[0]), tz=timezone.utc
+            int(parts[0]), tz=UTC
         )
         self.version_name: str = parts[1]
 
@@ -150,7 +150,7 @@ def protonprefix() -> Path:
 
 
 @functools.lru_cache
-def which(appname: str) -> Optional[str]:
+def which(appname: str) -> str | None:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
@@ -160,7 +160,7 @@ def which(appname: str) -> Optional[str]:
     return None
 
 
-def once(func: Optional[Callable] = None, retry: bool = False) -> Callable[..., Any]:
+def once(func: Callable | None = None, retry: bool = False) -> Callable[..., Any]:
     """Decorator to use on functions which should only run once in a prefix.
 
     Error handling:
@@ -287,7 +287,7 @@ def checkinstalled(verb: str) -> bool:
     return _checkinstalled(verb)
 
 
-def is_custom_verb(verb: str) -> Union[bool, str]:
+def is_custom_verb(verb: str) -> bool | str:
     """Returns path to custom winetricks verb, if found"""
     if verb == 'gui':
         return False
@@ -394,9 +394,9 @@ def protontricks(verb: str) -> bool:
 
 def regedit_add(
     folder: str,
-    name: Optional[str] = None,
-    typ: Optional[str] = None,
-    value: Optional[str] = None,
+    name: str | None = None,
+    typ: str | None = None,
+    value: str | None = None,
     arch: bool = False,
 ) -> None:
     """Add regedit keys"""
@@ -621,7 +621,7 @@ def _get_case_insensitive_name(path: str) -> str:
     return root
 
 
-def _get_config_full_path(cfile: StrPath, base_path: BasePath) -> Optional[str]:
+def _get_config_full_path(cfile: StrPath, base_path: BasePath) -> str | None:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
     if base_path == BasePath.USER:
@@ -720,7 +720,7 @@ def set_xml_options(
     return True
 
 
-def get_resolution() -> Optional[tuple[int, int]]:
+def get_resolution() -> tuple[int, int] | None:
     """Returns screen res width, height using xrandr"""
     # Execute xrandr command and capture its output
     xrandr_bin = shutil.which('xrandr')
@@ -751,7 +751,7 @@ def get_resolution() -> Optional[tuple[int, int]]:
     return (0, 0)  # or raise Exception('Resolution not found')
 
 
-def read_dxvk_conf(cfp: TextIOWrapper) -> Generator[str, None, None]:
+def read_dxvk_conf(cfp: TextIOWrapper) -> Generator[str]:
     """Add fake [DEFAULT] section to dxvk.conf"""
     yield f'[{configparser.ConfigParser().default_section}]'
     yield from cfp
@@ -809,7 +809,7 @@ def install_battleye_runtime() -> None:
     install_app('1161040')
 
 
-def install_all_from_tgz(url: str, path: Optional[StrPath] = None) -> None:
+def install_all_from_tgz(url: str, path: StrPath | None = None) -> None:
     """Install all files from a downloaded tar.gz"""
     path = path or os.getcwd()
     config.path.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -826,7 +826,7 @@ def install_all_from_tgz(url: str, path: Optional[StrPath] = None) -> None:
         tgz_obj.extractall(path)
 
 
-def install_from_zip(url: str, filename: str, path: Optional[StrPath] = None) -> None:
+def install_from_zip(url: str, filename: str, path: StrPath | None = None) -> None:
     """Install a file from a downloaded zip"""
     path = path or os.getcwd()
     if filename in os.listdir(path):
@@ -1025,7 +1025,7 @@ def import_saves_folder(
         log.warn(f'Failed to parse Steam libraryfolders.vdf: {e}')
         return False
 
-    library_folders: Optional[dict[str, Any]] = None
+    library_folders: dict[str, Any] | None = None
     for k, v in vdf_data.items():
         if k.lower() == 'libraryfolders' and isinstance(v, dict):
             library_folders = v
@@ -1058,7 +1058,7 @@ def import_saves_folder(
         return False
 
     # Find which of the library folders the prefix and save location are in
-    prefix: Optional[Path] = None
+    prefix: Path | None = None
     found_compatdata = False
     for p in paths:
         candidate_compatdata = Path(p) / 'steamapps' / 'compatdata' / str(from_appid)
@@ -1125,7 +1125,7 @@ def import_saves_folder(
         return False
 
 
-def get_steam_account_id() -> Optional[str]:
+def get_steam_account_id() -> str | None:
     """Returns your 17-digit Steam account ID"""
     client_path = (
         os.environ.get('STEAM_COMPAT_CLIENT_INSTALL_PATH')
@@ -1147,7 +1147,7 @@ def get_steam_account_id() -> Optional[str]:
         log.warn(f'Failed to parse Steam loginusers.vdf: {e}')
         return None
 
-    users: Optional[dict[str, Any]] = None
+    users: dict[str, Any] | None = None
     for k, v in vdf_data.items():
         if k.lower() == 'users' and isinstance(v, dict):
             users = v

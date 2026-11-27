@@ -11,7 +11,6 @@ from functools import lru_cache
 from urllib.error import HTTPError, URLError
 import zipfile
 from pathlib import Path
-from typing import Union
 from urllib.parse import unquote, urlparse
 
 from .logger import log
@@ -19,7 +18,7 @@ from .config import config
 
 
 __manifest_url = 'https://loathingkernel.github.io/proton-upscalers/manifest.json'
-__manifest_json: Union[dict, None] = None
+__manifest_json: dict | None = None
 
 
 def __get_manifest() -> dict:
@@ -68,7 +67,7 @@ def __get_dll_manifest(upscaler: str, version: str = 'default') -> dict:
 
 
 @lru_cache(maxsize=32)
-def __get_dll_manifest_from_path(upscaler: str, path: Path) -> dict[str, Union[str , int , bool]]:
+def __get_dll_manifest_from_path(upscaler: str, path: Path) -> dict[str, str | int | bool]:
     file_size = path.stat().st_size
     with path.open("rb") as path_fd:
         file_md5_hash = hashlib.md5(path_fd.read()).hexdigest().upper()
@@ -193,7 +192,7 @@ def __get_fsr4_dlls(version: str = 'default') -> dict[str, dict]:
     return __get_entries(entries)
 
 
-def __get_items(name: str, version: str) -> tuple[Union[dict[str, dict], tuple[str, dict]], str]:
+def __get_items(name: str, version: str) -> tuple[dict[str, dict] | tuple[str, dict], str]:
     components = {
         'dlss': (__get_dlss_dlls, __dlss_section),
         'xess': (__get_xess_dlls, __xess_section),
@@ -427,7 +426,7 @@ def check_component(
     )
 
 
-def __download_file(url: str, dst: Path, *, checksum: Union[str, None] = None) -> None:
+def __download_file(url: str, dst: Path, *, checksum: str | None = None) -> None:
     """Downloads a file and checks against a checksum.
 
     If the download fails or the checksums do not match, the file is removed and the exception is
