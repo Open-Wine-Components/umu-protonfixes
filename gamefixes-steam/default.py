@@ -4,7 +4,7 @@ even if no game fix is present. It is run before game fixes are applied.
 """
 
 import sys
-from protonfixes import util
+from protonfixes import exe_fixes, util
 
 
 def main() -> None:
@@ -33,3 +33,6 @@ def main() -> None:
                     util.replace_command(repl_opt, repl_val)
 
     use_steam_commands()
+
+    # Retail games added as non-Steam shortcuts have no fixed app id
+    exe_fixes.apply()
